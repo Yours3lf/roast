@@ -1,0 +1,4 @@
+#visual studio generated files
+*.user
+x64/
+.vs/
