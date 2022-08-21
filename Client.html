@@ -51,8 +51,14 @@
                 for (y = 0; y < 24; ++y) {
                     //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
                     //randomTemp = Math.random(); //pretend that it's normalised to 0..1
+					
+					temp = temperatures[32 * (23-y) + x];
+					//map temperatures to 0..1
+					minTemp = 10.0; //-40c
+					maxTemp = 40.0; //+300c
+					temp = (temp - minTemp) / (maxTemp - minTemp);
 
-                    canvasCtx.fillStyle = colorRamp(temperatures[x * 24 + y]);
+                    canvasCtx.fillStyle = colorRamp(temp);
                     canvasCtx.fillRect(x * 10, y * 10, 10, 10);
                 }
         }
