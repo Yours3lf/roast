@@ -2,6 +2,11 @@
 *.user
 x64/
 .vs/
+*.vcxproj
+*.vcxproj.filters
+Debug/
+*.dir/
+*.sln
 
 #cmake files
 CMakeLists.txt.user

@@ -6,7 +6,7 @@ int main(int argc, char** args)
 
 	{
 		websocketServer ws;
-		ws.run("localhost", 5000);
+		ws.run("localhost", 50000);
 
 		//wait for a connection
 		while (!ws.hasConnections())
