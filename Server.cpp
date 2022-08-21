@@ -11,7 +11,7 @@ int main(int argc, char** args)
 		//wait for a connection
 		while (!ws.hasConnections())
 		{
-			Sleep(10);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 
 		while (ws.hasConnections())
@@ -73,7 +73,7 @@ int main(int argc, char** args)
 				}
 			}
 
-			Sleep(10);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	}
 
