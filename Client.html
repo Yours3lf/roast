@@ -6,6 +6,8 @@
 
     <div id="test"></div>
 
+    <div>Websocket address: <input type="text" id="wsAddress" /> <button onclick="connect()">Connect</button></div>
+
     <script>
         function saturate(x)
         {
@@ -55,41 +57,41 @@
                 }
         }
 
-        try {
-            serverURL = "ws://localhost:50000"
-            webSocket = new WebSocket(serverURL);
-            webSocket.binaryType = 'arraybuffer';
+        function connect() {
+            try {
+                serverURL = document.getElementById("wsAddress").value;
+                webSocket = new WebSocket(serverURL);
+                webSocket.binaryType = 'arraybuffer';
 
-            webSocket.onerror = (event) => {
-                document.getElementById("test").innerHTML += "Failed to connect to " + serverURL + "<br>";
-            }
-
-            webSocket.onclose = (event) => {
-                document.getElementById("test").innerHTML += "onclose" + "<br>";
-            }
-
-            webSocket.onopen = (event) => {
-                document.getElementById("test").innerHTML += "onopen" + "<br>";
-                //webSocket.send(("a").repeat(65536*2));
-                webSocket.send("hello server!");
-            }
-
-            webSocket.onmessage = (event) => {
-                document.getElementById("test").innerHTML = "onmessage " + (typeof event.data) + "<br>";
-                if (typeof event.data == "string")
-                {
-                    document.getElementById("test").innerHTML += event.data + "<br>";
+                webSocket.onerror = (event) => {
+                    document.getElementById("test").innerHTML += "Failed to connect to " + serverURL + "<br>";
                 }
-                else if (typeof event.data == "object")
-                {
-                    arrayBuf = event.data;
-                    floatArray = new Float32Array(arrayBuf);
-                    drawThermalCameraOutput(floatArray);
+
+                webSocket.onclose = (event) => {
+                    document.getElementById("test").innerHTML += "onclose" + "<br>";
+                }
+
+                webSocket.onopen = (event) => {
+                    document.getElementById("test").innerHTML += "onopen" + "<br>";
+                    //webSocket.send(("a").repeat(65536*2));
+                    webSocket.send("hello server!");
+                }
+
+                webSocket.onmessage = (event) => {
+                    document.getElementById("test").innerHTML = "onmessage " + (typeof event.data) + "<br>";
+                    if (typeof event.data == "string") {
+                        document.getElementById("test").innerHTML += event.data + "<br>";
+                    }
+                    else if (typeof event.data == "object") {
+                        arrayBuf = event.data;
+                        floatArray = new Float32Array(arrayBuf);
+                        drawThermalCameraOutput(floatArray);
+                    }
                 }
             }
-        }
-        catch (error) {
-            document.getElementById("test").innerHTML = error.message;
+            catch (error) {
+                document.getElementById("test").innerHTML = error.message;
+            }
         }
     </script>
 </body>

@@ -2,11 +2,26 @@
 
 int main(int argc, char** args)
 {
+	if (argc < 2)
+	{
+		std::cerr << "Usage " << args[0] << " address port" << std::endl;
+		std::cerr << "Default port 50000 is used if omitted" << std::endl;
+		return -1;
+	}
+
+	std::string address(args[1]);
+
+	int port = 50000;
+	if (argc > 2)
+	{
+		port = std::stoi(std::string(args[2]));
+	}
+
 	socket::init();
 
 	{
 		websocketServer ws;
-		ws.run("localhost", 50000);
+		ws.run(address, port);
 
 		//wait for a connection
 		while (!ws.hasConnections())
