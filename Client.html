@@ -1,0 +1,96 @@
+<html>
+<body>
+    <canvas id="thermalCamera" width="320" height="240" style="border:1px solid #c3c3c3; visibility: hidden;">
+        Your browser does not support the canvas element.
+    </canvas>
+
+    <div id="test"></div>
+
+    <script>
+        function saturate(x)
+        {
+            return Math.min(1.0, Math.max(x, 0.0));
+        }
+
+        function componentToHex(c) {
+            var hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        function rgbToHex(r, g, b)
+        {
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+
+        function colorRamp(v)
+        {
+            v = 2.0 * v;
+            r = v - 0.0;
+            g = v - 1.0;
+            b = v - 2.0;
+
+            r = 1.0 - r * r;
+            g = 1.0 - g * g;
+            b = 1.0 - b * b;
+
+            r = Math.floor(saturate(r)*255);
+            g = Math.floor(saturate(g)*255);
+            b = Math.floor(saturate(b)*255);
+
+            return rgbToHex(r, g, b);
+        }
+
+        function drawThermalCameraOutput(temperatures)
+        {
+            var canvas = document.getElementById("thermalCamera");
+            canvas.style.visibility = "visible";
+            var canvasCtx = canvas.getContext("2d");
+            for (x = 0; x < 32; ++x)
+                for (y = 0; y < 24; ++y) {
+                    //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                    //randomTemp = Math.random(); //pretend that it's normalised to 0..1
+
+                    canvasCtx.fillStyle = colorRamp(temperatures[x * 24 + y]);
+                    canvasCtx.fillRect(x * 10, y * 10, 10, 10);
+                }
+        }
+
+        try {
+            serverURL = "ws://localhost/:80"
+            webSocket = new WebSocket(serverURL);
+            webSocket.binaryType = 'arraybuffer';
+
+            webSocket.onerror = (event) => {
+                document.getElementById("test").innerHTML += "Failed to connect to " + serverURL + "<br>";
+            }
+
+            webSocket.onclose = (event) => {
+                document.getElementById("test").innerHTML += "onclose" + "<br>";
+            }
+
+            webSocket.onopen = (event) => {
+                document.getElementById("test").innerHTML += "onopen" + "<br>";
+                //webSocket.send(("a").repeat(65536*2));
+                webSocket.send("hello server!");
+            }
+
+            webSocket.onmessage = (event) => {
+                document.getElementById("test").innerHTML = "onmessage " + (typeof event.data) + "<br>";
+                if (typeof event.data == "string")
+                {
+                    document.getElementById("test").innerHTML += event.data + "<br>";
+                }
+                else if (typeof event.data == "object")
+                {
+                    arrayBuf = event.data;
+                    floatArray = new Float32Array(arrayBuf);
+                    drawThermalCameraOutput(floatArray);
+                }
+            }
+        }
+        catch (error) {
+            document.getElementById("test").innerHTML = error.message;
+        }
+    </script>
+</body>
+</html>
