@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_definitions(-DUNICODE)
+add_definitions(-D_UNICODE)
+
 add_executable(roast Server.cpp)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
