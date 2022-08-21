@@ -19,4 +19,6 @@ if(UNIX)
 	find_package(OpenSSL REQUIRED)
 	include_directories(${OPENSSL_INCLUDE_DIR})
 	target_link_libraries(roast PRIVATE ${OPENSSL_CRYPTO_LIBRARY})
+
+	target_link_libraries(roast PRIVATE MLX90640_API)
 endif(UNIX)
