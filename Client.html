@@ -1,6 +1,10 @@
 <html>
 <body>
-    <canvas id="thermalCamera" width="320" height="240" style="border:1px solid #c3c3c3; visibility: hidden;">
+    <canvas id="thermalCamera" width="0" height="0" style="border:1px solid #c3c3c3; visibility: hidden;">
+        Your browser does not support the canvas element.
+    </canvas>
+
+    <canvas id="lineChart" style="border:1px solid #c3c3c3; visibility: hidden;">
         Your browser does not support the canvas element.
     </canvas>
 
@@ -9,6 +13,196 @@
     <div>Websocket address: <input type="text" id="wsAddress" /> <button onclick="connect()">Connect</button></div>
 
     <script>
+        // Heating elements:
+        // afterburner 120v (2 wire)
+        // quartz heater 120v
+        //
+        // Motors to be controlled:
+        // dc fan 12v 0.2a (2 wire)
+        // drum motor 16v (2 wire)
+        // scroll / cooling fan 120v
+        //
+        // On/off switch:
+        // light bulb 120v
+        //
+        // Sensors:
+        // thermocouple(s) 120v
+        // thermal camera 3.3v
+
+        function temperatureToCanvasYoffset(t, canvasHeight)
+        {
+            return canvasHeight - 40 - (t / 400.0) * canvasHeight;
+        }
+
+        function drawVerticalAxisTempText(t, canvasHeight)
+        {
+            var lineStr = t;
+            var lineOffsetY = temperatureToCanvasYoffset(t, canvasHeight);
+            ctx.fillText(lineStr, 5, lineOffsetY + 7);
+            return ctx.measureText(lineStr).width;
+        }
+
+        function drawHorizontalTempLines(t, canvasHeight, xOffset)
+        {
+            var line = new Path2D();
+            var yOffset = temperatureToCanvasYoffset(t, canvasHeight);
+            line.moveTo(xOffset + 10, yOffset);
+            line.lineTo(canvasWidth, yOffset);
+            ctx.stroke(line);
+        }
+
+        { //draw line chart
+            var canvas = document.getElementById("lineChart");
+            var ctx = canvas.getContext("2d");
+
+            var canvasWidth = 900;
+            var canvasHeight = 500;
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.visibility = "visible";
+
+            // Get the DPR and size of the canvas
+            const dpr = window.devicePixelRatio;
+            const rect = canvas.getBoundingClientRect();
+
+            // Set the "actual" size of the canvas
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+
+            // Scale the context to ensure correct drawing operations
+            ctx.scale(dpr, dpr);
+
+            // Set the "drawn" size of the canvas
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+
+            //canvas coordinate system:
+            //0...w
+            //0
+            //.
+            //.
+            //h
+
+            //supported primites: rectangles and paths
+
+            //rectangles
+            //fillRect(x, y, w, h) -> draws filled rectangle
+            //strokeRect(x, y, w, h) -> draws outline
+            //clearRect(x, y, w, h) -> clears area
+
+            //paths
+            //beginPath() -> create new path, then can build up the path from here
+            //closePath() -> tries to close the shape by drawing a straight line from the current point to the start
+            //stroke() -> draws path outline
+            //fill() -> fills the path's content area (any open shapes are closed)
+            //moveTo(x, y) -> move the path drawing point (lift and move the pen)
+            //lineTo(x, y) -> draw a line from current pos to coords
+
+            //Path2D() object
+            //combines all objects, can combine paths
+            //var rectangle = new Path2D();
+            //rectangle.rect(10, 10, 50, 50);
+            //ctx.stroke(rectangle);
+            //.addPath()
+            //.closePath()
+            //.moveTo()
+            //.lineTo()
+            //
+
+            //ctx.fillStyle = rgba(r, g, b, a) -> 0..255 fill color!
+            //ctx.strokeStyle = rgba()
+            //ctx.lineWidth = x -> linewidth in units?
+            //ctx.lineCap = "butt" "round" "square" -> line ending styles
+            //ctx.lineJoin = "round" "bevel" "miter" -> how line segments are joined
+
+            //text
+            //ctx.font = "20px Times New Roman"
+            //ctx.textAlign = "start" "end" "left" "right" "center"
+            //ctx.fillStyle = "black";
+            //ctx.fillText("string", x, y);
+            //ctx.measureText("string").width -> returns the width in pixels when the text is drawn
+
+            //ctx.save() -> save / restore canvas state
+            //ctx.restore() 
+
+            
+            //draw vertical axis texts
+            //keep track of offset to draw stuff next to it
+            var verticalAxisOffset = 0;
+
+            //axis title
+            ctx.font = "20px Times New Roman";
+            ctx.fillStyle = "black";
+            var verticalAxisTitleStr = "Temp" + " °C";
+            ctx.fillText(verticalAxisTitleStr, 0, 20);
+            verticalAxisOffset = Math.max(verticalAxisOffset, ctx.measureText(verticalAxisTitleStr).width);
+
+            //https://www.wikiwand.com/en/Coffee_roasting
+            //22c  unroasted
+            //165c drying phase
+            //196c cinnamon roast (right after first crack)
+            //205c new england roast
+            //210c american roast
+            //219c city roast (common for speciality coffee)
+            //225c full city roast (beginning of second crack)
+            //230c vienna roast 
+            //240c french roast
+            //245c italian roast
+
+            //0 = 400c
+            //canvasHeight = 0c
+
+            //draw vertical axis texts
+            var temps = [50, 100, 150, 200, 250, 300];
+            var vertAxisOffsetX = 0;
+            for (t of temps)
+            {
+                vertAxisOffsetX = Math.max(vertAxisOffsetX, drawVerticalAxisTempText(t, canvasHeight));
+            }
+
+            //draw horizontal axi texts
+            var minutes = [5, 10, 15, 20]
+            for (m of minutes)
+            {
+                var lineStr = m;
+                var vertWidth = canvasWidth - (vertAxisOffsetX + 20);
+                var offsetX = m / 25.0 * vertWidth;
+
+                var textWidth = ctx.measureText(lineStr).width;
+
+                ctx.fillText(lineStr, vertAxisOffsetX + 20 + offsetX - textWidth / 2, canvasHeight - 10);
+            }
+
+            //draw horizontal lines
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+            drawHorizontalTempLines(0, canvasHeight, vertAxisOffsetX + 10);
+            for (t of temps)
+            {
+                drawHorizontalTempLines(t, canvasHeight, vertAxisOffsetX);
+            }
+
+            //draw vertical axis vertical line
+            var line = new Path2D();
+            line.moveTo(vertAxisOffsetX + 20, canvasHeight - 40);
+            line.lineTo(vertAxisOffsetX + 20, 40);
+            ctx.stroke(line);
+
+            //draw vertical time lines
+            {
+                for (m of minutes)
+                {
+                    var vertWidth = canvasWidth - (vertAxisOffsetX + 20);
+                    var offsetX = m / 25.0 * vertWidth;
+
+                    var line = new Path2D();
+                    line.moveTo(vertAxisOffsetX + 20 + offsetX, canvasHeight - 40 + 10);
+                    line.lineTo(vertAxisOffsetX + 20 + offsetX, 40 - 10);
+                    ctx.stroke(line);
+                }
+            }
+        }
+
         function saturate(x)
         {
             return Math.min(1.0, Math.max(x, 0.0));
@@ -46,6 +240,8 @@
         {
             var canvas = document.getElementById("thermalCamera");
             canvas.style.visibility = "visible";
+            canvas.width = 320;
+            canvas.height = 240;
             var canvasCtx = canvas.getContext("2d");
             for (x = 0; x < 32; ++x)
                 for (y = 0; y < 24; ++y) {
