@@ -29,26 +29,143 @@
         // thermocouple(s) 120v
         // thermal camera 3.3v
 
-        function temperatureToCanvasYoffset(t, canvasHeight)
-        {
-            return canvasHeight - 40 - (t / 400.0) * canvasHeight;
-        }
+        class LineChart {
+            #horizontalMinVal;
+            #horizontalMaxVal;
+            #verticalMinVal;
+            #verticalMaxVal;
+            #canvasWidth;
+            #canvasHeight;
+            #ctx;
+            #prevH;
+            #prevV;
+            #vertAxisOffsetX;
+            #dataPointCounter;
 
-        function drawVerticalAxisTempText(t, canvasHeight)
-        {
-            var lineStr = t;
-            var lineOffsetY = temperatureToCanvasYoffset(t, canvasHeight);
-            ctx.fillText(lineStr, 5, lineOffsetY + 7);
-            return ctx.measureText(lineStr).width;
-        }
+            constructor(c, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal) {
+                this.#ctx = c;
+                this.#canvasWidth = cWidth;
+                this.#canvasHeight = cHeight;
+                this.#horizontalMinVal = hMinVal;
+                this.#horizontalMaxVal = hMaxVal;
+                this.#verticalMinVal = vMinVal;
+                this.#verticalMaxVal = vMaxVal;
+                this.#vertAxisOffsetX = 0;
+                this.#dataPointCounter = 0;
+            }
 
-        function drawHorizontalTempLines(t, canvasHeight, xOffset)
-        {
-            var line = new Path2D();
-            var yOffset = temperatureToCanvasYoffset(t, canvasHeight);
-            line.moveTo(xOffset + 10, yOffset);
-            line.lineTo(canvasWidth, yOffset);
-            ctx.stroke(line);
+            #valToCanvasYoffset(v)
+            {
+                var spaceAvailable = this.#canvasHeight - 40 * 2;
+                return this.#canvasHeight - 40 - (v - this.#verticalMinVal) / (this.#verticalMaxVal - this.#verticalMinVal) * spaceAvailable;
+            }
+
+            #drawHorizontalLines(v, xOffset)
+            {
+                var line = new Path2D();
+                var yOffset = this.#valToCanvasYoffset(v);
+                line.moveTo(xOffset + 15, yOffset);
+                line.lineTo(this.#canvasWidth - 40, yOffset);
+                this.#ctx.stroke(line);
+            }
+
+            #drawVerticalAxisText(v)
+            {
+                var lineOffsetY = this.#valToCanvasYoffset(v);
+                this.#ctx.fillText(v, 5, lineOffsetY + 7);
+                return this.#ctx.measureText(v).width;
+            }
+
+            #valToCanvasXoffset(v, offsetX)
+            {
+                var spaceAvailable = this.#canvasWidth - 40 - (offsetX + 20);
+                return offsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
+            }
+
+            #drawHorizontalAxisText(v, vertAxisOffsetX)
+            {
+                var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
+
+                var textWidth = this.#ctx.measureText(v).width;
+
+                this.#ctx.fillText(v, offsetX - textWidth / 2, this.#canvasHeight - 10);
+            }
+
+            #drawVertixalLines(v, vertAxisOffsetX, offsetY)
+            {
+                var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
+
+                var line = new Path2D();
+                line.moveTo(offsetX, this.#canvasHeight - 40 + offsetY);
+                line.lineTo(offsetX, 40);
+                this.#ctx.stroke(line);
+            }
+
+            drawLineChartBackground(
+                horizontalAxisTitleStr, verticalAxisTitleStr,
+                horizontalLabelArray, verticalLabelArray
+            )
+            {
+                //vertical axis title
+                this.#ctx.font = "20px Times New Roman";
+                this.#ctx.fillStyle = "black";
+                this.#ctx.fillText(verticalAxisTitleStr, 10, 20);
+
+                //horizontal axis title
+                var horizontalAxisTextSize = this.#ctx.measureText(horizontalAxisTitleStr).width;
+                this.#ctx.fillText(horizontalAxisTitleStr, this.#canvasWidth - horizontalAxisTextSize - 20, this.#canvasHeight - 10);
+
+                //draw vertical axis texts
+                for (var i of verticalLabelArray) {
+                    this.#vertAxisOffsetX = Math.max(this.#vertAxisOffsetX, this.#drawVerticalAxisText(i));
+                }
+
+                //draw horizontal axis texts
+                for (var i of horizontalLabelArray) {
+                    this.#drawHorizontalAxisText(i, this.#vertAxisOffsetX);
+                }
+
+                //draw horizontal lines
+                this.#ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+                this.#drawHorizontalLines(this.#verticalMinVal, this.#vertAxisOffsetX + 5);
+                this.#drawHorizontalLines(this.#verticalMaxVal, this.#vertAxisOffsetX + 5);
+                for (var i of verticalLabelArray) {
+                    this.#drawHorizontalLines(i, this.#vertAxisOffsetX);
+                }
+                
+
+                //draw vertical lines
+                this.#drawVertixalLines(this.#horizontalMinVal, this.#vertAxisOffsetX, 0);
+                this.#drawVertixalLines(this.#horizontalMaxVal, this.#vertAxisOffsetX, 0)
+                for (var i of horizontalLabelArray) {
+                    this.#drawVertixalLines(i, this.#vertAxisOffsetX, 5);
+                }
+            }
+
+            addDataPoint(h, v)
+            {
+                if (this.#dataPointCounter++ == 0)
+                {
+                    this.#prevH = h;
+                    this.#prevV = v;
+                    return;
+                }
+
+                this.#ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+                this.#ctx.lineCap = "round";
+                this.#ctx.lineJoin = "round";
+                this.#ctx.lineWidth = 4.0;
+                var line = new Path2D();
+                var xfrom = this.#valToCanvasXoffset(this.#prevH, this.#vertAxisOffsetX);
+                var xto = this.#valToCanvasXoffset(h, this.#vertAxisOffsetX);
+                var yfrom = this.#valToCanvasYoffset(this.#prevV);
+                var yto = this.#valToCanvasYoffset(v);
+                line.moveTo(xfrom, yfrom);
+                line.lineTo(xto, yto);
+                this.#ctx.stroke(line);
+                this.#prevH = h;
+                this.#prevV = v;                
+            }
         }
 
         { //draw line chart
@@ -126,17 +243,6 @@
             //ctx.save() -> save / restore canvas state
             //ctx.restore() 
 
-            
-            //draw vertical axis texts
-            //keep track of offset to draw stuff next to it
-            var verticalAxisOffset = 0;
-
-            //axis title
-            ctx.font = "20px Times New Roman";
-            ctx.fillStyle = "black";
-            var verticalAxisTitleStr = "Temp" + " °C";
-            ctx.fillText(verticalAxisTitleStr, 0, 20);
-            verticalAxisOffset = Math.max(verticalAxisOffset, ctx.measureText(verticalAxisTitleStr).width);
 
             //https://www.wikiwand.com/en/Coffee_roasting
             //22c  unroasted
@@ -152,55 +258,30 @@
 
             //0 = 400c
             //canvasHeight = 0c
+            
+            //could add minvalue, maxvalue for each axis
+            //then value array to draw lines and text to
+            //that would make adding data points easier too
+            var lineChart = new LineChart(ctx, canvasWidth, canvasHeight, 0, 25, 0, 300);
+            lineChart.drawLineChartBackground(
+                "Time (m)", "Temp °C", 
+                [5, 10, 15, 20], [50, 100, 150, 200, 250]
+            );
 
-            //draw vertical axis texts
-            var temps = [50, 100, 150, 200, 250, 300];
-            var vertAxisOffsetX = 0;
-            for (t of temps)
-            {
-                vertAxisOffsetX = Math.max(vertAxisOffsetX, drawVerticalAxisTempText(t, canvasHeight));
-            }
+            //test data for drawing a curve
+            var dataSet = [
+                22, //minute 0, eg starting
+                43, 113, 140, //drying phase
+                165, 177, 185, 192, 196, //yellowing, fc
+                204, 213, 220, //development
+                225, 226, 227, //second crack
+                229, 232, 236, 239, 242, 245, //15-20mins
+                199, 143, 93, 54, 25 //20-25mins
+            ];
+            console.log(dataSet.length);
+            for (var i = 0; i < dataSet.length; ++i)
+            lineChart.addDataPoint(i, dataSet[i]);
 
-            //draw horizontal axi texts
-            var minutes = [5, 10, 15, 20]
-            for (m of minutes)
-            {
-                var lineStr = m;
-                var vertWidth = canvasWidth - (vertAxisOffsetX + 20);
-                var offsetX = m / 25.0 * vertWidth;
-
-                var textWidth = ctx.measureText(lineStr).width;
-
-                ctx.fillText(lineStr, vertAxisOffsetX + 20 + offsetX - textWidth / 2, canvasHeight - 10);
-            }
-
-            //draw horizontal lines
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-            drawHorizontalTempLines(0, canvasHeight, vertAxisOffsetX + 10);
-            for (t of temps)
-            {
-                drawHorizontalTempLines(t, canvasHeight, vertAxisOffsetX);
-            }
-
-            //draw vertical axis vertical line
-            var line = new Path2D();
-            line.moveTo(vertAxisOffsetX + 20, canvasHeight - 40);
-            line.lineTo(vertAxisOffsetX + 20, 40);
-            ctx.stroke(line);
-
-            //draw vertical time lines
-            {
-                for (m of minutes)
-                {
-                    var vertWidth = canvasWidth - (vertAxisOffsetX + 20);
-                    var offsetX = m / 25.0 * vertWidth;
-
-                    var line = new Path2D();
-                    line.moveTo(vertAxisOffsetX + 20 + offsetX, canvasHeight - 40 + 10);
-                    line.lineTo(vertAxisOffsetX + 20 + offsetX, 40 - 10);
-                    ctx.stroke(line);
-                }
-            }
         }
 
         function saturate(x)
