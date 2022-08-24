@@ -1,5 +1,54 @@
 <html>
+<style>
+    .controller {
+        outline: 2px solid #aaa;
+        border-radius: 20px;
+        background-color: #555;
+        width: 300px;
+        height: 50px;
+        display: block;
+        margin: 20px;
+        user-select: none;
+    }
+
+    .controller > span {
+        height: inherit;
+        background-color: #fff;
+        background-size: 100% 100%;
+        display: block;
+        border-radius: 20px;
+    }
+
+    .controller > span > span {
+        display: flex;
+        height: inherit;
+        justify-content: left;
+        align-items: center;
+        color: #555;
+        padding-left: 15px;
+    }
+
+    .controller > span > span > img {
+        height: 30px;
+        opacity: 0.75;
+        animation: spin 1.35s linear infinite;
+    }
+
+    @keyframes spin 
+    {
+        100% 
+        {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 <body>
+    <div id="fanController" class="controller">
+        <span style="width: 70%;">
+            <span><img src="img/fan.png"/></span>
+        </span>
+    </div>
+
     <canvas id="thermalCamera" width="0" height="0" style="border:1px solid #c3c3c3; visibility: hidden;">
         Your browser does not support the canvas element.
     </canvas>
@@ -28,6 +77,77 @@
         // Sensors:
         // thermocouple(s) 120v
         // thermal camera 3.3v
+
+        var isDown = false;
+
+        for (c of document.getElementsByClassName("controller"))
+        {
+            c.addEventListener("mousedown", controlFunc);
+            c.addEventListener("mouseup", controlFunc);
+            c.addEventListener("mousemove", controlFunc);
+
+            c.addEventListener("touchstart", controlFunc);
+            c.addEventListener("touchend", controlFunc);
+            c.addEventListener("touchmove", controlFunc);
+        }
+
+        function controlMove(xPos, elem)
+        {
+            var percentage = (xPos - 29) / elem.clientWidth * 100;
+            if (percentage > 97)
+                percentage = 100;
+            else if (percentage < 3)
+                percentage = 0;
+            elem.firstElementChild.style = "width: " + percentage + "%;";
+            var animLen = 4 - 3.8 * percentage / 100;
+            if (percentage == 0)
+            {
+                elem.getElementsByTagName("img")[0].style = "animation: none;";
+            }
+            else
+            {
+                elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
+            }
+        }
+
+        function controlFunc(e)
+        {
+            if (e.type == "mousedown")
+            {
+                isDown = true;
+
+                controlMove(e.x, this);
+            }
+            else if (e.type == "touchstart")
+            {
+                isDown = true;
+
+                controlMove(e.targetTouches[0].clientX, this);
+            }
+            else if (e.type == "mousemove")
+            {
+                if (isDown)
+                {
+                    controlMove(e.x, this);
+                }
+            }
+            else if (e.type == "touchmove")
+            {
+                if (isDown)
+                {
+                    controlMove(e.targetTouches[0].clientX, this);
+                }
+            }
+            else if (e.type == "mouseup" || e.type == "touchend")
+            {
+                isDown = false;
+            }
+
+            if (e.type == "mousedown" || e.type == "mouseup" || e.type == "mousemove")
+            {
+                e.preventDefault();
+            }
+        }
 
         class LineChart {
             #horizontalMinVal;
@@ -268,6 +388,8 @@
                 [5, 10, 15, 20], [50, 100, 150, 200, 250]
             );
 
+            //todo multiple curves!
+
             //test data for drawing a curve
             var dataSet = [
                 22, //minute 0, eg starting
@@ -278,7 +400,6 @@
                 229, 232, 236, 239, 242, 245, //15-20mins
                 199, 143, 93, 54, 25 //20-25mins
             ];
-            console.log(dataSet.length);
             for (var i = 0; i < dataSet.length; ++i)
             lineChart.addDataPoint(i, dataSet[i]);
 
