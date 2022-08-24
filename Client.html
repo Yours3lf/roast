@@ -28,8 +28,7 @@
         padding-left: 15px;
     }
 
-    .controller > span > span > img {
-        height: 30px;
+    .fanImage {
         opacity: 0.75;
         animation: spin 1.35s linear infinite;
     }
@@ -45,7 +44,22 @@
 <body>
     <div id="fanController" class="controller">
         <span style="width: 70%;">
-            <span><img src="img/fan.png"/></span>
+            <span><img src="img/fan.png" width="30" class="fanImage" /></span>
+            <!--Icon created by Dreamstale - Flaticon-->
+        </span>
+    </div>
+
+    <div id="motorController" class="controller">
+        <span style="width: 70%;">
+            <span><img src="img/motor.png" width="45" style="opacity:0.75;" /></span>
+            <!--Icon created by monkik - Flaticon-->
+        </span>
+    </div>
+
+    <div id="motorController" class="controller">
+        <span style="width: 70%;">
+            <span><img src="img/fire.png" width="35" style="opacity:0.75;" /></span>
+            <!--Icon created by Those Icons - Flaticon-->
         </span>
     </div>
 
@@ -80,10 +94,10 @@
 
         var isDown = false;
 
-        for (c of document.getElementsByClassName("controller"))
-        {
+        document.addEventListener("mouseup", controlFunc);
+
+        for (c of document.getElementsByClassName("controller")) {
             c.addEventListener("mousedown", controlFunc);
-            c.addEventListener("mouseup", controlFunc);
             c.addEventListener("mousemove", controlFunc);
 
             c.addEventListener("touchstart", controlFunc);
@@ -91,60 +105,51 @@
             c.addEventListener("touchmove", controlFunc);
         }
 
-        function controlMove(xPos, elem)
-        {
+        function controlMove(xPos, elem) {
             var percentage = (xPos - 29) / elem.clientWidth * 100;
             if (percentage > 97)
                 percentage = 100;
             else if (percentage < 3)
                 percentage = 0;
             elem.firstElementChild.style = "width: " + percentage + "%;";
-            var animLen = 4 - 3.8 * percentage / 100;
-            if (percentage == 0)
-            {
-                elem.getElementsByTagName("img")[0].style = "animation: none;";
-            }
-            else
-            {
-                elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
+
+            if (elem.getElementsByTagName("img")[0].className == "fanImage") {
+                var animLen = 4 - 3.8 * percentage / 100;
+                if (percentage == 0) {
+                    elem.getElementsByTagName("img")[0].style = "animation: none;";
+                }
+                else {
+                    elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
+                }
             }
         }
 
-        function controlFunc(e)
-        {
-            if (e.type == "mousedown")
-            {
+        function controlFunc(e) {
+            if (e.type == "mousedown") {
                 isDown = true;
 
                 controlMove(e.x, this);
             }
-            else if (e.type == "touchstart")
-            {
+            else if (e.type == "touchstart") {
                 isDown = true;
 
                 controlMove(e.targetTouches[0].clientX, this);
             }
-            else if (e.type == "mousemove")
-            {
-                if (isDown)
-                {
+            else if (e.type == "mousemove") {
+                if (isDown) {
                     controlMove(e.x, this);
                 }
             }
-            else if (e.type == "touchmove")
-            {
-                if (isDown)
-                {
+            else if (e.type == "touchmove") {
+                if (isDown) {
                     controlMove(e.targetTouches[0].clientX, this);
                 }
             }
-            else if (e.type == "mouseup" || e.type == "touchend")
-            {
+            else if (e.type == "mouseup" || e.type == "touchend") {
                 isDown = false;
             }
 
-            if (e.type == "mousedown" || e.type == "mouseup" || e.type == "mousemove")
-            {
+            if (e.type == "mousedown" || e.type == "mousemove") {
                 e.preventDefault();
             }
         }
@@ -174,14 +179,12 @@
                 this.#dataPointCounter = 0;
             }
 
-            #valToCanvasYoffset(v)
-            {
+            #valToCanvasYoffset(v) {
                 var spaceAvailable = this.#canvasHeight - 40 * 2;
                 return this.#canvasHeight - 40 - (v - this.#verticalMinVal) / (this.#verticalMaxVal - this.#verticalMinVal) * spaceAvailable;
             }
 
-            #drawHorizontalLines(v, xOffset)
-            {
+            #drawHorizontalLines(v, xOffset) {
                 var line = new Path2D();
                 var yOffset = this.#valToCanvasYoffset(v);
                 line.moveTo(xOffset + 15, yOffset);
@@ -189,21 +192,18 @@
                 this.#ctx.stroke(line);
             }
 
-            #drawVerticalAxisText(v)
-            {
+            #drawVerticalAxisText(v) {
                 var lineOffsetY = this.#valToCanvasYoffset(v);
                 this.#ctx.fillText(v, 5, lineOffsetY + 7);
                 return this.#ctx.measureText(v).width;
             }
 
-            #valToCanvasXoffset(v, offsetX)
-            {
+            #valToCanvasXoffset(v, offsetX) {
                 var spaceAvailable = this.#canvasWidth - 40 - (offsetX + 20);
                 return offsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
             }
 
-            #drawHorizontalAxisText(v, vertAxisOffsetX)
-            {
+            #drawHorizontalAxisText(v, vertAxisOffsetX) {
                 var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
 
                 var textWidth = this.#ctx.measureText(v).width;
@@ -211,8 +211,7 @@
                 this.#ctx.fillText(v, offsetX - textWidth / 2, this.#canvasHeight - 10);
             }
 
-            #drawVertixalLines(v, vertAxisOffsetX, offsetY)
-            {
+            #drawVertixalLines(v, vertAxisOffsetX, offsetY) {
                 var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
 
                 var line = new Path2D();
@@ -224,8 +223,7 @@
             drawLineChartBackground(
                 horizontalAxisTitleStr, verticalAxisTitleStr,
                 horizontalLabelArray, verticalLabelArray
-            )
-            {
+            ) {
                 //vertical axis title
                 this.#ctx.font = "20px Times New Roman";
                 this.#ctx.fillStyle = "black";
@@ -252,7 +250,7 @@
                 for (var i of verticalLabelArray) {
                     this.#drawHorizontalLines(i, this.#vertAxisOffsetX);
                 }
-                
+
 
                 //draw vertical lines
                 this.#drawVertixalLines(this.#horizontalMinVal, this.#vertAxisOffsetX, 0);
@@ -262,10 +260,8 @@
                 }
             }
 
-            addDataPoint(h, v)
-            {
-                if (this.#dataPointCounter++ == 0)
-                {
+            addDataPoint(h, v) {
+                if (this.#dataPointCounter++ == 0) {
                     this.#prevH = h;
                     this.#prevV = v;
                     return;
@@ -284,7 +280,7 @@
                 line.lineTo(xto, yto);
                 this.#ctx.stroke(line);
                 this.#prevH = h;
-                this.#prevV = v;                
+                this.#prevV = v;
             }
         }
 
@@ -361,7 +357,7 @@
             //ctx.measureText("string").width -> returns the width in pixels when the text is drawn
 
             //ctx.save() -> save / restore canvas state
-            //ctx.restore() 
+            //ctx.restore()
 
 
             //https://www.wikiwand.com/en/Coffee_roasting
@@ -372,19 +368,19 @@
             //210c american roast
             //219c city roast (common for speciality coffee)
             //225c full city roast (beginning of second crack)
-            //230c vienna roast 
+            //230c vienna roast
             //240c french roast
             //245c italian roast
 
             //0 = 400c
             //canvasHeight = 0c
-            
+
             //could add minvalue, maxvalue for each axis
             //then value array to draw lines and text to
             //that would make adding data points easier too
             var lineChart = new LineChart(ctx, canvasWidth, canvasHeight, 0, 25, 0, 300);
             lineChart.drawLineChartBackground(
-                "Time (m)", "Temp °C", 
+                "Time (m)", "Temp °C",
                 [5, 10, 15, 20], [50, 100, 150, 200, 250]
             );
 
@@ -401,12 +397,11 @@
                 199, 143, 93, 54, 25 //20-25mins
             ];
             for (var i = 0; i < dataSet.length; ++i)
-            lineChart.addDataPoint(i, dataSet[i]);
+                lineChart.addDataPoint(i, dataSet[i]);
 
         }
 
-        function saturate(x)
-        {
+        function saturate(x) {
             return Math.min(1.0, Math.max(x, 0.0));
         }
 
@@ -415,13 +410,11 @@
             return hex.length == 1 ? "0" + hex : hex;
         }
 
-        function rgbToHex(r, g, b)
-        {
+        function rgbToHex(r, g, b) {
             return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
         }
 
-        function colorRamp(v)
-        {
+        function colorRamp(v) {
             v = 2.0 * v;
             r = v - 0.0;
             g = v - 1.0;
@@ -431,15 +424,14 @@
             g = 1.0 - g * g;
             b = 1.0 - b * b;
 
-            r = Math.floor(saturate(r)*255);
-            g = Math.floor(saturate(g)*255);
-            b = Math.floor(saturate(b)*255);
+            r = Math.floor(saturate(r) * 255);
+            g = Math.floor(saturate(g) * 255);
+            b = Math.floor(saturate(b) * 255);
 
             return rgbToHex(r, g, b);
         }
 
-        function drawThermalCameraOutput(temperatures)
-        {
+        function drawThermalCameraOutput(temperatures) {
             var canvas = document.getElementById("thermalCamera");
             canvas.style.visibility = "visible";
             canvas.width = 320;
@@ -449,12 +441,12 @@
                 for (y = 0; y < 24; ++y) {
                     //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
                     //randomTemp = Math.random(); //pretend that it's normalised to 0..1
-					
-					temp = temperatures[32 * (23-y) + x];
-					//map temperatures to 0..1
-					minTemp = 10.0; //-40c
-					maxTemp = 40.0; //+300c
-					temp = (temp - minTemp) / (maxTemp - minTemp);
+
+                    temp = temperatures[32 * (23 - y) + x];
+                    //map temperatures to 0..1
+                    minTemp = 10.0; //-40c
+                    maxTemp = 40.0; //+300c
+                    temp = (temp - minTemp) / (maxTemp - minTemp);
 
                     canvasCtx.fillStyle = colorRamp(temp);
                     canvasCtx.fillRect(x * 10, y * 10, 10, 10);
