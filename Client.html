@@ -1,76 +1,234 @@
 <html>
 <style>
-    .roastProperties {
-        border: 1px solid #c3c3c3;
+    body {
+        background-color:#EBECF0;
+        margin-top: 20px;
+        margin-left: 10px;
+        font-family: Verdana;
+    }
+
+    .propertySectionTitle {
+        width: 100%;
+        display: block;
+        margin-bottom: 10px;
+        margin-top: 20px;
+        text-align: center;
+        color: #9397a4;
+        text-shadow: 1px 1px 1px #fff;
+        font-weight: bold;
+    }
+
+    #propertiesInputForm{
+        display: flex;
+        flex-direction: column;
+    }
+
+    #propertiesInputForm > div{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+
+    input {
+        margin: 5px;
+        width: 200px;
+        box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
+        border-radius: 30px;
+        border: 0;
+        height: 30px;
+        padding: 16px;
+        outline: 0;
+        text-shadow: 1px 1px 0 white;
+        background-color: #EBECF0;
+        transition: all 0.2s ease-in-out;
+        color: #676767;
+    }
+
+    input:focus {
+        box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff
+    }
+
+    input:disabled {
+        box-shadow: -2px -2px 2px #fff, 3px 3px 5px #babecc;
+    }
+
+    #actions{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+    .actionButton{
+        text-align: center;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        font-size: 13px;
+    }
+
+    #backgroundBlur {
+        position: fixed;
+        backdrop-filter: blur(5px);
+        /*backdrop-filter: brightness(40%);*/
+        z-index: 999;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        visibility: hidden;
+    }
+
+    #websocketMessages {
+        width: 98%;
+        height: 150px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
+        border-radius: 10px;
+        border: 0;
+        padding-left: 15px;
+        outline: 0;
+        text-shadow: 1px 1px 0 white;
+        background-color: #ececec;
+        padding-top: 10px;
+        color: #676767;
+        font-size: 13px;
+    }
+
+    #websocketMessages::-webkit-scrollbar {
+        width: 20px;
+    }
+
+    #websocketMessages::-webkit-scrollbar-track {
+    }
+
+    #websocketMessages::-webkit-scrollbar-thumb {
+        border-radius: 20px;
+        background: #babecc;
+        border: 1px solid #9b9b9b;
+    }
+
+    #websocketMessages::-webkit-scrollbar-thumb:hover {
+        background: #a9adbb;
+    }
+
+    #websocketMessages::-webkit-scrollbar-thumb:active {
+        background: #989caa;
+    }
+
+    .propertiesIcon {
+        opacity: 0.5;
+        cursor: pointer;
+        transition: transform 0.5s;
+        padding: 5px;
+    }
+
+    .propertiesIcon:hover {
+        transform: rotate(90deg);
+    }
+
+    .propertiesIcon:active{
+        opacity: 0.75;
+    }
+
+    .propertiesDialog {
         position: fixed;
         left: 0;
         right: 0;
         margin: 5% auto;
-        width: 500px;
+        width: 700px;
         padding: 20px;
         border-radius: 20px;
-        box-shadow: 0px 0px 10px 5px #c3c3c3;
-        background-color: white;
+        box-shadow: -5px -5px 20px #b0b0b0, 5px 5px 20px black;
+        background-color: #EBECF0;
+        visibility: hidden;
+        z-index: 99999;
     }
 
-    .roastPropertiesTitle {
+    .propertiesTitle {
         width: 100%;
         display: block;
         text-align: center;
         margin-bottom: 20px;
+        color: #9397a4;
+        text-shadow: 1px 1px 1px #fff;
+        font-weight: bold;
+        font-size: 2em;
+    }
+
+    .button {
+        border: 0;
+        outline: 0;
+        border-radius: 20px;
+        background-color: #ebecf0;
+        text-shadow: 1px 1px 0 white;
+        box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
+        transition: all 0.2s ease-in-out;
+        padding: 5px 8px 5px 8px;
+        text-decoration: none;
+        cursor: pointer;
+        color: #676767;
+        font-weight: bold;
+        user-select: none;
+    }
+
+    .button:hover {
+        box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
+    }
+
+    .button:active {
+        box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
     }
 
     .closeButton {
         position: absolute;
         right: 15px;
         top: 12px;
-        border: 1px solid #a3a3a3;
-        box-shadow: 0px 0px 3px 1px #c3c3c3;
-        border-radius: 10px;
-        padding: 3px 8px 5px 8px;
-        text-decoration: none;
-        cursor: pointer;
-        font-family: Arial;
-    }
-
-    .closeButton:hover
-    {
-        color: white;
-        background-color: #c3c3c3;
-    }
-
-    .closeButton:active{
-        color:white;
-        background-color: #a3a3a3;
     }
 
     .lineChart {
-        border: 1px solid #c3c3c3;
+        margin: 0px 10px 0px 10px;
+        padding: 10px;
+        border-radius: 20px;
+        background-color: #ebecf0;
+        box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
     }
 
     .thermalCam {
-        border:1px solid #c3c3c3; 
         width: 320px;
         height: 240px;
         background-color: grey;
         vertical-align: top;
-        margin: 0px 20px 20px 20px;
+        margin: 0px 10px 20px 10px;
+        border-radius: 20px;
+        background-color: #ebecf0;
+        box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
+        background-image: url(img/noise.png);
     }
 
     .controller {
-        outline: 2px solid #aaa;
+        box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
         border-radius: 20px;
-        background-color: #555;
+        background-color: #c5c5cc;
         width: 50px;
         height: 300px;
         display: flex;
         margin: 20px;
         user-select: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .controller:hover {
+        box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
     }
 
     .controller > span {
         width: inherit;
-        background-color: #fff;
+        background-color: #ebecf0;
         background-size: 100% 100%;
         display: block;
         border-radius: 20px;
@@ -108,28 +266,85 @@
         density calculation, moisture, bean screen size, ambient temp/humidity/pressure,
         end weight, end volume, end density
     -->
-    <div id="roastProp" class="roastProperties">
-        <span class="closeButton" onclick="hideRoastProperties();">X</span>
-        <span class="roastPropertiesTitle">Roast Properties:</span>
-        Roast Name: <input type="text" id="roastName" value="Light sweet roast" /> <br />
-        Date: <input type="date" id="roastDate" /> Time <input type="time" id="roastTime" /> <br />
-        Bean type: <input type="text" id="beanType" value="Ethiopia Natural Djimmah" /> <br />
-        Bean weight (g): <input type="number" value="200" /> <br />
-        End weight (g): <input type="number" value="185" /> <br />
-        Bean volume (mL): <input type="number" value="10" /> <br />
-        End volume (mL): <input type="number" value="11" /> <br />
-        Density (g/mL): <input type="number" readonly="readonly" value="20" /> <br />
-        End density (g/mL): <input type="number" readonly="readonly" value="16.8" /> <br />
-        Moisture content (%): <input type="number" value="10" /> <br />
-        Bean screen size (1/64"): <input type="number" value="18" /> <br />
-        Ambient Temperature (°C) <input type="number" value="24" /> <br />
-        Ambient humidity (%) <input type="number" value="43" /> <br />
-        Ambient pressure (atm) <input type="number" value="1" /> <br />
-
-
+    <div id="roastProperties" class="propertiesDialog">
+        <span class="closeButton button" onclick="hideRoastProperties();">X</span>
+        <span class="propertiesTitle">Roast Properties:</span>
+        <div id="propertiesInputForm">
+            <div>
+                <input type="text" id="roastName" placeholder="Roast Name" />
+                <input type="date" readonly="readonly" disabled id="roastDate" title="Roast Date (auto filled)" />
+                <input type="time" readonly="readonly" disabled id="roastTime" title="Roast Time (auto filled)" />
+            </div>
+            <span class="propertySectionTitle">Pre Roast Bean Data</span>
+            <div>
+                <input type="text" id="beanType" placeholder="Bean Type" />
+                <input type="number" placeholder="Moisture Content (%)" />
+                <input type="number" placeholder='Bean Screen Size (1/64")' />
+            </div>
+            <div>
+                <input type="number" placeholder="Bean Weight (g)" />
+                <input type="number" placeholder="Bean Volume (mL)" />
+                <input type="number" placeholder="Density (g/mL)" />
+            </div>
+            <span class="propertySectionTitle">Post Roast Bean Data</span>
+            <div>
+                <input type="number" placeholder="End Weight (g)" />
+                <input type="number" placeholder="End Volume (mL)" />
+                <input type="number" placeholder="End Density (g/mL)" />
+            </div>
+            <span class="propertySectionTitle">Ambient Values</span>
+            <div>
+                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" />
+                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" />
+                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" />
+            </div>
+        </div>
+        <span class="propertySectionTitle">Connection settings</span>
+        <div style="margin-top: 20px; margin-bottom: 10px; ">
+            <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; "/> 
+            <span class="button" onclick="connect()">Connect</span>
+        </div>
+        <div id="websocketMessages"></div>
     </div>
 
+    <div id="backgroundBlur"></div>
+
     <div style="display: flex; flex-direction: row;">
+        <div id="actions">
+            <div class="button actionButton" onclick="showRoastProperties();" title="Start Roasting (Drying Phase Start)">
+                <img src="img/properties.png" width="40" class="propertiesIcon"  />
+                <!--Icon created by Freepik - Flaticon-->
+            </div>
+
+            <div class="button actionButton" title="Start Roasting (Drying Phase Start)">
+                <span>START</span>
+            </div>
+
+            <div class="button actionButton" title="Insert Drying Phase End Event">
+                <span>DRY<br />END</span>
+            </div>
+
+            <div class="button actionButton" title="Insert First Crack Start Event">
+                <span>FC<br />START</span>
+            </div>
+
+            <div class="button actionButton" title="Insert First Crack End Event">
+                <span>FC<br />END</span>
+            </div>
+
+            <div class="button actionButton" title="Insert Second Crack Start Event">
+                <span>SC<br />START</span>
+            </div>
+
+            <div class="button actionButton" title="Insert Second Crack End Event">
+                <span>SC<br />END</span>
+            </div>
+
+            <div class="button actionButton" title="Stop Roasting and Start Cooldown">
+                <span>STOP</span>
+            </div>
+        </div>
+
         <canvas id="lineChart" class="lineChart">
             Your browser does not support the canvas element.
         </canvas>
@@ -140,21 +355,21 @@
             </canvas>
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                <div id="fanController" class="controller">
+                <div id="fanController" class="controller" title="Cooling Fan Control">
                     <span style="height: 70%;">
                         <span><img src="img/fan.png" width="30" class="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
 
-                <div id="motorController" class="controller">
+                <div id="motorController" class="controller" title="Drum Motor Control">
                     <span style="height: 70%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
-                <div id="motorController" class="controller">
+                <div id="motorController" class="controller" title="Heating Element Control">
                     <span style="height: 70%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
@@ -164,9 +379,6 @@
         </div>
     </div>
 
-    <div id="test"></div>
-
-    <div>Websocket address: <input type="text" id="wsAddress" /> <button onclick="connect()">Connect</button></div>
 
     <script>
         // Heating elements:
@@ -253,16 +465,18 @@
                 isDown = false;
             }
 
-            if (e.type == "mousedown" || e.type == "mousemove") {
+            if (isDown) {
                 e.preventDefault();
             }
         }
 
         function showRoastProperties() {
-            document.getElementById('roastProp').style.visibility = "visible";
+            document.getElementById('roastProperties').style.visibility = "visible";
+            document.getElementById('backgroundBlur').style.visibility = "visible";
         }
         function hideRoastProperties() {
-            document.getElementById('roastProp').style.visibility = "hidden";
+            document.getElementById('roastProperties').style.visibility = "hidden";
+            document.getElementById('backgroundBlur').style.visibility = "hidden";
         }
 
         class LineChart {
@@ -400,7 +614,7 @@
             var ctx = canvas.getContext("2d");
 
             var canvasWidth = 900;
-            var canvasHeight = 500;
+            var canvasHeight = 600;
 
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
@@ -420,6 +634,9 @@
             // Set the "drawn" size of the canvas
             canvas.style.width = `${rect.width}px`;
             canvas.style.height = `${rect.height}px`;
+
+            canvasWidth = rect.width;
+            canvasHeight = rect.height;
 
             //canvas coordinate system:
             //0...w
@@ -571,23 +788,27 @@
                 webSocket.binaryType = 'arraybuffer';
 
                 webSocket.onerror = (event) => {
-                    document.getElementById("test").innerHTML += "Failed to connect to " + serverURL + "<br>";
+                    document.getElementById("websocketMessages").innerHTML += "Failed to connect to " + serverURL + "<br>";
                 }
 
                 webSocket.onclose = (event) => {
-                    document.getElementById("test").innerHTML += "onclose" + "<br>";
+                    document.getElementById("websocketMessages").innerHTML += "onclose" + "<br>";
+
+                    var tcc = document.getElementById("thermalCamera");
+                    var tccCtx = tcc.getContext("2d");
+                    tccCtx.clearRect(0, 0, 320, 240);
                 }
 
                 webSocket.onopen = (event) => {
-                    document.getElementById("test").innerHTML += "onopen" + "<br>";
+                    document.getElementById("websocketMessages").innerHTML += "onopen" + "<br>";
                     //webSocket.send(("a").repeat(65536*2));
                     webSocket.send("hello server!");
                 }
 
                 webSocket.onmessage = (event) => {
-                    document.getElementById("test").innerHTML = "onmessage " + (typeof event.data) + "<br>";
+                    //document.getElementById("websocketMessages").innerHTML += "onmessage " + (typeof event.data) + "<br>";
                     if (typeof event.data == "string") {
-                        document.getElementById("test").innerHTML += event.data + "<br>";
+                        document.getElementById("websocketMessages").innerHTML += event.data + "<br>";
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
@@ -597,7 +818,7 @@
                 }
             }
             catch (error) {
-                document.getElementById("test").innerHTML = error.message;
+                document.getElementById("websocketMessages").innerHTML += error.message + "<br>";
             }
         }
     </script>
