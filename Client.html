@@ -66,7 +66,7 @@
     #actions{
         display: flex;
         flex-direction: column;
-        justify-content: space-evenly;
+        justify-content: space-between;
         align-items: center;
         margin-right: 10px;
     }
@@ -95,7 +95,7 @@
 
     #websocketMessages {
         width: 98%;
-        height: 150px;
+        height: 100px;
         overflow-x: hidden;
         overflow-y: scroll;
         box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
@@ -150,7 +150,7 @@
         position: fixed;
         left: 0;
         right: 0;
-        margin: 5% auto;
+        margin: 2% auto;
         width: 700px;
         padding: 20px;
         border-radius: 20px;
@@ -310,9 +310,21 @@
                 <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" />
             </div>
         </div>
+        <span class="propertySectionTitle">Roast Profile Management</span>
+        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
+            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="filePath" />
+            <!--We'll be able to read/write a file using this.files[0] here-->
+            <input type="file" id="filePicker" style="display:none;" onchange="document.getElementById('filePath').value = this.files[0].name;" />
+            <span class="button" onclick="document.getElementById('filePicker').click();" style="margin-right:10px;">
+                <img src="img/file.png" width="20" />
+                <!--Icons created by Kiranshastry - Flaticon-->
+            </span>
+            <span class="button" style="margin-right:10px;">Load</span>
+            <span class="button" >Save</span>
+        </div>
         <span class="propertySectionTitle">Connection settings</span>
         <div style="margin-top: 20px; margin-bottom: 10px; ">
-            <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; "/> 
+            <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
             <span class="button" onclick="connect()">Connect</span>
         </div>
         <div id="websocketMessages"></div>
@@ -323,7 +335,7 @@
     <div style="display: flex; flex-direction: row;">
         <div id="actions">
             <div class="button actionButton" onclick="showRoastProperties();" title="Start Roasting (Drying Phase Start)">
-                <img src="img/properties.png" width="40" class="propertiesIcon"  />
+                <img src="img/properties.png" width="40" class="propertiesIcon" />
                 <!--Icon created by Freepik - Flaticon-->
             </div>
 
@@ -353,6 +365,11 @@
 
             <div class="button actionButton" title="Stop Roasting and Start Cooldown">
                 <span>STOP</span>
+            </div>
+
+            <div class="button actionButton" title="Replay Roast Profile">
+                <img src="img/replay.png" width="40"  style="opacity: 0.5; padding: 5px;" />
+                <!--Icon created by Freepik - Flaticon-->
             </div>
         </div>
 
