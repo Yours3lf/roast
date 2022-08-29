@@ -404,6 +404,7 @@
         var isDown = false;
         var initialYPos = 0.0;
         var clickedElem = undefined;
+        var thermalCamUpdate = true;
 
         document.addEventListener("mouseup", controlFunc);
         document.addEventListener("mousemove", controlFunc);
@@ -473,10 +474,15 @@
         function showRoastProperties() {
             document.getElementById('roastProperties').style.visibility = "visible";
             document.getElementById('backgroundBlur').style.visibility = "visible";
+            document.getElementsByClassName('fanImage')[0].style.animationPlayState = "paused";
+            console.log(document.getElementsByClassName('fanImage'));
+            thermalCamUpdate = false;
         }
         function hideRoastProperties() {
             document.getElementById('roastProperties').style.visibility = "hidden";
             document.getElementById('backgroundBlur').style.visibility = "hidden";
+            document.getElementsByClassName('fanImage')[0].style.animationPlayState = "running";
+            thermalCamUpdate = true;
         }
 
         class LineChart {
@@ -760,25 +766,27 @@
         }
 
         function drawThermalCameraOutput(temperatures) {
-            var canvas = document.getElementById("thermalCamera");
-            canvas.style.visibility = "visible";
-            canvas.width = 320;
-            canvas.height = 240;
-            var canvasCtx = canvas.getContext("2d");
-            for (x = 0; x < 32; ++x)
-                for (y = 0; y < 24; ++y) {
-                    //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-                    //randomTemp = Math.random(); //pretend that it's normalised to 0..1
+            if (thermalCamUpdate) {
+                var canvas = document.getElementById("thermalCamera");
+                canvas.style.visibility = "visible";
+                canvas.width = 320;
+                canvas.height = 240;
+                var canvasCtx = canvas.getContext("2d");
+                for (x = 0; x < 32; ++x)
+                    for (y = 0; y < 24; ++y) {
+                        //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                        //randomTemp = Math.random(); //pretend that it's normalised to 0..1
 
-                    temp = temperatures[32 * (23 - y) + x];
-                    //map temperatures to 0..1
-                    minTemp = 10.0; //-40c
-                    maxTemp = 40.0; //+300c
-                    temp = (temp - minTemp) / (maxTemp - minTemp);
+                        temp = temperatures[32 * (23 - y) + x];
+                        //map temperatures to 0..1
+                        minTemp = 10.0; //-40c
+                        maxTemp = 40.0; //+300c
+                        temp = (temp - minTemp) / (maxTemp - minTemp);
 
-                    canvasCtx.fillStyle = colorRamp(temp);
-                    canvasCtx.fillRect(x * 10, y * 10, 10, 10);
-                }
+                        canvasCtx.fillStyle = colorRamp(temp);
+                        canvasCtx.fillRect(x * 10, y * 10, 10, 10);
+                    }
+            }
         }
 
         function connect() {
