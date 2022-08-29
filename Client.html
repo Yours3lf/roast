@@ -7,6 +7,16 @@
         font-family: Verdana;
     }
 
+    #offlineText {
+        position: relative;
+        top: -150px;
+        height: 0;
+        font-size: 20px;
+        width: 100%;
+        text-align: center;
+        text-shadow: 1px 1px white;
+    }
+
     .propertySectionTitle {
         width: 100%;
         display: block;
@@ -354,6 +364,8 @@
             <canvas id="thermalCamera" width="320" height="240" class="thermalCam">
                 Your browser does not support the canvas element.
             </canvas>
+
+            <span id="offlineText">OFFLINE</span>
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                 <div id="fanController" class="controller" title="Cooling Fan Control">
@@ -801,17 +813,20 @@
                 }
 
                 webSocket.onclose = (event) => {
-                    document.getElementById("websocketMessages").innerHTML += "onclose" + "<br>";
+                    document.getElementById("websocketMessages").innerHTML += "Connection closed" + "<br>";
 
                     var tcc = document.getElementById("thermalCamera");
                     var tccCtx = tcc.getContext("2d");
                     tccCtx.clearRect(0, 0, 320, 240);
+                    document.getElementById("offlineText").style.visibility = "visible";
                 }
 
                 webSocket.onopen = (event) => {
-                    document.getElementById("websocketMessages").innerHTML += "onopen" + "<br>";
+                    document.getElementById("websocketMessages").innerHTML += "Connection opened successfully" + "<br>";
                     //webSocket.send(("a").repeat(65536*2));
                     webSocket.send("hello server!");
+
+                    document.getElementById("offlineText").style.visibility = "hidden";
                 }
 
                 webSocket.onmessage = (event) => {
