@@ -327,6 +327,7 @@
         <div style="margin-top: 20px; margin-bottom: 10px; ">
             <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
             <span class="button" onclick="connect()">Connect</span>
+            <span class="button" onclick="disconnect()">Disconnect</span>
         </div>
         <div id="websocketMessages"></div>
     </div>
@@ -820,6 +821,8 @@
             }
         }
 
+        var webSocket = null;
+
         function connect() {
             try {
                 serverURL = document.getElementById("wsAddress").value;
@@ -861,6 +864,14 @@
             }
             catch (error) {
                 document.getElementById("websocketMessages").innerHTML += error.message + "<br>";
+            }
+        }
+
+        function disconnect()
+        {
+            if (webSocket != undefined) {
+                webSocket.close();
+                webSocket = null;
             }
         }
     </script>
