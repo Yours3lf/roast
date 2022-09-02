@@ -3,6 +3,8 @@
 #ifndef _WIN32
 #include <MLX90640/MLX90640_API.h>
 
+#include <cmath>
+
 #define MLX_CHECK(x) \
 	{ int error = 0; \
 	error = (x); \
@@ -15,8 +17,8 @@ int main(int argc, char** args)
 {
 	if (argc < 2)
 	{
-		std::cerr << "Usage " << args[0] << " address port" << std::endl;
-		std::cerr << "Default port 50000 is used if omitted" << std::endl;
+		std::cerr << "Usage " << args[0] << " address port refreshRate" << std::endl;
+		std::cerr << "Default port 50000 and refreshRate 4HZ is used if omitted" << std::endl;
 		return -1;
 	}
 
@@ -26,6 +28,21 @@ int main(int argc, char** args)
 	if (argc > 2)
 	{
 		port = std::stoi(std::string(args[2]));
+	}
+
+	int inputRefreshRate = 4;
+	if(argc > 3)
+	{
+		inputRefreshRate = std::stoi(std::string(args[3]));
+		if(inputRefreshRate < 1)
+		{
+			inputRefreshRate = 1;
+		}
+
+		if(inputRefreshRate > 64)
+		{
+			inputRefreshRate = 64;
+		}
 	}
 
 
@@ -44,7 +61,7 @@ int main(int argc, char** args)
 		//16hz 0b101 baud 1000k
 		//32hz 0b110
 		//64hz 0b111
-		MLX_CHECK(MLX90640_SetRefreshRate(MLX_I2C_ADDR, 0b011));
+		MLX_CHECK(MLX90640_SetRefreshRate(MLX_I2C_ADDR, std::log2(inputRefreshRate)+1));
 
 		MLX_CHECK(MLX90640_SetChessMode(MLX_I2C_ADDR));
 
