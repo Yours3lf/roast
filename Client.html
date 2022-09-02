@@ -17,6 +17,17 @@
         text-shadow: 1px 1px white;
     }
 
+    #thermalCamTooltip{
+        visibility: hidden;
+        text-shadow: 1px 1px white;
+        background: rgba(255 255 255 / 53%);
+        margin-left: 15px;
+        z-index: 999999;
+        position:absolute;
+        padding: 5px;
+        border-radius: 10px;
+    }
+
     .propertySectionTitle {
         width: 100%;
         display: block;
@@ -384,6 +395,8 @@
                 Your browser does not support the canvas element.
             </canvas>
 
+            <span id="thermalCamTooltip"></span>
+
             <span id="offlineText">OFFLINE</span>
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
@@ -407,6 +420,20 @@
                         <!--Icon created by Those Icons - Flaticon-->
                     </span>
                 </div>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column;">
+            <canvas id="thermalCamHistogram" width="300" height="200"></canvas>
+            <div style="display: flex; flex-direction: row; justify-content: space-around;">
+                <span id="thermalCamMin">min</span>
+                <span id="thermalCamMedian">med</span>
+                <span id="thermalCamMax">max</span>
+            </div>
+            <div style="display: flex; flex-direction: row; justify-content: space-around;">
+                <span>min</span>
+                <span>med</span>
+                <span>max</span>
             </div>
         </div>
     </div>
@@ -507,7 +534,6 @@
             document.getElementById('roastProperties').style.visibility = "visible";
             document.getElementById('backgroundBlur').style.visibility = "visible";
             document.getElementsByClassName('fanImage')[0].style.animationPlayState = "paused";
-            console.log(document.getElementsByClassName('fanImage'));
             thermalCamUpdate = false;
         }
         function hideRoastProperties() {
@@ -821,6 +847,116 @@
             }
         }
 
+        function analyseThermalCameraData(temperatures) {
+            var temps = temperatures.slice().sort();
+            var min = 300.0;
+            var max = -40.0;
+            var median = (temps[temps.length / 2] + temps[temps.length / 2 + 1]) / 2.0;
+            for (var x of temps) {
+                min = Math.min(x, min);
+                max = Math.max(x, max);
+            }
+            document.getElementById("thermalCamMin").innerHTML = min.toFixed(1);
+            document.getElementById("thermalCamMax").innerHTML = max.toFixed(1);
+            document.getElementById("thermalCamMedian").innerHTML = median.toFixed(1);
+        }
+
+        function drawThermalCameraHistogram(temperatures) {
+            var histoCanvas = document.getElementById("thermalCamHistogram");
+            var histoCtx = histoCanvas.getContext("2d");
+            histoCanvas.width = 300;
+            histoCanvas.height = 200;
+
+            const dpr = window.devicePixelRatio;
+            const rect = histoCanvas.getBoundingClientRect();
+
+            // Set the "actual" size of the canvas
+            histoCanvas.width = rect.width * dpr;
+            histoCanvas.height = rect.height * dpr;
+
+            // Scale the context to ensure correct drawing operations
+            histoCtx.scale(dpr, dpr);
+
+            // Set the "drawn" size of the canvas
+            histoCanvas.style.width = `${rect.width}px`;
+            histoCanvas.style.height = `${rect.height}px`;
+
+            var canvasWidth = rect.width;
+            var canvasHeight = rect.height;
+
+            var min = 300.0;
+            var max = -40.0;
+            for (var x of temperatures) {
+                min = Math.min(x, min);
+                max = Math.max(x, max);
+            }
+
+            var histogram = new Map();
+            for (var x = Math.floor(min); x <= Math.ceil(max); ++x) {
+                histogram.set(x, 0);
+            }
+
+            for (var x of temperatures) {
+                histogram.set(Math.floor(x), histogram.get(Math.floor(x)) + 1);
+            }
+
+            var mostFrequentVal = 0;
+            for (const [key, val] of histogram) {
+                mostFrequentVal = Math.max(val, mostFrequentVal);
+            }
+
+            histoCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            var counter = 0;
+            var barwidth = canvasWidth / histogram.size;
+            for (const [key, val] of histogram) {
+                histoCtx.fillRect(
+                    (barwidth) * counter,
+                    (1.0 - val / mostFrequentVal) * canvasHeight,
+                    barwidth,
+                    val / mostFrequentVal * canvasHeight);
+                counter++;
+            }
+        }
+
+        document.getElementById("thermalCamera").addEventListener("mousemove", thermalCamMove);
+        document.getElementById("thermalCamera").addEventListener("mouseenter", thermalCamEnter);
+        document.getElementById("thermalCamera").addEventListener("mouseleave", thermalCamLeave);
+
+        var tempArray = null;
+
+        var samplePos = 0;
+        var isMouseIn = false;
+
+        function thermalCamMove(e) {
+            var x = Math.floor(e.offsetX / 10.0);
+            var y = Math.floor(e.offsetY / 10.0);
+            samplePos = 32 * (23 - y) + x;
+            document.getElementById("thermalCamTooltip").style.left = e.pageX + 'px';
+            document.getElementById("thermalCamTooltip").style.top = e.pageY + 'px';
+        }
+
+        function tooltipUpdate() {
+            if (isMouseIn && tempArray != null) {
+                document.getElementById("thermalCamTooltip").innerHTML = tempArray[samplePos].toFixed(1) + " °C";
+
+                setTimeout(tooltipUpdate, 30);
+            }
+        }
+
+        function thermalCamEnter(e) {
+            isMouseIn = true;
+            if (tempArray != null) {
+                document.getElementById("thermalCamTooltip").style.visibility = "visible";
+            }
+
+            tooltipUpdate();
+        }
+
+        function thermalCamLeave(e) {
+            isMouseIn = false;
+            document.getElementById("thermalCamTooltip").style.visibility = "hidden";
+        }
+
         var webSocket = null;
 
         function connect() {
@@ -859,6 +995,10 @@
                         arrayBuf = event.data;
                         floatArray = new Float32Array(arrayBuf);
                         drawThermalCameraOutput(floatArray);
+                        analyseThermalCameraData(floatArray);
+                        drawThermalCameraHistogram(floatArray);
+
+                        tempArray = floatArray;
                     }
                 }
             }
