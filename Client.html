@@ -841,7 +841,7 @@
                         maxTemp = 40.0; //+300c
                         temp = (temp - minTemp) / (maxTemp - minTemp);
 
-                        canvasCtx.fillStyle = colorRamp(temp);
+                        canvasCtx.fillStyle = colorRamp(1-temp);
                         canvasCtx.fillRect(x * 10, y * 10, 10, 10);
                     }
             }
