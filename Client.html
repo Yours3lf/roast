@@ -1,10 +1,11 @@
 <html>
 <style>
     body {
-        background-color:#EBECF0;
+        background-color: #EBECF0;
         margin-top: 20px;
         margin-left: 10px;
         font-family: Verdana;
+        -webkit-tap-highlight-color: transparent;
     }
 
     #offlineText {
@@ -238,9 +239,9 @@
         border-radius: 20px;
         background-color: #d1d4e0;
         width: 50px;
-        height: 300px;
+        height: 350px;
         display: flex;
-        margin: 20px;
+        margin: 10px;
         user-select: none;
         transition: all 0.2s ease-in-out;
     }
@@ -294,45 +295,52 @@
         <span class="propertiesTitle">Roast Properties:</span>
         <div id="propertiesInputForm">
             <div>
-                <input type="text" id="roastName" placeholder="Roast Name" />
+                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" oninput="roastProfile.setName(event.target.value)"/>
                 <input type="date" readonly="readonly" disabled id="roastDate" title="Roast Date (auto filled)" />
                 <input type="time" readonly="readonly" disabled id="roastTime" title="Roast Time (auto filled)" />
             </div>
             <span class="propertySectionTitle">Pre Roast Bean Data</span>
             <div>
-                <input type="text" id="beanType" placeholder="Bean Type" />
-                <input type="number" placeholder="Moisture Content (%)" />
-                <input type="number" placeholder='Bean Screen Size (1/64")' />
+                <input type="text" id="beanType" placeholder="Bean Type" title="Bean Type" oninput="roastProfile.setBeanType(event.target.value)" />
+                <input type="number" placeholder="Moisture Content (%)" title="Moisture Content (%)" oninput="roastProfile.setMoistureContent(event.target.value)" />
+                <input type="number" placeholder='Bean Screen Size (1/64")' title='Bean Screen Size (1/64")' oninput="roastProfile.setBeanScreenSize(event.target.value)" />
             </div>
             <div>
-                <input type="number" placeholder="Bean Weight (g)" />
-                <input type="number" placeholder="Bean Volume (mL)" />
-                <input type="number" placeholder="Density (g/mL)" />
+                <input type="number" id="beanWeight" placeholder="Bean Weight (g)" title="Bean Weight (g)" oninput="roastProfile.setWeight(event.target.value)" />
+                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" oninput="roastProfile.setVolume(event.target.value)"/>
+                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" oninput="roastProfile.setDensity(event.target.value)"/>
             </div>
             <span class="propertySectionTitle">Post Roast Bean Data</span>
             <div>
-                <input type="number" placeholder="End Weight (g)" />
-                <input type="number" placeholder="End Volume (mL)" />
-                <input type="number" placeholder="End Density (g/mL)" />
+                <input type="number" id="endBeanWeight" placeholder="End Weight (g)" title="End Weight (g)" oninput="roastProfile.setEndWeight(event.target.value)" />
+                <input type="number" id="endBeanVolume" placeholder="End Volume (mL)" title="End Volume (mL)" oninput="roastProfile.setEndVolume(event.target.value)" />
+                <input type="number" id="endBeanDensity" placeholder="End Density (g/mL)" title="End Density (g/mL)" oninput="roastProfile.setEndDensity(event.target.value)" />
             </div>
             <span class="propertySectionTitle">Ambient Values</span>
             <div>
-                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" />
-                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" />
-                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" />
+                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" title="Temperature (°C)" id="ambientTemperature" />
+                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" title="Humidity (%)" id="ambientHumidity"/>
+                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" title="Pressure (atm)" id="ambientPressure" />
             </div>
         </div>
         <span class="propertySectionTitle">Roast Profile Management</span>
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
-            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="filePath" />
+            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileLoadPath" />
             <!--We'll be able to read/write a file using this.files[0] here-->
-            <input type="file" id="filePicker" style="display:none;" onchange="document.getElementById('filePath').value = this.files[0].name;" />
+            <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
             <span class="button" onclick="document.getElementById('filePicker').click();" style="margin-right:10px;">
                 <img src="img/file.png" width="20" />
                 <!--Icons created by Kiranshastry - Flaticon-->
             </span>
-            <span class="button" style="margin-right:10px;">Load</span>
-            <span class="button" >Save</span>
+            <span class="button" onclick="loadRoastProfile()">Load</span>
+        </div>
+        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
+            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileSavePath" />
+            <span class="button" onclick="pickSaveFile()" style="margin-right:10px;">
+                <img src="img/file.png" width="20" />
+                <!--Icons created by Kiranshastry - Flaticon-->
+            </span>
+            <span class="button" onclick="saveRoastProfile()">Save</span>
         </div>
         <span class="propertySectionTitle">Connection settings</span>
         <div style="margin-top: 20px; margin-bottom: 10px; ">
@@ -352,36 +360,36 @@
                 <!--Icon created by Freepik - Flaticon-->
             </div>
 
-            <div class="button actionButton" title="Start Roasting (Drying Phase Start)">
+            <div class="button actionButton" onclick="roastProfile.setStart()" title="Start Roasting (Drying Phase Start)">
                 <span>START</span>
             </div>
 
-            <div class="button actionButton" title="Insert Drying Phase End Event">
+            <div class="button actionButton" onclick="roastProfile.setDryEnd()" title="Insert Drying Phase End Event">
                 <span>DRY<br />END</span>
             </div>
 
-            <div class="button actionButton" title="Insert First Crack Start Event">
+            <div class="button actionButton" onclick="roastProfile.setFirstCrackStart()" title="Insert First Crack Start Event">
                 <span>FC<br />START</span>
             </div>
 
-            <div class="button actionButton" title="Insert First Crack End Event">
+            <div class="button actionButton" onclick="roastProfile.setFirstCrackEnd()" title="Insert First Crack End Event">
                 <span>FC<br />END</span>
             </div>
 
-            <div class="button actionButton" title="Insert Second Crack Start Event">
+            <div class="button actionButton" onclick="roastProfile.setSecondCrackStart()" title="Insert Second Crack Start Event">
                 <span>SC<br />START</span>
             </div>
 
-            <div class="button actionButton" title="Insert Second Crack End Event">
+            <div class="button actionButton" onclick="roastProfile.setSecondCrackEnd()" title="Insert Second Crack End Event">
                 <span>SC<br />END</span>
             </div>
 
-            <div class="button actionButton" title="Stop Roasting and Start Cooldown">
+            <div class="button actionButton" onclick="roastProfile.setStop()" title="Stop Roasting and Start Cooldown">
                 <span>STOP</span>
             </div>
 
             <div class="button actionButton" title="Replay Roast Profile">
-                <img src="img/replay.png" width="40"  style="opacity: 0.5; padding: 5px;" />
+                <img src="img/replay.png" width="40" style="opacity: 0.5; padding: 5px;" />
                 <!--Icon created by Freepik - Flaticon-->
             </div>
         </div>
@@ -407,14 +415,14 @@
                     </span>
                 </div>
 
-                <div id="motorController" class="controller" title="Drum Motor Control">
+                <div id="drumController" class="controller" title="Drum Motor Control">
                     <span style="height: 70%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
-                <div id="motorController" class="controller" title="Heating Element Control">
+                <div id="heaterController" class="controller" title="Heater Element Control">
                     <span style="height: 70%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
@@ -436,6 +444,10 @@
                 <span>max</span>
             </div>
         </div>
+    </div>
+    <div style="display: flex; flex-direction: row; justify-content: space-evenly; width: 920px; left: 106px; top: 30px; position: absolute;">
+        <span id="auc"></span>
+        <span id="ror"></span>
     </div>
 
 
@@ -459,6 +471,41 @@
         // exhaust fan thermocouple
         // main chamber thermocouple
         // thermal camera 3.3v
+
+        var fileToLoad = null;
+        var fileToSave = null;
+
+        async function pickSaveFile() {
+            fileToSave = await window.showSaveFilePicker({
+                types: [{
+                    description: "JSON file",
+                    accept: { "text/plain": [".json"] }
+                }]
+            });
+            var file = await fileToSave.getFile();
+            document.getElementById('fileSavePath').value = file.name;
+        }
+
+        async function saveRoastProfile() {
+            if (fileToSave != null)
+            {
+                console.log(roastProfile.stringify());
+                const fileStream = await fileToSave.createWritable();
+                await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
+                await fileStream.close();
+            }
+        }
+
+        function loadRoastProfile() {
+            if (fileToLoad != null) {
+                var reader = new FileReader();
+                reader.readAsText(fileToLoad);
+                reader.onload = function (evt) {
+                    console.log(reader.result);
+                    roastProfile = JSON.parse(reader.result);
+                }
+            }
+        }
 
         var isDown = false;
         var initialYPos = 0.0;
@@ -496,6 +543,17 @@
                     elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
                 }
             }
+
+            if (elem.id == "fanController") {
+                roastProfile.setFanSpeed(percentage);
+            }
+            else if (elem.id == "drumController") {
+                roastProfile.setDrumSpeed(percentage);
+            }
+            else if (elem.id == "heaterController") {
+                roastProfile.setHeaterSpeed(percentage);
+            }
+
         }
 
         function controlFunc(e) {
@@ -548,15 +606,14 @@
             #horizontalMaxVal;
             #verticalMinVal;
             #verticalMaxVal;
+            #secondaryVerticalMinVal;
+            #secondaryVerticalMaxVal;
             #canvasWidth;
             #canvasHeight;
             #ctx;
-            #prevH;
-            #prevV;
             #vertAxisOffsetX;
-            #dataPointCounter;
 
-            constructor(c, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal) {
+            constructor(c, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal, vsMinVal, vsMaxVal) {
                 this.#ctx = c;
                 this.#canvasWidth = cWidth;
                 this.#canvasHeight = cHeight;
@@ -565,12 +622,18 @@
                 this.#verticalMinVal = vMinVal;
                 this.#verticalMaxVal = vMaxVal;
                 this.#vertAxisOffsetX = 0;
-                this.#dataPointCounter = 0;
+                this.#secondaryVerticalMinVal = vsMinVal;
+                this.#secondaryVerticalMaxVal = vsMaxVal;
             }
 
             #valToCanvasYoffset(v) {
                 var spaceAvailable = this.#canvasHeight - 40 * 2;
                 return this.#canvasHeight - 40 - (v - this.#verticalMinVal) / (this.#verticalMaxVal - this.#verticalMinVal) * spaceAvailable;
+            }
+
+            #valToCanvasYoffsetSecondaryAxis(v) {
+                var spaceAvailable = this.#canvasHeight - 40 * 2;
+                return this.#canvasHeight - 40 - (v - this.#secondaryVerticalMinVal) / (this.#secondaryVerticalMaxVal - this.#secondaryVerticalMinVal) * spaceAvailable;
             }
 
             #drawHorizontalLines(v, xOffset) {
@@ -581,10 +644,25 @@
                 this.#ctx.stroke(line);
             }
 
+            #drawHorizontalSecondaryLines(xOffset, v) {
+                var line = new Path2D();
+                var yOffset = this.#valToCanvasYoffsetSecondaryAxis(v);
+                var chartWidth = (this.#canvasWidth - 40) - (xOffset + 15);
+                line.moveTo(xOffset + 15 + chartWidth - 5, yOffset);
+                line.lineTo(xOffset + 15 + chartWidth + 5, yOffset);
+                this.#ctx.stroke(line);
+            }
+
             #drawVerticalAxisText(v) {
                 var lineOffsetY = this.#valToCanvasYoffset(v);
                 this.#ctx.fillText(v, 5, lineOffsetY + 7);
                 return this.#ctx.measureText(v).width;
+            }
+
+            #drawSecondaryVerticalAxisText(xOffset, v) {
+                var lineOffsetY = this.#valToCanvasYoffsetSecondaryAxis(v);
+                var chartWidth = (this.#canvasWidth - 40) - (xOffset + 15);
+                this.#ctx.fillText(v, xOffset + 15 + chartWidth + 15, lineOffsetY + 7);
             }
 
             #valToCanvasXoffset(v, offsetX) {
@@ -609,9 +687,21 @@
                 this.#ctx.stroke(line);
             }
 
+            drawEventLine(x, title) {
+                var xPos = this.#valToCanvasXoffset(x, this.#vertAxisOffsetX);
+                this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width/2, 65);
+
+                var line = new Path2D();
+                line.moveTo(xPos, this.#canvasHeight - 40);
+                line.lineTo(xPos, 70);
+                this.#ctx.stroke(line);
+            }
+
             drawLineChartBackground(
                 horizontalAxisTitleStr, verticalAxisTitleStr,
-                horizontalLabelArray, verticalLabelArray
+                secondaryVerticalAxisTitleStr,
+                horizontalLabelArray, verticalLabelArray,
+                secondaryVerticalLabelArray
             ) {
                 //vertical axis title
                 this.#ctx.font = "20px Verdana";
@@ -622,9 +712,17 @@
                 var horizontalAxisTextSize = this.#ctx.measureText(horizontalAxisTitleStr).width;
                 this.#ctx.fillText(horizontalAxisTitleStr, this.#canvasWidth - horizontalAxisTextSize - 20, this.#canvasHeight - 10);
 
+                this.#ctx.fillText(secondaryVerticalAxisTitleStr, 780, 20);
+
                 //draw vertical axis texts
                 for (var i of verticalLabelArray) {
                     this.#vertAxisOffsetX = Math.max(this.#vertAxisOffsetX, this.#drawVerticalAxisText(i));
+                }
+
+                //draw secondary vertical axis texts
+                for (var i of secondaryVerticalLabelArray) {
+                    this.#drawSecondaryVerticalAxisText(this.#vertAxisOffsetX, i);
+                    this.#drawHorizontalSecondaryLines(this.#vertAxisOffsetX, i);
                 }
 
                 //draw horizontal axis texts
@@ -649,28 +747,32 @@
                 }
             }
 
-            addDataPoint(h, v) {
-                if (this.#dataPointCounter++ == 0) {
-                    this.#prevH = h;
-                    this.#prevV = v;
-                    return;
-                }
-
-                this.#ctx.strokeStyle = '#676767';
+            drawCurveSegment(prevH, prevV, h, v, secondary = false, colour = '#676767') {
+                this.#ctx.strokeStyle = colour;
                 this.#ctx.lineCap = "round";
                 this.#ctx.lineJoin = "round";
                 this.#ctx.lineWidth = 4.0;
                 var line = new Path2D();
-                var xfrom = this.#valToCanvasXoffset(this.#prevH, this.#vertAxisOffsetX);
+                var xfrom = this.#valToCanvasXoffset(prevH, this.#vertAxisOffsetX);
                 var xto = this.#valToCanvasXoffset(h, this.#vertAxisOffsetX);
-                var yfrom = this.#valToCanvasYoffset(this.#prevV);
-                var yto = this.#valToCanvasYoffset(v);
+                var yfrom = 0;
+                var yto = 0;
+                if (!secondary) {
+                    yfrom = this.#valToCanvasYoffset(prevV);
+                    yto = this.#valToCanvasYoffset(v);
+                }
+                else {
+                    yfrom = this.#valToCanvasYoffsetSecondaryAxis(prevV);
+                    yto = this.#valToCanvasYoffsetSecondaryAxis(v);
+                }
                 line.moveTo(xfrom, yfrom);
                 line.lineTo(xto, yto);
                 this.#ctx.stroke(line);
-                this.#prevH = h;
-                this.#prevV = v;
             }
+        }
+
+        function lerp(v0, v1, t) {
+            return (1 - t) * v0 + t * v1;
         }
 
         { //draw line chart
@@ -770,28 +872,119 @@
             //could add minvalue, maxvalue for each axis
             //then value array to draw lines and text to
             //that would make adding data points easier too
-            var lineChart = new LineChart(ctx, canvasWidth, canvasHeight, 0, 25, 0, 300);
+            var lineChart = new LineChart(ctx, canvasWidth, canvasHeight, 0, 25, 0, 300, 0, 50);
             lineChart.drawLineChartBackground(
-                "Time (m)", "Temp °C",
-                [5, 10, 15, 20], [50, 100, 150, 200, 250]
+                "Time (min)", "Temp °C", "ROR °C/min",
+                [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
             );
-
-            //todo multiple curves!
-
-            //test data for drawing a curve
-            var dataSet = [
-                22, //minute 0, eg starting
-                43, 113, 140, //drying phase
-                165, 177, 185, 192, 196, //yellowing, fc
-                204, 213, 220, //development
-                225, 226, 227, //second crack
-                229, 232, 236, 239, 242, 245, //15-20mins
-                199, 143, 93, 54, 25 //20-25mins
-            ];
-            for (var i = 0; i < dataSet.length; ++i)
-                lineChart.addDataPoint(i, dataSet[i]);
-
         }
+
+        //test data for drawing a curve
+        var dataSet = [
+            22, //minute 0, eg starting
+            43, 87, 120, //drying phase
+            165, 177, 185, 192, 196, //yellowing, fc
+            204, 213, 220, //development
+            225, 226, 227, //second crack
+            229, 232, 236, 239, 242, 245, //15-20mins
+            199, 143, 93, 54, 25 //20-25mins
+        ];
+        var prevX = 0;
+        var prevY = dataSet[0];
+        var prevROR = 0;
+
+        class MovingAverage {
+            #containerMA = [];
+            #maxSize = 1000;
+            constructor(ms) {
+                this.#maxSize = ms;
+            }
+
+            ma(x) {
+                this.#containerMA.push(x);
+
+                var avg = 0;
+                for (var v of this.#containerMA) {
+                    avg += v;
+                }
+                avg /= this.#containerMA.length;
+
+                if (this.#containerMA.length >= this.#maxSize) {
+                    this.#containerMA.shift();
+                }
+
+                return avg;
+            }
+        }
+
+        var temperatureMA = new MovingAverage(100);
+        var rorMA = new MovingAverage(100);
+
+        var auc = 0;
+
+        function dummyData(t) {
+            var tMin = t / 60.0;
+            var interp = tMin - Math.floor(tMin);
+            var val = lerp(dataSet[Math.floor(tMin)], dataSet[Math.ceil(tMin)], interp);
+            val = temperatureMA.ma(val);
+
+            var deltaTemp = Math.max(val - prevY, 0.0);
+            var deltaTime = tMin - prevX + 0.00001;
+            var ror = rorMA.ma(deltaTemp / deltaTime);
+            lineChart.drawCurveSegment(prevX, prevROR, tMin, ror, true, '#ababab');
+            prevROR = ror;
+
+            document.getElementById("ror").innerHTML = "ROR: " + ror.toFixed(2) + " °C/min";
+
+            var threshold = 110;
+            //var deltaTempAUC = Math.abs((prevY - ambient) - (val - ambient));
+            if (val > prevY) {
+                /*
+                 *   /|  current temp
+                 *  / |
+                 * /--|  prev temp
+                 * |  |
+                 * |--|  ambient temp
+                 * |  |
+                 * ----  time elapsed
+                 *
+                 * */
+                if (val > threshold) {
+                    var deltaRect = Math.max(prevY - threshold, 0) * deltaTime;
+                    var deltaTri = Math.abs(val - prevY) * deltaTime / 2.0;
+                    var deltaAUC = deltaRect + deltaTri;
+                    auc += deltaAUC;
+                }
+            }
+            else {
+                /*
+                 * |\    current temp
+                 * | \
+                 * |--\  prev temp
+                 * |  |
+                 * |--|  ambient temp
+                 * |  |
+                 * ----  time elapsed
+                 *
+                 * */
+                if (prevY > threshold) {
+                    var deltaRect = Math.max(val - threshold, 0) * deltaTime;
+                    var deltaTri = Math.abs(val - prevY) * deltaTime / 2.0;
+                    var deltaAUC = deltaRect + deltaTri;
+                    auc += deltaAUC;
+                }
+            }
+
+            document.getElementById("auc").innerHTML = "AUC: " + auc.toFixed(2) + " °C*min";
+
+            lineChart.drawCurveSegment(prevX, prevY, tMin, val);
+            prevX = tMin;
+            prevY = val;
+
+            setTimeout(dummyData.bind(null, t + 0.33), 33);
+        }
+
+        dummyData(0);
 
         function saturate(x) {
             return Math.min(1.0, Math.max(x, 0.0));
@@ -841,7 +1034,7 @@
                         maxTemp = 40.0; //+300c
                         temp = (temp - minTemp) / (maxTemp - minTemp);
 
-                        canvasCtx.fillStyle = colorRamp(1-temp);
+                        canvasCtx.fillStyle = colorRamp(1 - temp);
                         canvasCtx.fillRect(x * 10, y * 10, 10, 10);
                     }
             }
@@ -957,6 +1150,270 @@
             document.getElementById("thermalCamTooltip").style.visibility = "hidden";
         }
 
+        class RoastProfile {
+            #startTime = null; //in milliseconds using performance.now()
+            #dryEndTime = null;
+            #firstCrackStartTime = null;
+            #firstCrackEndTime = null;
+            #secondCrackStartTime = null;
+            #secondCrackEndTime = null;
+            #stopTime = null;
+
+            #fanSettings = []; //stores pairs of (performance.now(), percentage%)
+            #heaterSettings = [];
+            #drumSettings = [];
+
+            #beanTemperatures = []; //stores pairs of (performance.now(), temperature in C)
+            #airTemperatures = [];
+            #exhaustTemperatures = [];
+
+            #name = null;
+            #date = null; //JS Date()
+            #beanType = null;
+            #moistureContent = null; //%
+            #beanScreenSize = null; //1/64"
+            #weight = null; //g
+            #volume = null; //mL
+            #density = null; //g/mL
+            #endWeight = null;
+            #endVolume = null;
+            #endDensity = null;
+            #ambientTemperature = null;
+            #ambientHumidity = null; //%
+            #ambientPressure = null; //atm
+
+            stringify() {
+                return JSON.stringify(
+                    {
+                        '#startTime': this.#startTime,
+                        '#dryEndTime': this.#dryEndTime,
+                        '#firstCrackStartTime': this.#firstCrackStartTime,
+                        '#firstCrackEndTime': this.#firstCrackEndTime,
+                        '#secondCrackStartTime': this.#secondCrackStartTime,
+                        '#secondCrackEndTime': this.#secondCrackEndTime,
+                        '#stopTime': this.#stopTime,
+                        '#fanSettings': this.#fanSettings,
+                        '#heaterSettings': this.#heaterSettings,
+                        '#drumSettings': this.#drumSettings,
+                        '#beanTemperatures': this.#beanTemperatures,
+                        '#airTemperatures': this.#airTemperatures,
+                        '#name': this.#name,
+                        '#date': this.#date,
+                        '#beanType': this.#beanType,
+                        '#moistureContent': this.#moistureContent,
+                        '#beanScreenSize': this.#beanScreenSize,
+                        '#weight': this.#weight,
+                        '#volume': this.#volume,
+                        '#density': this.#density,
+                        '#endWeight': this.#endWeight,
+                        '#endVolume': this.#endVolume,
+                        '#endDensity': this.#endDensity,
+                        '#ambientTemperature': this.#ambientTemperature,
+                        '#ambientHumidity': this.#ambientHumidity,
+                        '#ambientPressure': this.#ambientPressure,
+                    }
+                );
+            }
+
+            parse(s) {
+                var j = JSON.parse(s);
+
+                
+            }
+
+            setStart() {
+                this.#startTime = performance.now();
+                this.#date = new Date();
+
+                this.#ambientTemperature = 24.0; //TODO read from sensor
+                this.#ambientHumidity = 50.0;
+                this.#ambientPressure = 1.0;
+
+                document.getElementById("ambientTemperature").value = this.#ambientTemperature;
+                document.getElementById("ambientHumidity").value = this.#ambientHumidity;
+                document.getElementById("ambientPressure").value = this.#ambientPressure;
+
+                document.getElementById("roastDate").valueAsDate = this.#date;
+                document.getElementById("roastTime").valueAsDate = this.#date;
+            }
+
+            setDryEnd() {
+                if (this.#dryEndTime == null) {
+                    this.#dryEndTime = performance.now();
+                    lineChart.drawEventLine(this.#dryEndTime / 60000, "DE");
+                }
+            }
+
+            setFirstCrackStart() {
+                if (this.#firstCrackStartTime == null) {
+                    this.#firstCrackStartTime = performance.now();
+                    lineChart.drawEventLine(this.#firstCrackStartTime / 60000, "FCS");
+                }
+            }
+
+            setFirstCrackEnd() {
+                if (this.#firstCrackEndTime == null) {
+                    this.#firstCrackEndTime = performance.now();
+                    lineChart.drawEventLine(this.#firstCrackEndTime / 60000, "FCE");
+                }
+            }
+
+            setSecondCrackStart() {
+                if (this.#secondCrackStartTime == null) {
+                    this.#secondCrackStartTime = performance.now();
+                    lineChart.drawEventLine(this.#secondCrackStartTime / 60000, "SCS");
+                }
+            }
+
+            setSecondCrackEnd() {
+                if (this.#secondCrackEndTime == null) {
+                    this.#secondCrackEndTime = performance.now();
+                    lineChart.drawEventLine(this.#secondCrackEndTime / 60000, "SCE");
+                }
+            }
+
+            setStop() {
+                if (this.#stopTime == null) {
+                    this.#stopTime = performance.now();
+                    lineChart.drawEventLine(this.#stopTime / 60000, "STOP");
+                }
+            }
+
+            setFanSpeed(percentage) {
+                this.#fanSettings.push([performance.now(), percentage]);
+            }
+
+            setHeaterSpeed(percentage) {
+                this.#heaterSettings.push([performance.now(), percentage]);
+            }
+
+            setDrumSpeed(percentage) {
+                this.#drumSettings.push([performance.now(), percentage]);
+            }
+
+            setBeanTemperature(temperature) {
+                this.#beanTemperatures.push([performance.now(), temperature]);
+            }
+
+            setAirTemperature(temperature) {
+                this.#airTemperatures.push([performance.now(), temperature]);
+            }
+
+            setExhaustTemperature(temperature) {
+                this.#exhaustTemperatures.push([performance.now(), temperature]);
+            }
+
+            setName(n) {
+                this.#name = n;
+            }
+
+            setBeanType(type) {
+                this.#beanType = type;
+            }
+
+            setMoistureContent(mc) {
+                this.#moistureContent = mc;
+            }
+
+            setBeanScreenSize(ss) {
+                this.#beanScreenSize = ss;
+            }
+
+            #calcWeightVolumeDensity() {
+                if (this.#weight != null && this.#volume != null && this.#density != null) return;
+
+                if (this.#density != null && this.#volume != null) {
+                    this.#weight = this.#density * this.#volume;
+                    document.getElementById("beanWeight").value = this.#weight;
+                    return;
+                }
+
+                if (this.#weight != null && this.#volume != null) {
+                    this.#density = this.#weight / this.#volume;
+                    document.getElementById("beanDensity").value = this.#density;
+                    return;
+                }
+
+                if (this.#density != null && this.#weight != null) {
+                    this.#volume = this.#weight / this.#density;
+                    document.getElementById("beanVolume").value = this.#volume;
+                    return;
+                }
+            }
+
+            #calcEndWeightVolumeDensity() {
+                if (this.#endWeight != null && this.#endVolume != null && this.#endDensity != null) return;
+
+                if (this.#endDensity != null && this.#endVolume != null) {
+                    this.#endWeight = this.#endDensity * this.#endVolume;
+                    document.getElementById("endBeanWeight").value = this.#endWeight;
+                    return;
+                }
+
+                if (this.#endWeight != null && this.#endVolume != null) {
+                    this.#endDensity = this.#endWeight / this.#endVolume;
+                    document.getElementById("endBeanDensity").value = this.#endDensity;
+                    return;
+                }
+
+                if (this.#endDensity != null && this.#endWeight != null) {
+                    this.#endVolume = this.#endWeight / this.#endDensity;
+                    document.getElementById("endBeanVolume").value = this.#endVolume;
+                    return;
+                }
+            }
+
+            setWeight(bw) {
+                if (bw == "") this.#weight = null;
+                else {
+                    this.#weight = bw;
+                    this.#calcWeightVolumeDensity();
+                }
+            }
+
+            setVolume(bv) {
+                if (bv == "" || bv == 0) this.#volume = null;
+                else {
+                    this.#volume = bv;
+                    this.#calcWeightVolumeDensity();
+                }
+            }
+
+            setDensity(bd) {
+                if (bd == "" || bd == 0) this.#density = null;
+                else {
+                    this.#density = bd;
+                    this.#calcWeightVolumeDensity();
+                }
+            }
+
+            setEndWeight(ew) {
+                if (ew == "") this.#endWeight = null;
+                else {
+                    this.#endWeight = ew;
+                    this.#calcEndWeightVolumeDensity();
+                }
+            }
+
+            setEndVolume(ev) {
+                if (ev == "" || ev == 0) this.#endVolume = null;
+                else {
+                    this.#endVolume = ev;
+                    this.#calcEndWeightVolumeDensity();
+                }
+            }
+
+            setEndDensity(ed) {
+                if (ed == "" || ed == 0) this.#endDensity = null;
+                else {
+                    this.#endDensity = ed;
+                    this.#calcEndWeightVolumeDensity();
+                }
+            }
+        }
+
+        var roastProfile = new RoastProfile();
+
         var webSocket = null;
 
         function connect() {
@@ -1007,8 +1464,7 @@
             }
         }
 
-        function disconnect()
-        {
+        function disconnect() {
             if (webSocket != undefined) {
                 webSocket.close();
                 webSocket = null;
