@@ -6,6 +6,23 @@
         margin-left: 10px;
         font-family: Verdana;
         -webkit-tap-highlight-color: transparent;
+        text-shadow: 1px 1px white;
+        color: #676767;
+    }
+
+    #phaseContainer {
+        display: flex;
+        flex-direction: row;
+        width: 1430px;
+        margin-left: 80px;
+        margin-top: 20px;
+        justify-content: space-evenly;
+        font-size: 13px;
+    }
+
+    #phaseContainer > div{
+        display: flex;
+        flex-direction: column;
     }
 
     #offlineText {
@@ -15,12 +32,10 @@
         font-size: 20px;
         width: 100%;
         text-align: center;
-        text-shadow: 1px 1px white;
     }
 
     #thermalCamTooltip{
         visibility: hidden;
-        text-shadow: 1px 1px white;
         background: rgba(255 255 255 / 53%);
         margin-left: 15px;
         z-index: 999999;
@@ -36,7 +51,6 @@
         margin-top: 20px;
         text-align: center;
         color: #9397a4;
-        text-shadow: 1px 1px 1px #fff;
         font-weight: bold;
     }
 
@@ -60,10 +74,8 @@
         height: 30px;
         padding: 16px;
         outline: 0;
-        text-shadow: 1px 1px 0 white;
         background-color: #EBECF0;
         transition: all 0.2s ease-in-out;
-        color: #676767;
     }
 
     input:focus {
@@ -115,10 +127,8 @@
         border: 0;
         padding-left: 15px;
         outline: 0;
-        text-shadow: 1px 1px 0 white;
         background-color: #ececec;
         padding-top: 10px;
-        color: #676767;
         font-size: 13px;
         margin-left: 5px;
     }
@@ -144,22 +154,22 @@
         background: #989caa;
     }
 
-    .propertiesIcon {
+    #propertiesIcon {
         opacity: 0.5;
         cursor: pointer;
         transition: transform 0.5s;
         padding: 5px;
     }
 
-    .propertiesIcon:hover {
+    #propertiesIcon:hover {
         transform: rotate(90deg);
     }
 
-    .propertiesIcon:active{
+    #propertiesIcon:active{
         opacity: 0.75;
     }
 
-    .propertiesDialog {
+    #propertiesDialog {
         position: fixed;
         left: 0;
         right: 0;
@@ -173,13 +183,12 @@
         z-index: 99999;
     }
 
-    .propertiesTitle {
+    #propertiesTitle {
         width: 100%;
         display: block;
         text-align: center;
         margin-bottom: 20px;
         color: #9397a4;
-        text-shadow: 1px 1px 1px #fff;
         font-weight: bold;
         font-size: 2em;
     }
@@ -189,13 +198,12 @@
         outline: 0;
         border-radius: 20px;
         background-color: #ebecf0;
-        text-shadow: 1px 1px 0 white;
         box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
         transition: all 0.2s ease-in-out;
         padding: 5px 8px 5px 8px;
         text-decoration: none;
         cursor: pointer;
-        color: #676767;
+        
         font-weight: bold;
         user-select: none;
     }
@@ -238,8 +246,8 @@
         box-shadow: -5px -5px 10px #fff, 5px 5px 10px #babecc;
         border-radius: 20px;
         background-color: #d1d4e0;
-        width: 50px;
-        height: 350px;
+        width: 60px;
+        height: 320px;
         display: flex;
         margin: 10px;
         user-select: none;
@@ -270,7 +278,7 @@
         bottom: 15px;
     }
 
-    .fanImage {
+    #fanImage {
         opacity: 0.75;
         animation: spin 1.35s linear infinite;
     }
@@ -290,9 +298,9 @@
         density calculation, moisture, bean screen size, ambient temp/humidity/pressure,
         end weight, end volume, end density
     -->
-    <div id="roastProperties" class="propertiesDialog">
+    <div id="propertiesDialog">
         <span class="closeButton button" onclick="hideRoastProperties();">X</span>
-        <span class="propertiesTitle">Roast Properties:</span>
+        <span id="propertiesTitle">Roast Properties:</span>
         <div id="propertiesInputForm">
             <div>
                 <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" oninput="roastProfile.setName(event.target.value)"/>
@@ -345,7 +353,7 @@
         <span class="propertySectionTitle">Connection settings</span>
         <div style="margin-top: 20px; margin-bottom: 10px; ">
             <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
-            <span class="button" onclick="connect()">Connect</span>
+            <span class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
             <span class="button" onclick="disconnect()">Disconnect</span>
         </div>
         <div id="websocketMessages"></div>
@@ -356,12 +364,16 @@
     <div style="display: flex; flex-direction: row;">
         <div id="actions">
             <div class="button actionButton" onclick="showRoastProperties();" title="Start Roasting (Drying Phase Start)">
-                <img src="img/properties.png" width="40" class="propertiesIcon" />
+                <img src="img/properties.png" width="40" id="propertiesIcon" />
                 <!--Icon created by Freepik - Flaticon-->
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setStart()" title="Start Roasting (Drying Phase Start)">
+            <div class="button actionButton" onclick="roastProfile.setStart()" title="Start Roasting">
                 <span>START</span>
+            </div>
+
+            <div class="button actionButton" onclick="roastProfile.setCharge()" title="Charge beans (Drying Phase Start)">
+                <span>CHG</span>
             </div>
 
             <div class="button actionButton" onclick="roastProfile.setDryEnd()" title="Insert Drying Phase End Event">
@@ -407,10 +419,24 @@
 
             <span id="offlineText">OFFLINE</span>
 
+            <div style="display:flex; flex-direction:column; padding:10px;">
+                <canvas id="thermalCamHistogram" width="300" height="150" style="border: 1px solid #bebebe; background-color: #d1d4e0"></canvas>
+                <div style="display: flex; flex-direction: row; justify-content: space-around;">
+                    <span id="thermalCamMin">min</span>
+                    <span id="thermalCamMedian">med</span>
+                    <span id="thermalCamMax">max</span>
+                </div>
+                <div style="display: flex; flex-direction: row; justify-content: space-around;">
+                    <span>min</span>
+                    <span>med</span>
+                    <span>max</span>
+                </div>
+            </div>
+
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                 <div id="fanController" class="controller" title="Cooling Fan Control">
                     <span style="height: 70%;">
-                        <span><img src="img/fan.png" width="30" class="fanImage" /></span>
+                        <span><img src="img/fan.png" width="30" id="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
@@ -430,24 +456,35 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div style="display:flex; flex-direction:column;">
-            <canvas id="thermalCamHistogram" width="300" height="200"></canvas>
-            <div style="display: flex; flex-direction: row; justify-content: space-around;">
-                <span id="thermalCamMin">min</span>
-                <span id="thermalCamMedian">med</span>
-                <span id="thermalCamMax">max</span>
-            </div>
-            <div style="display: flex; flex-direction: row; justify-content: space-around;">
-                <span>min</span>
-                <span>med</span>
-                <span>max</span>
-            </div>
+    <div id="phaseContainer">
+        <div>
+            <span>Drying Phase</span>
+            <span id="dryingPhaseTime">Time Percentage</span>
+            <span id="dryingPhaseStat">RoR: AUC:</span>
+        </div>
+        <div>
+            <span>Maillard Phase</span>
+            <span id="maillardPhaseTime">Time Percentage</span>
+            <span id="maillardPhaseStat">RoR: AUC:</span>
+        </div>
+        <div>
+            <span>Development Phase</span>
+            <span id="developmentPhaseTime">Time Percentage</span>
+            <span id="developmentPhaseStat">RoR: AUC:</span>
+        </div>
+        <div>
+            <span>Cooling Phase</span>
+            <span id="coolingPhaseTime">Time Percentage</span>
+            <span id="coolingPhaseStat">RoR: AUC:</span>
         </div>
     </div>
-    <div style="display: flex; flex-direction: row; justify-content: space-evenly; width: 920px; left: 106px; top: 30px; position: absolute;">
+
+    <div style="display: flex; flex-direction: row; justify-content: space-evenly; width: 1160px; left: 205px; top: 30px; position: absolute;">
         <span id="auc"></span>
         <span id="ror"></span>
+        <span id="dtr">DTR: 10%</span>
     </div>
 
 
@@ -472,134 +509,41 @@
         // main chamber thermocouple
         // thermal camera 3.3v
 
-        var fileToLoad = null;
-        var fileToSave = null;
+        //https://www.wikiwand.com/en/Coffee_roasting
+        //22c  unroasted
+        //165c drying phase
+        //196c cinnamon roast (right after first crack)
+        //205c new england roast
+        //210c american roast
+        //219c city roast (common for speciality coffee)
+        //225c full city roast (beginning of second crack)
+        //230c vienna roast
+        //240c french roast
+        //245c italian roast
 
-        async function pickSaveFile() {
-            fileToSave = await window.showSaveFilePicker({
-                types: [{
-                    description: "JSON file",
-                    accept: { "text/plain": [".json"] }
-                }]
-            });
-            var file = await fileToSave.getFile();
-            document.getElementById('fileSavePath').value = file.name;
-        }
-
-        async function saveRoastProfile() {
-            if (fileToSave != null)
-            {
-                console.log(roastProfile.stringify());
-                const fileStream = await fileToSave.createWritable();
-                await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
-                await fileStream.close();
+        class MovingAverage {
+            #containerMA = [];
+            #maxSize = 1000;
+            constructor(ms) {
+                this.#maxSize = ms;
             }
-        }
 
-        function loadRoastProfile() {
-            if (fileToLoad != null) {
-                var reader = new FileReader();
-                reader.readAsText(fileToLoad);
-                reader.onload = function (evt) {
-                    console.log(reader.result);
-                    roastProfile = JSON.parse(reader.result);
+            ma(x) {
+                this.#containerMA.push(x);
+
+                var avg = 0;
+                for (var v of this.#containerMA) {
+                    avg += v;
                 }
-            }
-        }
+                avg /= this.#containerMA.length;
 
-        var isDown = false;
-        var initialYPos = 0.0;
-        var clickedElem = undefined;
-        var thermalCamUpdate = true;
-
-        document.addEventListener("mouseup", controlFunc);
-        document.addEventListener("mousemove", controlFunc);
-
-        for (c of document.getElementsByClassName("controller")) {
-            c.addEventListener("mousedown", controlFunc);
-
-            c.addEventListener("touchstart", controlFunc);
-            c.addEventListener("touchend", controlFunc);
-            c.addEventListener("touchmove", controlFunc);
-        }
-
-        function controlMove(initial, yPos, elem) {
-            var curPercentage = elem.firstElementChild.clientHeight / elem.clientHeight;
-            var delta = (initial - yPos);
-            var percentage = (curPercentage + delta / elem.clientHeight) * 100;
-
-            if (percentage > 100)
-                percentage = 100;
-            else if (percentage < 0)
-                percentage = 0;
-            elem.firstElementChild.style = "height: " + percentage + "%;";
-
-            if (elem.getElementsByTagName("img")[0].className == "fanImage") {
-                var animLen = 4 - 3.8 * percentage / 100;
-                if (percentage == 0) {
-                    elem.getElementsByTagName("img")[0].style = "animation: none;";
+                if (this.#containerMA.length >= this.#maxSize) {
+                    this.#containerMA.shift();
                 }
-                else {
-                    elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
-                }
-            }
 
-            if (elem.id == "fanController") {
-                roastProfile.setFanSpeed(percentage);
+                return avg;
             }
-            else if (elem.id == "drumController") {
-                roastProfile.setDrumSpeed(percentage);
-            }
-            else if (elem.id == "heaterController") {
-                roastProfile.setHeaterSpeed(percentage);
-            }
-
-        }
-
-        function controlFunc(e) {
-            if (e.type == "mousedown") {
-                isDown = true;
-                initialYPos = e.y;
-                clickedElem = this;
-            }
-            else if (e.type == "touchstart") {
-                isDown = true;
-                initialYPos = e.targetTouches[0].clientY;
-                clickedElem = this;
-            }
-            else if (e.type == "mousemove") {
-                if (isDown) {
-                    controlMove(initialYPos, e.y, clickedElem);
-                    initialYPos = e.y;
-                }
-            }
-            else if (e.type == "touchmove") {
-                if (isDown) {
-                    controlMove(initialYPos, e.targetTouches[0].clientY, clickedElem);
-                    initialYPos = e.targetTouches[0].clientY;
-                }
-            }
-            else if (e.type == "mouseup" || e.type == "touchend") {
-                isDown = false;
-            }
-
-            if (isDown) {
-                e.preventDefault();
-            }
-        }
-
-        function showRoastProperties() {
-            document.getElementById('roastProperties').style.visibility = "visible";
-            document.getElementById('backgroundBlur').style.visibility = "visible";
-            document.getElementsByClassName('fanImage')[0].style.animationPlayState = "paused";
-            thermalCamUpdate = false;
-        }
-        function hideRoastProperties() {
-            document.getElementById('roastProperties').style.visibility = "hidden";
-            document.getElementById('backgroundBlur').style.visibility = "hidden";
-            document.getElementsByClassName('fanImage')[0].style.animationPlayState = "running";
-            thermalCamUpdate = true;
-        }
+        } 
 
         class LineChart {
             #horizontalMinVal;
@@ -613,7 +557,11 @@
             #ctx;
             #vertAxisOffsetX;
 
-            constructor(c, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal, vsMinVal, vsMaxVal) {
+            constructor(canvas, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal, vsMinVal, vsMaxVal) {
+                var c = canvas.getContext("2d");
+                var wh = scaleCanvas(canvas, c, cWidth, cHeight);
+                cWidth = wh[0];
+                cHeight = wh[1];
                 this.#ctx = c;
                 this.#canvasWidth = cWidth;
                 this.#canvasHeight = cHeight;
@@ -689,11 +637,12 @@
 
             drawEventLine(x, title) {
                 var xPos = this.#valToCanvasXoffset(x, this.#vertAxisOffsetX);
-                this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width/2, 65);
+                this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width / 2, 65);
 
                 var line = new Path2D();
                 line.moveTo(xPos, this.#canvasHeight - 40);
                 line.lineTo(xPos, 70);
+                this.#ctx.lineWidth = 2.0;
                 this.#ctx.stroke(line);
             }
 
@@ -712,7 +661,7 @@
                 var horizontalAxisTextSize = this.#ctx.measureText(horizontalAxisTitleStr).width;
                 this.#ctx.fillText(horizontalAxisTitleStr, this.#canvasWidth - horizontalAxisTextSize - 20, this.#canvasHeight - 10);
 
-                this.#ctx.fillText(secondaryVerticalAxisTitleStr, 780, 20);
+                this.#ctx.fillText(secondaryVerticalAxisTitleStr, this.#canvasWidth - this.#ctx.measureText(secondaryVerticalAxisTitleStr).width - 20, 20);
 
                 //draw vertical axis texts
                 for (var i of verticalLabelArray) {
@@ -771,387 +720,9 @@
             }
         }
 
-        function lerp(v0, v1, t) {
-            return (1 - t) * v0 + t * v1;
-        }
-
-        { //draw line chart
-            var canvas = document.getElementById("lineChart");
-            var ctx = canvas.getContext("2d");
-
-            var canvasWidth = 900;
-            var canvasHeight = 600;
-
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-            canvas.style.visibility = "visible";
-
-            // Get the DPR and size of the canvas
-            const dpr = window.devicePixelRatio;
-            const rect = canvas.getBoundingClientRect();
-
-            // Set the "actual" size of the canvas
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-
-            // Scale the context to ensure correct drawing operations
-            ctx.scale(dpr, dpr);
-
-            // Set the "drawn" size of the canvas
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-
-            canvasWidth = rect.width;
-            canvasHeight = rect.height;
-
-            //canvas coordinate system:
-            //0...w
-            //0
-            //.
-            //.
-            //h
-
-            //supported primites: rectangles and paths
-
-            //rectangles
-            //fillRect(x, y, w, h) -> draws filled rectangle
-            //strokeRect(x, y, w, h) -> draws outline
-            //clearRect(x, y, w, h) -> clears area
-
-            //paths
-            //beginPath() -> create new path, then can build up the path from here
-            //closePath() -> tries to close the shape by drawing a straight line from the current point to the start
-            //stroke() -> draws path outline
-            //fill() -> fills the path's content area (any open shapes are closed)
-            //moveTo(x, y) -> move the path drawing point (lift and move the pen)
-            //lineTo(x, y) -> draw a line from current pos to coords
-
-            //Path2D() object
-            //combines all objects, can combine paths
-            //var rectangle = new Path2D();
-            //rectangle.rect(10, 10, 50, 50);
-            //ctx.stroke(rectangle);
-            //.addPath()
-            //.closePath()
-            //.moveTo()
-            //.lineTo()
-            //
-
-            //ctx.fillStyle = rgba(r, g, b, a) -> 0..255 fill color!
-            //ctx.strokeStyle = rgba()
-            //ctx.lineWidth = x -> linewidth in units?
-            //ctx.lineCap = "butt" "round" "square" -> line ending styles
-            //ctx.lineJoin = "round" "bevel" "miter" -> how line segments are joined
-
-            //text
-            //ctx.font = "20px Times New Roman"
-            //ctx.textAlign = "start" "end" "left" "right" "center"
-            //ctx.fillStyle = "black";
-            //ctx.fillText("string", x, y);
-            //ctx.measureText("string").width -> returns the width in pixels when the text is drawn
-
-            //ctx.save() -> save / restore canvas state
-            //ctx.restore()
-
-
-            //https://www.wikiwand.com/en/Coffee_roasting
-            //22c  unroasted
-            //165c drying phase
-            //196c cinnamon roast (right after first crack)
-            //205c new england roast
-            //210c american roast
-            //219c city roast (common for speciality coffee)
-            //225c full city roast (beginning of second crack)
-            //230c vienna roast
-            //240c french roast
-            //245c italian roast
-
-            //0 = 400c
-            //canvasHeight = 0c
-
-            //could add minvalue, maxvalue for each axis
-            //then value array to draw lines and text to
-            //that would make adding data points easier too
-            var lineChart = new LineChart(ctx, canvasWidth, canvasHeight, 0, 25, 0, 300, 0, 50);
-            lineChart.drawLineChartBackground(
-                "Time (min)", "Temp °C", "ROR °C/min",
-                [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
-            );
-        }
-
-        //test data for drawing a curve
-        var dataSet = [
-            22, //minute 0, eg starting
-            43, 87, 120, //drying phase
-            165, 177, 185, 192, 196, //yellowing, fc
-            204, 213, 220, //development
-            225, 226, 227, //second crack
-            229, 232, 236, 239, 242, 245, //15-20mins
-            199, 143, 93, 54, 25 //20-25mins
-        ];
-        var prevX = 0;
-        var prevY = dataSet[0];
-        var prevROR = 0;
-
-        class MovingAverage {
-            #containerMA = [];
-            #maxSize = 1000;
-            constructor(ms) {
-                this.#maxSize = ms;
-            }
-
-            ma(x) {
-                this.#containerMA.push(x);
-
-                var avg = 0;
-                for (var v of this.#containerMA) {
-                    avg += v;
-                }
-                avg /= this.#containerMA.length;
-
-                if (this.#containerMA.length >= this.#maxSize) {
-                    this.#containerMA.shift();
-                }
-
-                return avg;
-            }
-        }
-
-        var temperatureMA = new MovingAverage(100);
-        var rorMA = new MovingAverage(100);
-
-        var auc = 0;
-
-        function dummyData(t) {
-            var tMin = t / 60.0;
-            var interp = tMin - Math.floor(tMin);
-            var val = lerp(dataSet[Math.floor(tMin)], dataSet[Math.ceil(tMin)], interp);
-            val = temperatureMA.ma(val);
-
-            var deltaTemp = Math.max(val - prevY, 0.0);
-            var deltaTime = tMin - prevX + 0.00001;
-            var ror = rorMA.ma(deltaTemp / deltaTime);
-            lineChart.drawCurveSegment(prevX, prevROR, tMin, ror, true, '#ababab');
-            prevROR = ror;
-
-            document.getElementById("ror").innerHTML = "ROR: " + ror.toFixed(2) + " °C/min";
-
-            var threshold = 110;
-            //var deltaTempAUC = Math.abs((prevY - ambient) - (val - ambient));
-            if (val > prevY) {
-                /*
-                 *   /|  current temp
-                 *  / |
-                 * /--|  prev temp
-                 * |  |
-                 * |--|  ambient temp
-                 * |  |
-                 * ----  time elapsed
-                 *
-                 * */
-                if (val > threshold) {
-                    var deltaRect = Math.max(prevY - threshold, 0) * deltaTime;
-                    var deltaTri = Math.abs(val - prevY) * deltaTime / 2.0;
-                    var deltaAUC = deltaRect + deltaTri;
-                    auc += deltaAUC;
-                }
-            }
-            else {
-                /*
-                 * |\    current temp
-                 * | \
-                 * |--\  prev temp
-                 * |  |
-                 * |--|  ambient temp
-                 * |  |
-                 * ----  time elapsed
-                 *
-                 * */
-                if (prevY > threshold) {
-                    var deltaRect = Math.max(val - threshold, 0) * deltaTime;
-                    var deltaTri = Math.abs(val - prevY) * deltaTime / 2.0;
-                    var deltaAUC = deltaRect + deltaTri;
-                    auc += deltaAUC;
-                }
-            }
-
-            document.getElementById("auc").innerHTML = "AUC: " + auc.toFixed(2) + " °C*min";
-
-            lineChart.drawCurveSegment(prevX, prevY, tMin, val);
-            prevX = tMin;
-            prevY = val;
-
-            setTimeout(dummyData.bind(null, t + 0.33), 33);
-        }
-
-        dummyData(0);
-
-        function saturate(x) {
-            return Math.min(1.0, Math.max(x, 0.0));
-        }
-
-        function componentToHex(c) {
-            var hex = c.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-
-        function rgbToHex(r, g, b) {
-            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-        }
-
-        function colorRamp(v) {
-            v = 2.0 * v;
-            r = v - 0.0;
-            g = v - 1.0;
-            b = v - 2.0;
-
-            r = 1.0 - r * r;
-            g = 1.0 - g * g;
-            b = 1.0 - b * b;
-
-            r = Math.floor(saturate(r) * 255);
-            g = Math.floor(saturate(g) * 255);
-            b = Math.floor(saturate(b) * 255);
-
-            return rgbToHex(r, g, b);
-        }
-
-        function drawThermalCameraOutput(temperatures) {
-            if (thermalCamUpdate) {
-                var canvas = document.getElementById("thermalCamera");
-                canvas.style.visibility = "visible";
-                canvas.width = 320;
-                canvas.height = 240;
-                var canvasCtx = canvas.getContext("2d");
-                for (x = 0; x < 32; ++x)
-                    for (y = 0; y < 24; ++y) {
-                        //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-                        //randomTemp = Math.random(); //pretend that it's normalised to 0..1
-
-                        temp = temperatures[32 * (23 - y) + x];
-                        //map temperatures to 0..1
-                        minTemp = 10.0; //-40c
-                        maxTemp = 40.0; //+300c
-                        temp = (temp - minTemp) / (maxTemp - minTemp);
-
-                        canvasCtx.fillStyle = colorRamp(1 - temp);
-                        canvasCtx.fillRect(x * 10, y * 10, 10, 10);
-                    }
-            }
-        }
-
-        function analyseThermalCameraData(temperatures) {
-            var temps = temperatures.slice().sort();
-            var min = 300.0;
-            var max = -40.0;
-            var median = (temps[temps.length / 2] + temps[temps.length / 2 + 1]) / 2.0;
-            for (var x of temps) {
-                min = Math.min(x, min);
-                max = Math.max(x, max);
-            }
-            document.getElementById("thermalCamMin").innerHTML = min.toFixed(1);
-            document.getElementById("thermalCamMax").innerHTML = max.toFixed(1);
-            document.getElementById("thermalCamMedian").innerHTML = median.toFixed(1);
-        }
-
-        function drawThermalCameraHistogram(temperatures) {
-            var histoCanvas = document.getElementById("thermalCamHistogram");
-            var histoCtx = histoCanvas.getContext("2d");
-            histoCanvas.width = 300;
-            histoCanvas.height = 200;
-
-            const dpr = window.devicePixelRatio;
-            const rect = histoCanvas.getBoundingClientRect();
-
-            // Set the "actual" size of the canvas
-            histoCanvas.width = rect.width * dpr;
-            histoCanvas.height = rect.height * dpr;
-
-            // Scale the context to ensure correct drawing operations
-            histoCtx.scale(dpr, dpr);
-
-            // Set the "drawn" size of the canvas
-            histoCanvas.style.width = `${rect.width}px`;
-            histoCanvas.style.height = `${rect.height}px`;
-
-            var canvasWidth = rect.width;
-            var canvasHeight = rect.height;
-
-            var min = 300.0;
-            var max = -40.0;
-            for (var x of temperatures) {
-                min = Math.min(x, min);
-                max = Math.max(x, max);
-            }
-
-            var histogram = new Map();
-            for (var x = Math.floor(min); x <= Math.ceil(max); ++x) {
-                histogram.set(x, 0);
-            }
-
-            for (var x of temperatures) {
-                histogram.set(Math.floor(x), histogram.get(Math.floor(x)) + 1);
-            }
-
-            var mostFrequentVal = 0;
-            for (const [key, val] of histogram) {
-                mostFrequentVal = Math.max(val, mostFrequentVal);
-            }
-
-            histoCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-            var counter = 0;
-            var barwidth = canvasWidth / histogram.size;
-            for (const [key, val] of histogram) {
-                histoCtx.fillRect(
-                    (barwidth) * counter,
-                    (1.0 - val / mostFrequentVal) * canvasHeight,
-                    barwidth,
-                    val / mostFrequentVal * canvasHeight);
-                counter++;
-            }
-        }
-
-        document.getElementById("thermalCamera").addEventListener("mousemove", thermalCamMove);
-        document.getElementById("thermalCamera").addEventListener("mouseenter", thermalCamEnter);
-        document.getElementById("thermalCamera").addEventListener("mouseleave", thermalCamLeave);
-
-        var tempArray = null;
-
-        var samplePos = 0;
-        var isMouseIn = false;
-
-        function thermalCamMove(e) {
-            var x = Math.floor(e.offsetX / 10.0);
-            var y = Math.floor(e.offsetY / 10.0);
-            samplePos = 32 * (23 - y) + x;
-            document.getElementById("thermalCamTooltip").style.left = e.pageX + 'px';
-            document.getElementById("thermalCamTooltip").style.top = e.pageY + 'px';
-        }
-
-        function tooltipUpdate() {
-            if (isMouseIn && tempArray != null) {
-                document.getElementById("thermalCamTooltip").innerHTML = tempArray[samplePos].toFixed(1) + " °C";
-
-                setTimeout(tooltipUpdate, 30);
-            }
-        }
-
-        function thermalCamEnter(e) {
-            isMouseIn = true;
-            if (tempArray != null) {
-                document.getElementById("thermalCamTooltip").style.visibility = "visible";
-            }
-
-            tooltipUpdate();
-        }
-
-        function thermalCamLeave(e) {
-            isMouseIn = false;
-            document.getElementById("thermalCamTooltip").style.visibility = "hidden";
-        }
-
         class RoastProfile {
             #startTime = null; //in milliseconds using performance.now()
+            #chargeTime = null;
             #dryEndTime = null;
             #firstCrackStartTime = null;
             #firstCrackEndTime = null;
@@ -1186,6 +757,7 @@
                 return JSON.stringify(
                     {
                         '#startTime': this.#startTime,
+                        '#chargeTime': this.#chargeTime,
                         '#dryEndTime': this.#dryEndTime,
                         '#firstCrackStartTime': this.#firstCrackStartTime,
                         '#firstCrackEndTime': this.#firstCrackEndTime,
@@ -1218,88 +790,294 @@
             parse(s) {
                 var j = JSON.parse(s);
 
-                
+
+            }
+
+            #prevROR = 0;
+            #calcROR(prevTime, prevTemp, currTime, currTemp) {
+                var deltaTemp = Math.max(currTemp - prevTemp, 0.0);
+                var deltaTime = currTime - prevTime + 0.00001;
+                var ror = deltaTemp / deltaTime;
+
+                if (this.#beanTemperatures.length == 1) {
+                    this.#prevROR = ror;
+                }
+
+                lineChart.drawCurveSegment(prevTime, this.#prevROR, currTime, ror, true, '#ababab');
+                document.getElementById("ror").innerHTML = "ROR: " + ror.toFixed(2) + " °C/min";
+
+                this.#prevROR = ror;
+
+                return ror;
+            }
+
+            #auc = 0;
+            #calcAUC(prevTime, prevTemp, currTime, currTemp) {
+                var threshold = 110;
+
+                var deltaTime = currTime - prevTime + 0.00001;
+
+                var deltaAUC = 0;
+
+                if (currTemp > prevTemp) {
+                    /*
+                     *   /|  current temp
+                     *  / |
+                     * /--|  prev temp
+                     * |  |
+                     * |--|  ambient temp
+                     * |  |
+                     * ----  time elapsed
+                     *
+                     * */
+                    if (currTemp > threshold) {
+                        var deltaRect = Math.max(prevTemp - threshold, 0) * deltaTime;
+                        var deltaTri = Math.abs(currTemp - prevTemp) * deltaTime / 2.0;
+                        deltaAUC = deltaRect + deltaTri;
+                        this.#auc += deltaAUC;
+                    }
+                }
+                else {
+                    /*
+                     * |\    current temp
+                     * | \
+                     * |--\  prev temp
+                     * |  |
+                     * |--|  ambient temp
+                     * |  |
+                     * ----  time elapsed
+                     *
+                     * */
+                    if (prevTemp > threshold) {
+                        var deltaRect = Math.max(currTemp - threshold, 0) * deltaTime;
+                        var deltaTri = Math.abs(currTemp - prevTemp) * deltaTime / 2.0;
+                        deltaAUC = deltaRect + deltaTri;
+                        this.#auc += deltaAUC;
+                    }
+                }
+
+                document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
+
+                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
+
+                return deltaAUC;
             }
 
             setStart() {
-                this.#startTime = performance.now();
-                this.#date = new Date();
+                if (this.#startTime == null) {
+                    this.#startTime = performance.now();
+                    this.#date = new Date();
 
-                this.#ambientTemperature = 24.0; //TODO read from sensor
-                this.#ambientHumidity = 50.0;
-                this.#ambientPressure = 1.0;
+                    this.#ambientTemperature = 24.0; //TODO read from sensor
+                    this.#ambientHumidity = 50.0;
+                    this.#ambientPressure = 1.0;
 
-                document.getElementById("ambientTemperature").value = this.#ambientTemperature;
-                document.getElementById("ambientHumidity").value = this.#ambientHumidity;
-                document.getElementById("ambientPressure").value = this.#ambientPressure;
+                    document.getElementById("ambientTemperature").value = this.#ambientTemperature;
+                    document.getElementById("ambientHumidity").value = this.#ambientHumidity;
+                    document.getElementById("ambientPressure").value = this.#ambientPressure;
 
-                document.getElementById("roastDate").valueAsDate = this.#date;
-                document.getElementById("roastTime").valueAsDate = this.#date;
+                    document.getElementById("roastDate").valueAsDate = this.#date;
+                    document.getElementById("roastTime").valueAsDate = this.#date;
+
+                    //for dev purposes
+                    dummyData(0);
+                }
+            }
+
+            setCharge() {
+                if (this.#chargeTime == null && this.#startTime != null) {
+                    this.#chargeTime = performance.now();
+                    lineChart.drawEventLine((this.#chargeTime - this.#startTime) / 60000, "CHG");
+                }
             }
 
             setDryEnd() {
-                if (this.#dryEndTime == null) {
+                if (this.#dryEndTime == null && this.#chargeTime != null) {
                     this.#dryEndTime = performance.now();
-                    lineChart.drawEventLine(this.#dryEndTime / 60000, "DE");
+                    lineChart.drawEventLine((this.#dryEndTime - this.#startTime) / 60000, "DE");
                 }
             }
 
             setFirstCrackStart() {
-                if (this.#firstCrackStartTime == null) {
+                if (this.#firstCrackStartTime == null && this.#dryEndTime != null) {
                     this.#firstCrackStartTime = performance.now();
-                    lineChart.drawEventLine(this.#firstCrackStartTime / 60000, "FCS");
+                    lineChart.drawEventLine((this.#firstCrackStartTime - this.#startTime) / 60000, "FCS");
                 }
             }
 
             setFirstCrackEnd() {
-                if (this.#firstCrackEndTime == null) {
+                if (this.#firstCrackEndTime == null && this.#firstCrackStartTime != null) {
                     this.#firstCrackEndTime = performance.now();
-                    lineChart.drawEventLine(this.#firstCrackEndTime / 60000, "FCE");
+                    lineChart.drawEventLine((this.#firstCrackEndTime - this.#startTime) / 60000, "FCE");
                 }
             }
 
             setSecondCrackStart() {
-                if (this.#secondCrackStartTime == null) {
+                if (this.#secondCrackStartTime == null && this.#firstCrackEndTime != null) {
                     this.#secondCrackStartTime = performance.now();
-                    lineChart.drawEventLine(this.#secondCrackStartTime / 60000, "SCS");
+                    lineChart.drawEventLine((this.#secondCrackStartTime - this.#startTime) / 60000, "SCS");
                 }
             }
 
             setSecondCrackEnd() {
-                if (this.#secondCrackEndTime == null) {
+                if (this.#secondCrackEndTime == null && this.#secondCrackStartTime != null) {
                     this.#secondCrackEndTime = performance.now();
-                    lineChart.drawEventLine(this.#secondCrackEndTime / 60000, "SCE");
+                    lineChart.drawEventLine((this.#secondCrackEndTime - this.#startTime) / 60000, "SCE");
                 }
             }
 
             setStop() {
-                if (this.#stopTime == null) {
+                if (this.#stopTime == null && this.#startTime != null) {
                     this.#stopTime = performance.now();
-                    lineChart.drawEventLine(this.#stopTime / 60000, "STOP");
+                    lineChart.drawEventLine((this.#stopTime - this.#startTime) / 60000, "STOP");
                 }
             }
 
             setFanSpeed(percentage) {
+
+                if (this.#startTime == null) return;
                 this.#fanSettings.push([performance.now(), percentage]);
             }
 
             setHeaterSpeed(percentage) {
+
+                if (this.#startTime == null) return;
                 this.#heaterSettings.push([performance.now(), percentage]);
             }
 
             setDrumSpeed(percentage) {
+
+                if (this.#startTime == null) return;
                 this.#drumSettings.push([performance.now(), percentage]);
             }
 
+            #dryingPhaseRORSum = 0;
+            #dryingPhaseCount = 0;
+            #maillardPhaseRORSum = 0;
+            #maillardPhaseCount = 0;
+            #developmentPhaseRORSum = 0;
+            #developmentPhaseCount = 0;
+            #coolingPhaseRORSum = 0;
+            #coolingPhaseCount = 0;
+
+            #dryingPhaseAUCSum = 0;
+            #maillardPhaseAUCSum = 0;
+            #developmentPhaseAUCSum = 0;
+            #coolingPhaseAUCSum = 0;
             setBeanTemperature(temperature) {
-                this.#beanTemperatures.push([performance.now(), temperature]);
+                if (this.#startTime == null) return;
+
+                var now = performance.now();
+
+                this.#beanTemperatures.push([now, temperature]);
+
+                var currTime = this.#beanTemperatures[this.#beanTemperatures.length - 1][0];
+                var currTemp = this.#beanTemperatures[this.#beanTemperatures.length - 1][1]
+                var prevTime = 0;
+                var prevTemp = 0;
+                if (this.#beanTemperatures.length > 1) {
+                    prevTime = this.#beanTemperatures[this.#beanTemperatures.length - 2][0];
+                    prevTemp = this.#beanTemperatures[this.#beanTemperatures.length - 2][1];
+                    prevTime -= this.#startTime;
+                }
+                else {
+                    prevTime = 0;
+                    prevTemp = currTemp;
+                }
+
+                currTime -= this.#startTime;
+
+                currTime /= 60000; //ms to min
+                prevTime /= 60000; //ms to min
+
+                var ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
+                var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
+
+                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
+
+                var totalTime = now - this.#startTime;
+
+                if (this.#chargeTime != null) {
+                    var dryingPhaseTime = now;
+                    if (this.#dryEndTime != null) dryingPhaseTime = this.#dryEndTime;
+                    dryingPhaseTime -= this.#chargeTime;
+                    var dryingPhasePercentage = dryingPhaseTime / totalTime * 100.0;
+                    dryingPhaseTime /= 1000.0;
+                    var dryingPhaseTimeMin = dryingPhaseTime / 60;
+                    document.getElementById("dryingPhaseTime").innerHTML = Math.floor(dryingPhaseTimeMin) + ":" + ((dryingPhaseTime) - Math.floor(dryingPhaseTimeMin) * 60).toFixed(1) + " " + dryingPhasePercentage.toFixed(1) + "%";
+
+                    if (this.#dryEndTime == null) {
+                        this.#dryingPhaseCount++;
+                        this.#dryingPhaseRORSum += ror;
+                        this.#dryingPhaseAUCSum += deltaAUC;
+
+                        document.getElementById("dryingPhaseStat").innerHTML = "ROR: " + (this.#dryingPhaseRORSum / this.#dryingPhaseCount).toFixed(1) + " AUC: " + (this.#dryingPhaseAUCSum).toFixed(1);
+                    }
+                }
+
+                if (this.#dryEndTime != null) {
+                    var maillardPhaseTime = now;
+                    if (this.#firstCrackStartTime != null) maillardPhaseTime = this.#firstCrackStartTime;
+                    maillardPhaseTime -= this.#dryEndTime;
+                    var maillardPhasePercentage = maillardPhaseTime / totalTime * 100.0;
+                    maillardPhaseTime /= 1000.0;
+                    var maillardPhaseTimeMin = maillardPhaseTime / 60;
+                    document.getElementById("maillardPhaseTime").innerHTML = Math.floor(maillardPhaseTimeMin) + ":" + ((maillardPhaseTime) - Math.floor(maillardPhaseTimeMin) * 60).toFixed(1) + " " + maillardPhasePercentage.toFixed(1) + "%";
+
+                    if (this.#firstCrackStartTime == null) {
+                        this.#maillardPhaseCount++;
+                        this.#maillardPhaseRORSum += ror;
+                        this.#maillardPhaseAUCSum += deltaAUC;
+
+                        document.getElementById("maillardPhaseStat").innerHTML = "ROR: " + (this.#maillardPhaseRORSum / this.#maillardPhaseCount).toFixed(1) + " AUC: " + (this.#maillardPhaseAUCSum).toFixed(1);
+                    }
+                }
+
+                if (this.#firstCrackStartTime != null) {
+                    var developmentPhaseTime = now;
+                    if (this.#stopTime != null) developmentPhaseTime = this.#stopTime;
+                    developmentPhaseTime -= this.#firstCrackStartTime;
+                    var developmentPhasePercentage = developmentPhaseTime / totalTime * 100.0;
+                    developmentPhaseTime /= 1000.0;
+                    var developmentPhaseTimeMin = developmentPhaseTime / 60;
+                    document.getElementById("developmentPhaseTime").innerHTML = Math.floor(developmentPhaseTimeMin) + ":" + ((developmentPhaseTime) - Math.floor(developmentPhaseTimeMin) * 60).toFixed(1) + " " + developmentPhasePercentage.toFixed(1) + "%";
+
+                    if (this.#stopTime == null) {
+                        this.#developmentPhaseCount++;
+                        this.#developmentPhaseRORSum += ror;
+                        this.#developmentPhaseAUCSum += deltaAUC;
+
+                        document.getElementById("developmentPhaseStat").innerHTML = "ROR: " + (this.#developmentPhaseRORSum / this.#developmentPhaseCount).toFixed(1) + " AUC: " + (this.#developmentPhaseAUCSum).toFixed(1);
+                    }
+
+                    document.getElementById("dtr").innerHTML = "DTR: " + developmentPhasePercentage.toFixed(1) + "%";
+                }
+
+                if (this.#stopTime != null) {
+                    var coolingPhaseTime = now;
+                    coolingPhaseTime -= this.#stopTime;
+                    var coolingPhasePercentage = coolingPhaseTime / totalTime * 100.0;
+                    coolingPhaseTime /= 1000.0;
+                    var coolingPhaseTimeMin = coolingPhaseTime / 60;
+                    document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1) + " " + coolingPhasePercentage.toFixed(1) + "%";
+
+                    {
+                        this.#coolingPhaseCount++;
+                        this.#coolingPhaseRORSum += ror;
+                        this.#coolingPhaseAUCSum += deltaAUC;
+
+                        document.getElementById("coolingPhaseStat").innerHTML = "ROR: " + (this.#coolingPhaseRORSum / this.#coolingPhaseCount).toFixed(1) + " AUC: " + (this.#coolingPhaseAUCSum).toFixed(1);
+                    }
+                }
             }
 
             setAirTemperature(temperature) {
+                if (this.#startTime == null) return;
                 this.#airTemperatures.push([performance.now(), temperature]);
             }
 
             setExhaustTemperature(temperature) {
+                if (this.#startTime == null) return;
                 this.#exhaustTemperatures.push([performance.now(), temperature]);
             }
 
@@ -1412,9 +1190,303 @@
             }
         }
 
-        var roastProfile = new RoastProfile();
+        function scaleCanvas(canvas, ctx, w, h) {
+            // Get the DPR and size of the canvas
+            const dpr = window.devicePixelRatio;
 
-        var webSocket = null;
+            // Set the "actual" size of the canvas
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+
+            // Scale the context to ensure correct drawing operations
+            ctx.scale(dpr, dpr);
+
+            // Set the "drawn" size of the canvas
+            canvas.style.width = `${w}px`;
+            canvas.style.height = `${h}px`;
+
+            return [w, h];
+        }
+
+        function lerp(v0, v1, t) {
+            return (1 - t) * v0 + t * v1;
+        }
+
+        function saturate(x) {
+            return Math.min(1.0, Math.max(x, 0.0));
+        }
+
+        function componentToHex(c) {
+            var hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+
+        function colorRamp(v) {
+            v = 2.0 * v;
+            r = v - 0.0;
+            g = v - 1.0;
+            b = v - 2.0;
+
+            r = 1.0 - r * r;
+            g = 1.0 - g * g;
+            b = 1.0 - b * b;
+
+            r = Math.floor(saturate(r) * 255);
+            g = Math.floor(saturate(g) * 255);
+            b = Math.floor(saturate(b) * 255);
+
+            return rgbToHex(r, g, b);
+        }
+
+        async function pickSaveFile() {
+            fileToSave = await window.showSaveFilePicker({
+                types: [{
+                    description: "JSON file",
+                    accept: { "text/plain": [".json"] }
+                }]
+            });
+            var file = await fileToSave.getFile();
+            document.getElementById('fileSavePath').value = file.name;
+        }
+
+        async function saveRoastProfile() {
+            if (fileToSave != null)
+            {
+                console.log(roastProfile.stringify());
+                const fileStream = await fileToSave.createWritable();
+                await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
+                await fileStream.close();
+            }
+        }
+
+        function loadRoastProfile() {
+            if (fileToLoad != null) {
+                var reader = new FileReader();
+                reader.readAsText(fileToLoad);
+                reader.onload = function (evt) {
+                    console.log(reader.result);
+                    roastProfile = new RoastProfile();
+                    roastProfile.parse(reader.result);
+                }
+            }
+        }
+
+        function controlMove(initial, yPos, elem) {
+            var curPercentage = elem.firstElementChild.clientHeight / elem.clientHeight;
+            var delta = (initial - yPos);
+            var percentage = (curPercentage + delta / elem.clientHeight) * 100;
+
+            if (percentage > 100)
+                percentage = 100;
+            else if (percentage < 0)
+                percentage = 0;
+            elem.firstElementChild.style = "height: " + percentage + "%;";
+
+            if (elem.getElementsByTagName("img")[0].id == "fanImage") {
+                var animLen = 4 - 3.8 * percentage / 100;
+                if (percentage == 0) {
+                    elem.getElementsByTagName("img")[0].style = "animation: none;";
+                }
+                else {
+                    elem.getElementsByTagName("img")[0].style = "animation: spin " + animLen + "s linear infinite;";
+                }
+            }
+
+            if (elem.id == "fanController") {
+                roastProfile.setFanSpeed(percentage);
+            }
+            else if (elem.id == "drumController") {
+                roastProfile.setDrumSpeed(percentage);
+            }
+            else if (elem.id == "heaterController") {
+                roastProfile.setHeaterSpeed(percentage);
+            }
+
+        }
+
+        function controlFunc(e) {
+            if (e.type == "mousedown") {
+                controllerIsMouseDown = true;
+                controllerInitialYPos = e.y;
+                controllerClickedElem = this;
+            }
+            else if (e.type == "touchstart") {
+                controllerIsMouseDown = true;
+                controllerInitialYPos = e.targetTouches[0].clientY;
+                controllerClickedElem = this;
+            }
+            else if (e.type == "mousemove") {
+                if (controllerIsMouseDown) {
+                    controlMove(controllerInitialYPos, e.y, controllerClickedElem);
+                    controllerInitialYPos = e.y;
+                }
+            }
+            else if (e.type == "touchmove") {
+                if (controllerIsMouseDown) {
+                    controlMove(controllerInitialYPos, e.targetTouches[0].clientY, controllerClickedElem);
+                    controllerInitialYPos = e.targetTouches[0].clientY;
+                }
+            }
+            else if (e.type == "mouseup" || e.type == "touchend") {
+                controllerIsMouseDown = false;
+            }
+
+            if (controllerIsMouseDown) {
+                e.preventDefault();
+            }
+        }
+
+        function showRoastProperties() {
+            document.getElementById('propertiesDialog').style.visibility = "visible";
+            document.getElementById('backgroundBlur').style.visibility = "visible";
+            document.getElementById('fanImage').style.animationPlayState = "paused";
+            updateUI = false;
+        }
+
+        function hideRoastProperties() {
+            document.getElementById('propertiesDialog').style.visibility = "hidden";
+            document.getElementById('backgroundBlur').style.visibility = "hidden";
+            document.getElementById('fanImage').style.animationPlayState = "running";
+            updateUI = true;
+        }
+
+        var temperatureMA = new MovingAverage(100);
+        function dummyData(t) {
+            //test data for drawing a curve
+            var dataSet = [
+                22, //minute 0, eg starting
+                43, 87, 120, //drying phase
+                165, 177, 185, 192, 196, //yellowing, fc
+                204, 213, 220, //development
+                225, 226, 227, //second crack
+                229, 232, 236, 239, 242, 245, //15-20mins
+                199, 143, 93, 54, 25 //20-25mins
+            ];
+
+            var tMin = t / 60.0;
+            var interp = tMin - Math.floor(tMin);
+            var val = lerp(dataSet[Math.floor(tMin)], dataSet[Math.ceil(tMin)], interp);
+            val = temperatureMA.ma(val);
+
+            roastProfile.setBeanTemperature(val);
+
+            setTimeout(dummyData.bind(null, t + 0.250), 250);
+        }
+        
+        function drawThermalCameraOutput(temperatures) {
+            if (updateUI) {
+                var canvas = document.getElementById("thermalCamera");
+                canvas.style.visibility = "visible";
+                canvas.width = 320;
+                canvas.height = 240;
+                var canvasCtx = canvas.getContext("2d");
+                for (x = 0; x < 32; ++x)
+                    for (y = 0; y < 24; ++y) {
+                        //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                        //randomTemp = Math.random(); //pretend that it's normalised to 0..1
+
+                        temp = temperatures[32 * (23 - y) + x];
+                        //map temperatures to 0..1
+                        minTemp = 10.0; //-40c
+                        maxTemp = 40.0; //+300c
+                        temp = (temp - minTemp) / (maxTemp - minTemp);
+
+                        canvasCtx.fillStyle = colorRamp(1 - temp);
+                        canvasCtx.fillRect(x * 10, y * 10, 10, 10);
+                    }
+            }
+        }
+
+        function analyseThermalCameraData(temperatures) {
+            var temps = temperatures.slice().sort();
+            var min = 300.0;
+            var max = -40.0;
+            var median = (temps[temps.length / 2] + temps[temps.length / 2 + 1]) / 2.0;
+            for (var x of temps) {
+                min = Math.min(x, min);
+                max = Math.max(x, max);
+            }
+            document.getElementById("thermalCamMin").innerHTML = min.toFixed(1);
+            document.getElementById("thermalCamMax").innerHTML = max.toFixed(1);
+            document.getElementById("thermalCamMedian").innerHTML = median.toFixed(1);
+        }
+
+        function drawThermalCameraHistogram(temperatures) {
+            var histoCanvas = document.getElementById("thermalCamHistogram");
+            var histoCtx = histoCanvas.getContext("2d");
+
+            var wh = scaleCanvas(histoCanvas, histoCtx, 300, 150);
+            var canvasWidth = wh[0];
+            var canvasHeight = wh[1];
+
+            var min = 300.0;
+            var max = -40.0;
+            for (var x of temperatures) {
+                min = Math.min(x, min);
+                max = Math.max(x, max);
+            }
+
+            var histogram = new Map();
+            for (var x = Math.floor(min); x <= Math.floor(max); ++x) {
+                histogram.set(x, 0);
+            }
+
+            for (var x of temperatures) {
+                histogram.set(Math.floor(x), histogram.get(Math.floor(x)) + 1);
+            }
+
+            var mostFrequentVal = 0;
+            for (const [key, val] of histogram) {
+                mostFrequentVal = Math.max(val, mostFrequentVal);
+            }
+
+            histoCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            histoCtx.fillStyle = "#555";
+            var counter = 0;
+            var barwidth = canvasWidth / histogram.size;
+            for (const [key, val] of histogram) {
+                histoCtx.fillRect(
+                    (barwidth) * counter,
+                    (1.0 - val / mostFrequentVal) * canvasHeight,
+                    barwidth,
+                    val / mostFrequentVal * canvasHeight);
+                counter++;
+            }
+        }
+
+        function thermalCamMove(e) {
+            var x = Math.floor(e.offsetX / 10.0);
+            var y = Math.floor(e.offsetY / 10.0);
+            thermalCamSamplePos = 32 * (23 - y) + x;
+            document.getElementById("thermalCamTooltip").style.left = e.pageX + 'px';
+            document.getElementById("thermalCamTooltip").style.top = e.pageY + 'px';
+        }
+
+        function thermalCamTooltipUpdate() {
+            if (thermalCamIsMouseIn && thermalCamTemperatures != null) {
+                document.getElementById("thermalCamTooltip").innerHTML = thermalCamTemperatures[thermalCamSamplePos].toFixed(1) + " °C";
+
+                setTimeout(thermalCamTooltipUpdate, 30);
+            }
+        }
+
+        function thermalCamEnter(e) {
+            thermalCamIsMouseIn = true;
+            if (thermalCamTemperatures != null) {
+                document.getElementById("thermalCamTooltip").style.visibility = "visible";
+            }
+
+            thermalCamTooltipUpdate();
+        }
+
+        function thermalCamLeave(e) {
+            thermalCamIsMouseIn = false;
+            document.getElementById("thermalCamTooltip").style.visibility = "hidden";
+        }
 
         function connect() {
             try {
@@ -1450,12 +1522,10 @@
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
-                        floatArray = new Float32Array(arrayBuf);
-                        drawThermalCameraOutput(floatArray);
-                        analyseThermalCameraData(floatArray);
-                        drawThermalCameraHistogram(floatArray);
-
-                        tempArray = floatArray;
+                        thermalCamTemperatures = new Float32Array(arrayBuf);
+                        drawThermalCameraOutput(thermalCamTemperatures);
+                        analyseThermalCameraData(thermalCamTemperatures);
+                        drawThermalCameraHistogram(thermalCamTemperatures);
                     }
                 }
             }
@@ -1470,6 +1540,44 @@
                 webSocket = null;
             }
         }
+
+        var fileToLoad = null;
+        var fileToSave = null;
+        var controllerIsMouseDown = false;
+        var controllerInitialYPos = 0.0;
+        var controllerClickedElem = undefined;
+        var updateUI = true;
+        var thermalCamTemperatures = null;
+        var thermalCamSamplePos = 0;
+        var thermalCamIsMouseIn = false;
+        var roastProfile = null;
+        var webSocket = null;
+        var lineChart = null;
+
+        (function () {
+            lineChart = new LineChart(document.getElementById("lineChart"), 1400, 800, 0, 25, 0, 300, 0, 50);
+            lineChart.drawLineChartBackground(
+                "Time (min)", "Temp °C", "ROR °C/min",
+                [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
+            );
+
+            document.addEventListener("mouseup", controlFunc);
+            document.addEventListener("mousemove", controlFunc);
+
+            for (c of document.getElementsByClassName("controller")) {
+                c.addEventListener("mousedown", controlFunc);
+
+                c.addEventListener("touchstart", controlFunc);
+                c.addEventListener("touchend", controlFunc);
+                c.addEventListener("touchmove", controlFunc);
+            }
+
+            document.getElementById("thermalCamera").addEventListener("mousemove", thermalCamMove);
+            document.getElementById("thermalCamera").addEventListener("mouseenter", thermalCamEnter);
+            document.getElementById("thermalCamera").addEventListener("mouseleave", thermalCamLeave);
+
+            roastProfile = new RoastProfile();
+        })();
     </script>
 </body>
 </html>
