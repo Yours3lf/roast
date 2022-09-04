@@ -422,9 +422,9 @@
             <div style="display:flex; flex-direction:column; padding:10px;">
                 <canvas id="thermalCamHistogram" width="300" height="150" style="border: 1px solid #bebebe; background-color: #d1d4e0"></canvas>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
-                    <span id="thermalCamMin">min</span>
-                    <span id="thermalCamMedian">med</span>
-                    <span id="thermalCamMax">max</span>
+                    <span id="thermalCamMin"></span>
+                    <span id="thermalCamMedian"></span>
+                    <span id="thermalCamMax"></span>
                 </div>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
                     <span>min</span>
@@ -461,30 +461,30 @@
     <div id="phaseContainer">
         <div>
             <span>Drying Phase</span>
-            <span id="dryingPhaseTime">Time Percentage</span>
-            <span id="dryingPhaseStat">RoR: AUC:</span>
+            <span id="dryingPhaseTime"></span>
+            <span id="dryingPhaseStat"></span>
         </div>
         <div>
             <span>Maillard Phase</span>
-            <span id="maillardPhaseTime">Time Percentage</span>
-            <span id="maillardPhaseStat">RoR: AUC:</span>
+            <span id="maillardPhaseTime"></span>
+            <span id="maillardPhaseStat"></span>
         </div>
         <div>
             <span>Development Phase</span>
-            <span id="developmentPhaseTime">Time Percentage</span>
-            <span id="developmentPhaseStat">RoR: AUC:</span>
+            <span id="developmentPhaseTime"></span>
+            <span id="developmentPhaseStat"></span>
         </div>
         <div>
             <span>Cooling Phase</span>
-            <span id="coolingPhaseTime">Time Percentage</span>
-            <span id="coolingPhaseStat">RoR: AUC:</span>
+            <span id="coolingPhaseTime"></span>
+            <span id="coolingPhaseStat"></span>
         </div>
     </div>
 
     <div style="display: flex; flex-direction: row; justify-content: space-evenly; width: 1160px; left: 205px; top: 30px; position: absolute;">
         <span id="auc"></span>
         <span id="ror"></span>
-        <span id="dtr">DTR: 10%</span>
+        <span id="bt"></span>
     </div>
 
 
@@ -995,6 +995,8 @@
 
                 lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
 
+                document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
+
                 var totalTime = now - this.#startTime;
 
                 if (this.#chargeTime != null) {
@@ -1049,8 +1051,6 @@
 
                         document.getElementById("developmentPhaseStat").innerHTML = "ROR: " + (this.#developmentPhaseRORSum / this.#developmentPhaseCount).toFixed(1) + " AUC: " + (this.#developmentPhaseAUCSum).toFixed(1);
                     }
-
-                    document.getElementById("dtr").innerHTML = "DTR: " + developmentPhasePercentage.toFixed(1) + "%";
                 }
 
                 if (this.#stopTime != null) {
