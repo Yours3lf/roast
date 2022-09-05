@@ -485,6 +485,8 @@
         <span id="auc"></span>
         <span id="ror"></span>
         <span id="bt"></span>
+        <span id="airt">AirT: xx*C</span>
+        <span id="ext">ExT: xx*C</span>
     </div>
 
 
@@ -635,13 +637,16 @@
                 this.#ctx.stroke(line);
             }
 
-            drawEventLine(x, title) {
+            drawEventLine(x, title, subtitle, subsubtitle) {
                 var xPos = this.#valToCanvasXoffset(x, this.#vertAxisOffsetX);
-                this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width / 2, 65);
+                this.#ctx.font = "13px Verdana";
+                this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width / 2, 55);
+                this.#ctx.fillText(subtitle, xPos - this.#ctx.measureText(subtitle).width / 2, 55 + 13);
+                this.#ctx.fillText(subsubtitle, xPos - this.#ctx.measureText(subsubtitle).width / 2, 55 + 13 * 2);
 
                 var line = new Path2D();
                 line.moveTo(xPos, this.#canvasHeight - 40);
-                line.lineTo(xPos, 70);
+                line.lineTo(xPos, 50 + 3 * 13);
                 this.#ctx.lineWidth = 2.0;
                 this.#ctx.stroke(line);
             }
@@ -825,13 +830,26 @@
                 for (var i = 0; i < this.#beanTemperatures.length; ++i)
                     this.#drawBeanTemperature(i, this.#beanTemperatures[i][0]);
 
-                this.#drawChargeEvent();
-                this.#drawDryEndEvent();
-                this.#drawFirstCrackStartEvent();
-                this.#drawFirstCrackEndEvent();
-                this.#drawSecondCrackStartEvent();
-                this.#drawSecondCrackEndEvent();
-                this.#drawStopEvent();
+                if (this.#chargeTime != null && this.#startTime != null)
+                    this.#drawEvent("CHG", this.#chargeTime);
+
+                if (this.#dryEndTime != null && this.#startTime != null)
+                    this.#drawEvent("DE", this.#dryEndTime);
+
+                if (this.#firstCrackStartTime != null && this.#startTime != null)
+                    this.#drawEvent("FCS", this.#firstCrackStartTime);
+
+                if (this.#firstCrackEndTime != null && this.#startTime != null)
+                    this.#drawEvent("FCE", this.#firstCrackEndTime);
+
+                if (this.#secondCrackStartTime != null && this.#startTime != null)
+                    this.#drawEvent("SCS", this.#secondCrackStartTime);
+
+                if (this.#secondCrackEndTime != null && this.#startTime != null)
+                    this.#drawEvent("SCE", this.#secondCrackEndTime);
+
+                if (this.#stopTime != null && this.#startTime != null)
+                    this.#drawEvent("STOP", this.#stopTime);
             }
 
             #prevROR = 0;
@@ -966,87 +984,61 @@
                 }
             }
 
-            #drawChargeEvent() {
-                if (this.#chargeTime != null && this.#startTime != null) 
-                lineChart.drawEventLine((this.#chargeTime - this.#startTime) / 60000, "CHG");
+            #drawEvent(str, inputTime) {
+                var i = 1;
+                for (; i < this.#beanTemperatures.length; ++i) {
+                    if (this.#beanTemperatures[i][0] > inputTime) break;
+                }
+                var time = (inputTime - this.#startTime) / 60000;
+                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#beanTemperatures[i - 1][1].toFixed(1) + "°C");
             }
 
             setCharge() {
                 if (this.#chargeTime == null && this.#startTime != null) {
                     this.#chargeTime = performance.now();
-                    this.#drawChargeEvent();
+                    this.#drawEvent("CHG", this.#chargeTime);
                 }
-            }
-
-            #drawDryEndEvent() {
-                if (this.#dryEndTime != null && this.#chargeTime != null)
-                lineChart.drawEventLine((this.#dryEndTime - this.#startTime) / 60000, "DE");
             }
 
             setDryEnd() {
                 if (this.#dryEndTime == null && this.#chargeTime != null) {
                     this.#dryEndTime = performance.now();
-                    this.#drawDryEndEvent();
+                    this.#drawEvent("DE", this.#dryEndTime);
                 }
-            }
-
-            #drawFirstCrackStartEvent() {
-                if (this.#firstCrackStartTime != null && this.#dryEndTime != null)
-                lineChart.drawEventLine((this.#firstCrackStartTime - this.#startTime) / 60000, "FCS");
             }
 
             setFirstCrackStart() {
                 if (this.#firstCrackStartTime == null && this.#dryEndTime != null) {
                     this.#firstCrackStartTime = performance.now();
-                    this.#drawFirstCrackStartEvent();
+                    this.#drawEvent("FCS", this.#firstCrackStartTime);
                 }
-            }
-
-            #drawFirstCrackEndEvent() {
-                if (this.#firstCrackEndTime != null && this.#firstCrackStartTime != null)
-                lineChart.drawEventLine((this.#firstCrackEndTime - this.#startTime) / 60000, "FCE");
             }
 
             setFirstCrackEnd() {
                 if (this.#firstCrackEndTime == null && this.#firstCrackStartTime != null) {
                     this.#firstCrackEndTime = performance.now();
-                    this.#drawFirstCrackEndEvent();
+                    this.#drawEvent("FCE", this.#firstCrackEndTime);
                 }
-            }
-
-            #drawSecondCrackStartEvent() {
-                if (this.#secondCrackStartTime != null && this.#firstCrackEndTime != null)
-                lineChart.drawEventLine((this.#secondCrackStartTime - this.#startTime) / 60000, "SCS");
             }
 
             setSecondCrackStart() {
                 if (this.#secondCrackStartTime == null && this.#firstCrackEndTime != null) {
                     this.#secondCrackStartTime = performance.now();
-                    this.#drawSecondCrackStartEvent();
+                    this.#drawEvent("SCS", this.#secondCrackStartTime);
                 }
-            }
-
-            #drawSecondCrackEndEvent() {
-                if (this.#secondCrackEndTime != null && this.#secondCrackStartTime != null)
-                lineChart.drawEventLine((this.#secondCrackEndTime - this.#startTime) / 60000, "SCE");
             }
 
             setSecondCrackEnd() {
                 if (this.#secondCrackEndTime == null && this.#secondCrackStartTime != null) {
                     this.#secondCrackEndTime = performance.now();
-                    this.#drawSecondCrackEndEvent();
+                    this.#drawEvent("SCE", this.#secondCrackEndTime);
                 }
-            }
-
-            #drawStopEvent() {
-                if (this.#stopTime != null && this.#startTime != null)
-                lineChart.drawEventLine((this.#stopTime - this.#startTime) / 60000, "STOP");
             }
 
             setStop() {
                 if (this.#stopTime == null && this.#startTime != null) {
                     this.#stopTime = performance.now();
-                    this.#drawStopEvent();
+                    this.#drawEvent("STOP", this.#stopTime);
                 }
             }
 
