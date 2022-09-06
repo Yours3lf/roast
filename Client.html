@@ -396,14 +396,20 @@
                 <span>SC<br />END</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setStop()" title="Stop Roasting and Start Cooldown">
+            <div class="button actionButton" onclick="roastProfile.setCool()" title="Start Cooldown (fan max, drum max, heater min)">
+                <span>COOL</span>
+            </div>
+
+            <div class="button actionButton" onclick="roastProfile.setStop()" title="Stop Roasting">
                 <span>STOP</span>
             </div>
 
-            <div class="button actionButton" title="Replay Roast Profile">
-                <img src="img/replay.png" width="40" style="opacity: 0.5; padding: 5px;" />
-                <!--Icon created by Freepik - Flaticon-->
-            </div>
+            <!--
+    <div class="button actionButton" title="Replay Roast Profile">
+        <img src="img/replay.png" width="40" style="opacity: 0.5; padding: 5px;" />
+        <!--Icon created by Freepik - Flaticon--
+    </div>
+    -->
         </div>
 
         <canvas id="lineChart" class="lineChart">
@@ -435,21 +441,21 @@
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                 <div id="fanController" class="controller" title="Cooling Fan Control">
-                    <span style="height: 70%;">
+                    <span style="height: 60%;">
                         <span><img src="img/fan.png" width="30" id="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
 
                 <div id="drumController" class="controller" title="Drum Motor Control">
-                    <span style="height: 70%;">
+                    <span style="height: 40%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
                 <div id="heaterController" class="controller" title="Heater Element Control">
-                    <span style="height: 70%;">
+                    <span style="height: 10%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
                     </span>
@@ -733,6 +739,7 @@
             #firstCrackEndTime = null;
             #secondCrackStartTime = null;
             #secondCrackEndTime = null;
+            #coolTime = null
             #stopTime = null;
 
             #fanSettings = []; //stores pairs of (performance.now(), percentage%)
@@ -768,6 +775,7 @@
                         '#firstCrackEndTime': this.#firstCrackEndTime,
                         '#secondCrackStartTime': this.#secondCrackStartTime,
                         '#secondCrackEndTime': this.#secondCrackEndTime,
+                        '#coolTime': this.#coolTime,
                         '#stopTime': this.#stopTime,
                         '#fanSettings': this.#fanSettings,
                         '#heaterSettings': this.#heaterSettings,
@@ -803,6 +811,7 @@
                 this.#firstCrackEndTime = j['#firstCrackEndTime'];
                 this.#secondCrackStartTime = j['#secondCrackStartTime'];
                 this.#secondCrackEndTime = j['#secondCrackEndTime'];
+                this.#coolTime = j['#coolTime'];
                 this.#stopTime = j['#stopTime'];
                 this.#fanSettings = j['#fanSettings'];
                 this.#heaterSettings = j['#heaterSettings'];
@@ -830,6 +839,18 @@
                 for (var i = 0; i < this.#beanTemperatures.length; ++i)
                     this.#drawBeanTemperature(i, this.#beanTemperatures[i][0]);
 
+                for (var i = 0; i < this.#fanSettings.length; ++i)
+                    this.#drawSetting(this.#fanSettings, i, 0);
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, this.#stopTime);
+
+                for (var i = 0; i < this.#heaterSettings.length; ++i)
+                    this.#drawSetting(this.#heaterSettings, i, 0);
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, this.#stopTime);
+
+                for (var i = 0; i < this.#drumSettings.length; ++i)
+                    this.#drawSetting(this.#drumSettings, i, 0);
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, this.#stopTime);
+
                 if (this.#chargeTime != null && this.#startTime != null)
                     this.#drawEvent("CHG", this.#chargeTime);
 
@@ -848,8 +869,8 @@
                 if (this.#secondCrackEndTime != null && this.#startTime != null)
                     this.#drawEvent("SCE", this.#secondCrackEndTime);
 
-                if (this.#stopTime != null && this.#startTime != null)
-                    this.#drawEvent("STOP", this.#stopTime);
+                if (this.#coolTime != null && this.#startTime != null)
+                    this.#drawEvent("COOL", this.#coolTime);
             }
 
             #prevROR = 0;
@@ -858,7 +879,10 @@
                 var deltaTime = currTime - prevTime + 0.00001;
                 var ror = deltaTemp / deltaTime;
 
-                if (this.#beanTemperatures.length == 1) {
+                if (ror == 0)
+                    return;
+
+                if (this.#prevROR == 0) {
                     this.#prevROR = ror;
                 }
 
@@ -977,6 +1001,18 @@
                     this.#ambientHumidity = 50.0;
                     this.#ambientPressure = 1.0;
 
+                    var fanPercentage = document.getElementById("fanController").firstElementChild.style.height;
+                    fanPercentage = parseFloat(fanPercentage.substring(0, fanPercentage.length - 1));
+                    this.setFanSpeed(fanPercentage);
+
+                    var heaterPercentage = document.getElementById("heaterController").firstElementChild.style.height;
+                    heaterPercentage = parseFloat(heaterPercentage.substring(0, heaterPercentage.length - 1));
+                    this.setHeaterSpeed(heaterPercentage);
+
+                    var drumPercentage = document.getElementById("drumController").firstElementChild.style.height;
+                    drumPercentage = parseFloat(drumPercentage.substring(0, drumPercentage.length - 1));
+                    this.setDrumSpeed(drumPercentage);
+
                     this.#updateDialog();
 
                     //for dev purposes
@@ -1035,29 +1071,72 @@
                 }
             }
 
+            setCool() {
+                if (this.#coolTime == null && this.#startTime != null) {
+                    this.#coolTime = performance.now();
+                    this.#drawEvent("COOL", this.#coolTime);
+                }
+            }
+
             setStop() {
                 if (this.#stopTime == null && this.#startTime != null) {
                     this.#stopTime = performance.now();
-                    this.#drawEvent("STOP", this.#stopTime);
                 }
             }
 
             setFanSpeed(percentage) {
 
                 if (this.#startTime == null) return;
-                this.#fanSettings.push([performance.now(), percentage]);
+                var now = performance.now();
+                this.#fanSettings.push([now, percentage]);
+
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now);
             }
 
             setHeaterSpeed(percentage) {
 
                 if (this.#startTime == null) return;
-                this.#heaterSettings.push([performance.now(), percentage]);
+                var now = performance.now();
+                this.#heaterSettings.push([now, percentage]);
+
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now);
             }
 
             setDrumSpeed(percentage) {
 
                 if (this.#startTime == null) return;
-                this.#drumSettings.push([performance.now(), percentage]);
+                var now = performance.now();
+                this.#drumSettings.push([now, percentage]);
+
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now);
+            }
+
+            #drawSetting(setting, index, now) {
+                var currTime = setting[index][0];
+                var currSetting = setting[index][1];
+                var prevTime = 0;
+                var prevSetting = 0;
+
+                if (index > 0) {
+                    prevTime = setting[index - 1][0];
+                    prevSetting = setting[index - 1][1]
+                }
+                else {
+                    prevTime = currTime;
+                    prevSetting = currSetting;
+                }
+
+                if (now > currTime) {
+                    currTime = now;
+                }
+
+                prevTime -= this.#startTime;
+                currTime -= this.#startTime;
+
+                prevTime /= 60000;
+                currTime /= 60000;
+
+                lineChart.drawCurveSegment(prevTime, prevSetting, currTime, currSetting);
             }
 
             #dryingPhaseRORSum = 0;
@@ -1079,16 +1158,16 @@
                 var currTemp = this.#beanTemperatures[index][1]
                 var prevTime = 0;
                 var prevTemp = 0;
-                if (index > 1) {
+                if (index > 0) {
                     prevTime = this.#beanTemperatures[index - 1][0];
                     prevTemp = this.#beanTemperatures[index - 1][1];
-                    prevTime -= this.#startTime;
                 }
                 else {
-                    prevTime = 0;
+                    prevTime = currTime;
                     prevTemp = currTemp;
                 }
 
+                prevTime -= this.#startTime;
                 currTime -= this.#startTime;
 
                 currTime /= 60000; //ms to min
@@ -1141,14 +1220,14 @@
 
                 if (this.#firstCrackStartTime != null) {
                     var developmentPhaseTime = now;
-                    if (this.#stopTime != null) developmentPhaseTime = this.#stopTime;
+                    if (this.#coolTime != null) developmentPhaseTime = this.#coolTime;
                     developmentPhaseTime -= this.#firstCrackStartTime;
                     var developmentPhasePercentage = developmentPhaseTime / totalTime * 100.0;
                     developmentPhaseTime /= 1000.0;
                     var developmentPhaseTimeMin = developmentPhaseTime / 60;
                     document.getElementById("developmentPhaseTime").innerHTML = Math.floor(developmentPhaseTimeMin) + ":" + ((developmentPhaseTime) - Math.floor(developmentPhaseTimeMin) * 60).toFixed(1) + " " + developmentPhasePercentage.toFixed(1) + "%";
 
-                    if (this.#stopTime == null || (now >= this.#firstCrackStartTime && now <= this.#stopTime)) {
+                    if (this.#coolTime == null || (now >= this.#firstCrackStartTime && now <= this.#coolTime)) {
                         this.#developmentPhaseCount++;
                         this.#developmentPhaseRORSum += ror;
                         this.#developmentPhaseAUCSum += deltaAUC;
@@ -1157,15 +1236,15 @@
                     }
                 }
 
-                if (this.#stopTime != null) {
+                if (this.#coolTime != null) {
                     var coolingPhaseTime = now;
-                    coolingPhaseTime -= this.#stopTime;
+                    coolingPhaseTime -= this.#coolTime;
                     var coolingPhasePercentage = coolingPhaseTime / totalTime * 100.0;
                     coolingPhaseTime /= 1000.0;
                     var coolingPhaseTimeMin = coolingPhaseTime / 60;
                     document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1) + " " + coolingPhasePercentage.toFixed(1) + "%";
 
-                    if(now >= this.#stopTime)
+                    if(now >= this.#coolTime)
                     {
                         this.#coolingPhaseCount++;
                         this.#coolingPhaseRORSum += ror;
@@ -1184,6 +1263,10 @@
                 this.#beanTemperatures.push([now, temperature]);
 
                 this.#drawBeanTemperature(this.#beanTemperatures.length - 1, now);
+
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now);
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now);
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now);
             }
 
             setAirTemperature(temperature) {
