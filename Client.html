@@ -44,6 +44,32 @@
         border-radius: 10px;
     }
 
+    #lineChartTooltip {
+        visibility: hidden;
+        z-index: 999999;
+        position: absolute;
+        margin-left: 15px;
+        display: flex;
+    }
+
+    #lineChartTooltipText {
+        background: rgba(255 255 255 / 53%);
+        padding: 5px;
+        border-radius: 10px;
+    }
+
+    #lineChartTooltipIndicator {
+        visibility: hidden;
+        z-index: 999999;
+        position: absolute;
+        margin-left: -5px;
+        display: block;
+        background: #bebebe;
+        height: 720px;
+        width: 2px;
+        top: 70px;
+    }
+
     .propertySectionTitle {
         width: 100%;
         display: block;
@@ -303,26 +329,26 @@
         <span id="propertiesTitle">Roast Properties:</span>
         <div id="propertiesInputForm">
             <div>
-                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" oninput="roastProfile.setName(event.target.value)"/>
+                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" onchange="roastProfile.setName(event.target.value)"/>
                 <input type="date" readonly="readonly" disabled id="roastDate" title="Roast Date (auto filled)" />
                 <input type="time" readonly="readonly" disabled id="roastTime" title="Roast Time (auto filled)" />
             </div>
             <span class="propertySectionTitle">Pre Roast Bean Data</span>
             <div>
-                <input type="text" id="beanType" placeholder="Bean Type" title="Bean Type" oninput="roastProfile.setBeanType(event.target.value)" />
-                <input type="number" id="moistureContent" placeholder="Moisture Content (%)" title="Moisture Content (%)" oninput="roastProfile.setMoistureContent(event.target.value)" />
-                <input type="number" id="beanScreenSize" placeholder='Bean Screen Size (1/64")' title='Bean Screen Size (1/64")' oninput="roastProfile.setBeanScreenSize(event.target.value)" />
+                <input type="text" id="beanType" placeholder="Bean Type" title="Bean Type" onchange="roastProfile.setBeanType(event.target.value)" />
+                <input type="number" id="moistureContent" placeholder="Moisture Content (%)" title="Moisture Content (%)" onchange="roastProfile.setMoistureContent(event.target.value)" />
+                <input type="number" id="beanScreenSize" placeholder='Bean Screen Size (1/64")' title='Bean Screen Size (1/64")' onchange="roastProfile.setBeanScreenSize(event.target.value)" />
             </div>
             <div>
-                <input type="number" id="beanWeight" placeholder="Bean Weight (g)" title="Bean Weight (g)" oninput="roastProfile.setWeight(event.target.value)" />
-                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" oninput="roastProfile.setVolume(event.target.value)"/>
-                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" oninput="roastProfile.setDensity(event.target.value)"/>
+                <input type="number" id="beanWeight" placeholder="Bean Weight (g)" title="Bean Weight (g)" onchange="roastProfile.setWeight(event.target.value)" />
+                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" onchange="roastProfile.setVolume(event.target.value)"/>
+                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" onchange="roastProfile.setDensity(event.target.value)"/>
             </div>
             <span class="propertySectionTitle">Post Roast Bean Data</span>
             <div>
-                <input type="number" id="endBeanWeight" placeholder="End Weight (g)" title="End Weight (g)" oninput="roastProfile.setEndWeight(event.target.value)" />
-                <input type="number" id="endBeanVolume" placeholder="End Volume (mL)" title="End Volume (mL)" oninput="roastProfile.setEndVolume(event.target.value)" />
-                <input type="number" id="endBeanDensity" placeholder="End Density (g/mL)" title="End Density (g/mL)" oninput="roastProfile.setEndDensity(event.target.value)" />
+                <input type="number" id="endBeanWeight" placeholder="End Weight (g)" title="End Weight (g)" onchange="roastProfile.setEndWeight(event.target.value)" />
+                <input type="number" id="endBeanVolume" placeholder="End Volume (mL)" title="End Volume (mL)" onchange="roastProfile.setEndVolume(event.target.value)" />
+                <input type="number" id="endBeanDensity" placeholder="End Density (g/mL)" title="End Density (g/mL)" onchange="roastProfile.setEndDensity(event.target.value)" />
             </div>
             <span class="propertySectionTitle">Ambient Values</span>
             <div>
@@ -405,16 +431,22 @@
             </div>
 
             <!--
-    <div class="button actionButton" title="Replay Roast Profile">
-        <img src="img/replay.png" width="40" style="opacity: 0.5; padding: 5px;" />
-        <!--Icon created by Freepik - Flaticon--
-    </div>
-    -->
+        <div class="button actionButton" title="Replay Roast Profile">
+            <img src="img/replay.png" width="40" style="opacity: 0.5; padding: 5px;" />
+            <!--Icon created by Freepik - Flaticon--
+        </div>
+        -->
         </div>
 
         <canvas id="lineChart" class="lineChart">
             Your browser does not support the canvas element.
         </canvas>
+
+        <div id="lineChartTooltip">
+            <span id="lineChartTooltipText"></span>
+        </div>
+
+        <div id="lineChartTooltipIndicator"></div>
 
         <div style="display: flex; flex-direction: column;">
             <canvas id="thermalCamera" width="320" height="240" class="thermalCam">
@@ -624,6 +656,14 @@
             #valToCanvasXoffset(v, offsetX) {
                 var spaceAvailable = this.#canvasWidth - 40 - (offsetX + 20);
                 return offsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
+            }
+
+            canvasXoffsetToVal(x) {
+                var v = x - this.#vertAxisOffsetX - 20;
+                var w = this.#canvasWidth - 40 - (this.#vertAxisOffsetX + 20);
+                var r = v / w;
+                var s = r * this.#horizontalMaxVal - this.#horizontalMinVal;
+                return s;
             }
 
             #drawHorizontalAxisText(v, vertAxisOffsetX) {
@@ -1030,63 +1070,77 @@
             }
 
             setCharge() {
-                if (this.#chargeTime == null && this.#startTime != null) {
+                if (this.#chargeTime == null && this.#startTime != null && this.#stopTime == null) {
                     this.#chargeTime = performance.now();
                     this.#drawEvent("CHG", this.#chargeTime);
                 }
             }
 
             setDryEnd() {
-                if (this.#dryEndTime == null && this.#chargeTime != null) {
+                if (this.#dryEndTime == null && this.#chargeTime != null && this.#stopTime == null) {
                     this.#dryEndTime = performance.now();
                     this.#drawEvent("DE", this.#dryEndTime);
                 }
             }
 
             setFirstCrackStart() {
-                if (this.#firstCrackStartTime == null && this.#dryEndTime != null) {
+                if (this.#firstCrackStartTime == null && this.#dryEndTime != null && this.#stopTime == null) {
                     this.#firstCrackStartTime = performance.now();
                     this.#drawEvent("FCS", this.#firstCrackStartTime);
                 }
             }
 
             setFirstCrackEnd() {
-                if (this.#firstCrackEndTime == null && this.#firstCrackStartTime != null) {
+                if (this.#firstCrackEndTime == null && this.#firstCrackStartTime != null && this.#stopTime == null) {
                     this.#firstCrackEndTime = performance.now();
                     this.#drawEvent("FCE", this.#firstCrackEndTime);
                 }
             }
 
             setSecondCrackStart() {
-                if (this.#secondCrackStartTime == null && this.#firstCrackEndTime != null) {
+                if (this.#secondCrackStartTime == null && this.#firstCrackEndTime != null && this.#stopTime == null) {
                     this.#secondCrackStartTime = performance.now();
                     this.#drawEvent("SCS", this.#secondCrackStartTime);
                 }
             }
 
             setSecondCrackEnd() {
-                if (this.#secondCrackEndTime == null && this.#secondCrackStartTime != null) {
+                if (this.#secondCrackEndTime == null && this.#secondCrackStartTime != null && this.#stopTime == null) {
                     this.#secondCrackEndTime = performance.now();
                     this.#drawEvent("SCE", this.#secondCrackEndTime);
                 }
             }
 
+            #endRoast() {
+                document.getElementById("fanController").firstElementChild.style.height = "100%";
+                document.getElementById("drumController").firstElementChild.style.height = "100%";
+                document.getElementById("heaterController").firstElementChild.style.height = "0%"; 
+                this.setFanSpeed(100);
+                this.setFanSpeed(100);
+                this.setDrumSpeed(100);
+                this.setDrumSpeed(100);
+                this.setHeaterSpeed(0);
+                this.setHeaterSpeed(0);
+            }
+
             setCool() {
-                if (this.#coolTime == null && this.#startTime != null) {
+                if (this.#coolTime == null && this.#startTime != null && this.#stopTime == null) {
                     this.#coolTime = performance.now();
                     this.#drawEvent("COOL", this.#coolTime);
+                    this.#endRoast();
                 }
             }
 
             setStop() {
                 if (this.#stopTime == null && this.#startTime != null) {
                     this.#stopTime = performance.now();
+                    this.#endRoast();
                 }
             }
 
             setFanSpeed(percentage) {
 
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
                 var now = performance.now();
                 this.#fanSettings.push([now, percentage]);
 
@@ -1095,7 +1149,7 @@
 
             setHeaterSpeed(percentage) {
 
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
                 var now = performance.now();
                 this.#heaterSettings.push([now, percentage]);
 
@@ -1104,7 +1158,7 @@
 
             setDrumSpeed(percentage) {
 
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
                 var now = performance.now();
                 this.#drumSettings.push([now, percentage]);
 
@@ -1256,7 +1310,7 @@
             }
 
             setBeanTemperature(temperature) {
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
 
                 var now = performance.now();
 
@@ -1270,12 +1324,12 @@
             }
 
             setAirTemperature(temperature) {
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
                 this.#airTemperatures.push([performance.now(), temperature]);
             }
 
             setExhaustTemperature(temperature) {
-                if (this.#startTime == null) return;
+                if (this.#startTime == null || this.#stopTime != null) return;
                 this.#exhaustTemperatures.push([performance.now(), temperature]);
             }
 
@@ -1385,6 +1439,95 @@
                     this.#endDensity = ed;
                     this.#calcEndWeightVolumeDensity();
                 }
+            }
+
+            getBeanTemperature(t) {
+                if (this.#beanTemperatures.length > 0) {
+                    var i = 1;
+                    for (; i < this.#beanTemperatures.length; ++i) {
+                        if (this.#beanTemperatures[i][0] > (t + this.#startTime))
+                            break;
+                    }
+                    return this.#beanTemperatures[i - 1][1];
+                }
+
+                return null;
+            }
+
+            getROR(t) {
+                if (this.#beanTemperatures.length > 0) {
+                    var i = 1;
+                    for (; i < this.#beanTemperatures.length; ++i) {
+                        if (this.#beanTemperatures[i][0] > (t + this.#startTime))
+                            break;
+                    }
+
+                    var currTime = this.#beanTemperatures[i - 1][0];
+                    var currTemp = this.#beanTemperatures[i - 1][1];
+
+                    var prevTime = 0;
+                    var prevTemp = 0;
+
+                    if (i < 2) {
+                        prevTime = currTime;
+                        prevTemp = currTemp;
+                    } else {
+                        prevTime = this.#beanTemperatures[i - 2][0];
+                        prevTemp = this.#beanTemperatures[i - 2][1];
+                    }
+
+                    prevTime -= this.#startTime;
+                    currTime -= this.#startTime;
+
+                    prevTime /= 60000;
+                    currTime /= 60000;
+
+                    var deltaTemp = Math.max(currTemp - prevTemp, 0.0);
+                    var deltaTime = currTime - prevTime + 0.00001;
+
+                    return deltaTemp / deltaTime;
+                }
+
+                return null;
+            }
+
+            getFanSpeed(t) {
+                if (this.#fanSettings.length > 0) {
+                    var i = 1;
+                    for (; i < this.#fanSettings.length; ++i) {
+                        if (this.#fanSettings[i][0] > (t + this.#startTime))
+                            break;
+                    }
+                    return this.#fanSettings[i - 1][1];
+                }
+
+                return null;
+            }
+
+            getDrumSpeed(t) {
+                if (this.#drumSettings.length > 0) {
+                    var i = 1;
+                    for (; i < this.#drumSettings.length; ++i) {
+                        if (this.#drumSettings[i][0] > (t + this.#startTime))
+                            break;
+                    }
+                    return this.#drumSettings[i - 1][1];
+                }
+
+                return null;
+            }
+
+            getHeaterSetting(t) {
+                if (this.#heaterSettings.length > 0) {
+                    var i = 1;
+                    for (; i < this.#heaterSettings.length; ++i) {
+                        if (this.#heaterSettings[i][0] > (t + this.#startTime))
+                            break;
+                    }
+                    return this.#heaterSettings[i - 1][1];
+                }
+
+                return null;
             }
         }
 
@@ -1685,6 +1828,46 @@
             document.getElementById("thermalCamTooltip").style.visibility = "hidden";
         }
 
+        function lineChartMove(e) {
+            var x = e.offsetX - 5 - 10; //compensate line being 5 off to left, 10 for padding
+            var y = e.offsetY;
+
+            var time = lineChart.canvasXoffsetToVal(x);
+            var timems = time * 60000;
+            var bt = roastProfile.getBeanTemperature(timems);
+            if (bt == null) return;
+            var ror = roastProfile.getROR(timems);
+            var fs = roastProfile.getFanSpeed(timems);
+            var ds = roastProfile.getDrumSpeed(timems);
+            var hs = roastProfile.getHeaterSetting(timems);
+
+            
+            document.getElementById("lineChartTooltip").style.left = e.pageX + 'px';
+            document.getElementById("lineChartTooltip").style.top = e.pageY + 'px';
+
+            document.getElementById("lineChartTooltipIndicator").style.left = e.pageX + 'px';
+
+            document.getElementById("lineChartTooltipText").innerHTML = Math.floor(time) + ":" + ((time - Math.floor(time)) * 60).toFixed(0) + "<br>"
+                + bt.toFixed(1) + " °C" + "<br>"
+                + ror.toFixed(1) + " °C/min" + "<br>"
+                + "Fan: " + fs.toFixed(1) + "%<br>"
+                + "Drum: " + ds.toFixed(1) + "%<br>"
+                + "Heater: " + hs.toFixed(1) + "%";
+        }
+
+        function lineChartEnter(e) {
+            var bt = roastProfile.getBeanTemperature(0);
+            if (bt == null) return;
+            document.getElementById("lineChartTooltip").style.visibility = "visible";
+            document.getElementById("lineChartTooltipIndicator").style.visibility = "visible";
+        }
+
+        function lineChartLeave(e) {
+            document.getElementById("lineChartTooltip").style.visibility = "hidden";
+            document.getElementById("lineChartTooltipIndicator").style.visibility = "hidden";
+        }
+
+
         function connect() {
             try {
                 serverURL = document.getElementById("wsAddress").value;
@@ -1772,6 +1955,10 @@
             document.getElementById("thermalCamera").addEventListener("mousemove", thermalCamMove);
             document.getElementById("thermalCamera").addEventListener("mouseenter", thermalCamEnter);
             document.getElementById("thermalCamera").addEventListener("mouseleave", thermalCamLeave);
+
+            document.getElementById("lineChart").addEventListener("mousemove", lineChartMove);
+            document.getElementById("lineChart").addEventListener("mouseenter", lineChartEnter);
+            document.getElementById("lineChart").addEventListener("mouseleave", lineChartLeave);
 
             roastProfile = new RoastProfile();
         })();
