@@ -70,6 +70,16 @@
         top: 70px;
     }
 
+    #beanTemperatureProjection {
+        z-index: 99999;
+        position: absolute;
+        display: block;
+        height: 500px;
+        width: 2px;
+        background: repeating-linear-gradient( 0deg, transparent, transparent 10px, #ccc 10px, #ccc 20px );
+        visibility: hidden;
+    }
+
     .propertySectionTitle {
         width: 100%;
         display: block;
@@ -456,6 +466,8 @@
 
         <div id="lineChartTooltipIndicator"></div>
 
+        <div id="beanTemperatureProjection"></div>
+
         <div style="display: flex; flex-direction: column;">
             <canvas id="thermalCamera" width="320" height="240" class="thermalCam">
                 Your browser does not support the canvas element.
@@ -622,19 +634,19 @@
                 this.#secondaryVerticalMaxVal = vsMaxVal;
             }
 
-            #valToCanvasYoffset(v) {
+            valToCanvasYoffset(v) {
                 var spaceAvailable = this.#canvasHeight - 40 * 2;
                 return this.#canvasHeight - 40 - (v - this.#verticalMinVal) / (this.#verticalMaxVal - this.#verticalMinVal) * spaceAvailable;
             }
 
-            #valToCanvasYoffsetSecondaryAxis(v) {
+            valToCanvasYoffsetSecondaryAxis(v) {
                 var spaceAvailable = this.#canvasHeight - 40 * 2;
                 return this.#canvasHeight - 40 - (v - this.#secondaryVerticalMinVal) / (this.#secondaryVerticalMaxVal - this.#secondaryVerticalMinVal) * spaceAvailable;
             }
 
             #drawHorizontalLines(v, xOffset) {
                 var line = new Path2D();
-                var yOffset = this.#valToCanvasYoffset(v);
+                var yOffset = this.valToCanvasYoffset(v);
                 line.moveTo(xOffset + 15, yOffset);
                 line.lineTo(this.#canvasWidth - 40, yOffset);
                 this.#ctx.stroke(line);
@@ -642,7 +654,7 @@
 
             #drawHorizontalSecondaryLines(xOffset, v) {
                 var line = new Path2D();
-                var yOffset = this.#valToCanvasYoffsetSecondaryAxis(v);
+                var yOffset = this.valToCanvasYoffsetSecondaryAxis(v);
                 var chartWidth = (this.#canvasWidth - 40) - (xOffset + 15);
                 line.moveTo(xOffset + 15 + chartWidth - 5, yOffset);
                 line.lineTo(xOffset + 15 + chartWidth + 5, yOffset);
@@ -650,18 +662,18 @@
             }
 
             #drawVerticalAxisText(v) {
-                var lineOffsetY = this.#valToCanvasYoffset(v);
+                var lineOffsetY = this.valToCanvasYoffset(v);
                 this.#ctx.fillText(v, 5, lineOffsetY + 7);
                 return this.#ctx.measureText(v).width;
             }
 
             #drawSecondaryVerticalAxisText(xOffset, v) {
-                var lineOffsetY = this.#valToCanvasYoffsetSecondaryAxis(v);
+                var lineOffsetY = this.valToCanvasYoffsetSecondaryAxis(v);
                 var chartWidth = (this.#canvasWidth - 40) - (xOffset + 15);
                 this.#ctx.fillText(v, xOffset + 15 + chartWidth + 15, lineOffsetY + 7);
             }
 
-            #valToCanvasXoffset(v, offsetX) {
+            valToCanvasXoffset(v, offsetX) {
                 var spaceAvailable = this.#canvasWidth - 40 - (offsetX + 20);
                 return offsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
             }
@@ -675,7 +687,7 @@
             }
 
             #drawHorizontalAxisText(v, vertAxisOffsetX) {
-                var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
+                var offsetX = this.valToCanvasXoffset(v, vertAxisOffsetX);
 
                 var textWidth = this.#ctx.measureText(v).width;
 
@@ -683,7 +695,7 @@
             }
 
             #drawVertixalLines(v, vertAxisOffsetX, offsetY) {
-                var offsetX = this.#valToCanvasXoffset(v, vertAxisOffsetX);
+                var offsetX = this.valToCanvasXoffset(v, vertAxisOffsetX);
 
                 var line = new Path2D();
                 line.moveTo(offsetX, this.#canvasHeight - 40 + offsetY);
@@ -692,7 +704,7 @@
             }
 
             drawEventLine(x, title, subtitle, subsubtitle) {
-                var xPos = this.#valToCanvasXoffset(x, this.#vertAxisOffsetX);
+                var xPos = this.valToCanvasXoffset(x, this.#vertAxisOffsetX);
                 this.#ctx.font = "13px Verdana";
                 this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width / 2, 55);
                 this.#ctx.fillText(subtitle, xPos - this.#ctx.measureText(subtitle).width / 2, 55 + 13);
@@ -761,17 +773,17 @@
                 this.#ctx.lineJoin = "round";
                 this.#ctx.lineWidth = 4.0;
                 var line = new Path2D();
-                var xfrom = this.#valToCanvasXoffset(prevH, this.#vertAxisOffsetX);
-                var xto = this.#valToCanvasXoffset(h, this.#vertAxisOffsetX);
+                var xfrom = this.valToCanvasXoffset(prevH, this.#vertAxisOffsetX);
+                var xto = this.valToCanvasXoffset(h, this.#vertAxisOffsetX);
                 var yfrom = 0;
                 var yto = 0;
                 if (!secondary) {
-                    yfrom = this.#valToCanvasYoffset(prevV);
-                    yto = this.#valToCanvasYoffset(v);
+                    yfrom = this.valToCanvasYoffset(prevV);
+                    yto = this.valToCanvasYoffset(v);
                 }
                 else {
-                    yfrom = this.#valToCanvasYoffsetSecondaryAxis(prevV);
-                    yto = this.#valToCanvasYoffsetSecondaryAxis(v);
+                    yfrom = this.valToCanvasYoffsetSecondaryAxis(prevV);
+                    yto = this.valToCanvasYoffsetSecondaryAxis(v);
                 }
                 line.moveTo(xfrom, yfrom);
                 line.lineTo(xto, yto);
@@ -1065,6 +1077,8 @@
 
                     document.getElementById("startButton").classList.add('disabledElement');
 
+                    document.getElementById("beanTemperatureProjection").style.visibility = "visible";
+
                     //for dev purposes
                     dummyData(0);
                 }
@@ -1210,6 +1224,32 @@
                 lineChart.drawCurveSegment(prevTime, prevSetting, currTime, currSetting);
             }
 
+            #rorProjection = 0; //c / min
+
+            #drawBeanTemperatureProjection(temp, time) {
+                var height = 800 - 40*2;
+                var width = 1400 - 38 - 20 - 40;
+                var onemin = width / 25;
+                var onec = height / 300;
+                /*
+                 *     /|
+                 *   /  | ror * onec
+                 * /    |
+                 * ------
+                 * 1min
+                 * */
+                var angle = 270 - Math.atan(this.#rorProjection * onec / onemin) * 180 / Math.PI;
+
+                var currentTime = (time - this.#startTime) / 60000;
+
+                var xoffset = lineChart.valToCanvasXoffset(currentTime, 0) + 145;
+                var yoffset = lineChart.valToCanvasYoffset(temp) - 220; //includes / affected by length
+
+                document.getElementById("beanTemperatureProjection").style.transform = "rotate(" + angle + "deg) translatey(250px)";
+                document.getElementById("beanTemperatureProjection").style.left = xoffset + "px";
+                document.getElementById("beanTemperatureProjection").style.top = yoffset + "px";
+            }
+
             #dryingPhaseRORSum = 0;
             #dryingPhaseCount = 0;
             #maillardPhaseRORSum = 0;
@@ -1223,6 +1263,8 @@
             #maillardPhaseAUCSum = 0;
             #developmentPhaseAUCSum = 0;
             #coolingPhaseAUCSum = 0;
+
+            #rorMA = new MovingAverage(50);
 
             #drawBeanTemperature(index, now) {
                 var currTime = this.#beanTemperatures[index][0];
@@ -1247,11 +1289,15 @@
                 var ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
                 var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
 
+                this.#rorProjection = this.#rorMA.ma(ror);
+
                 lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
 
                 var totalTime = now - this.#startTime;
+                if (this.#coolTime != null)
+                    totalTime = this.#coolTime - this.#startTime;
 
                 if (this.#chargeTime != null) {
                     var dryingPhaseTime = now;
@@ -1310,10 +1356,10 @@
                 if (this.#coolTime != null) {
                     var coolingPhaseTime = now;
                     coolingPhaseTime -= this.#coolTime;
-                    var coolingPhasePercentage = coolingPhaseTime / totalTime * 100.0;
+                    //var coolingPhasePercentage = coolingPhaseTime / totalTime * 100.0;
                     coolingPhaseTime /= 1000.0;
                     var coolingPhaseTimeMin = coolingPhaseTime / 60;
-                    document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1) + " " + coolingPhasePercentage.toFixed(1) + "%";
+                    document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1);// + " " + coolingPhasePercentage.toFixed(1) + "%";
 
                     if(now >= this.#coolTime)
                     {
@@ -1338,6 +1384,8 @@
                 this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now);
                 this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now);
                 this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now);
+
+                this.#drawBeanTemperatureProjection(temperature, now);
             }
 
             setAirTemperature(temperature) {
