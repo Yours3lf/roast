@@ -242,6 +242,13 @@
         box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
     }
 
+    .disabledElement {
+        pointer-events: none !important;
+        box-shadow: none !important;
+        border: 1px solid #bebebe !important;
+        transition: all 0.35s ease-in-out 0.01s;
+    }
+
     .closeButton {
         position: absolute;
         right: 15px;
@@ -282,6 +289,7 @@
 
     .controller:hover {
         box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
+        cursor: pointer;
     }
 
     .controller > span {
@@ -379,8 +387,8 @@
         <span class="propertySectionTitle">Connection settings</span>
         <div style="margin-top: 20px; margin-bottom: 10px; ">
             <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
-            <span class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
-            <span class="button" onclick="disconnect()">Disconnect</span>
+            <span id="connectButton" class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
+            <span id="disconnectButton" class="button disabledElement" onclick="disconnect()">Disconnect</span>
         </div>
         <div id="websocketMessages"></div>
     </div>
@@ -394,39 +402,39 @@
                 <!--Icon created by Freepik - Flaticon-->
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setStart()" title="Start Roasting">
+            <div id="startButton" class="button actionButton" onclick="roastProfile.setStart();" title="Start Roasting">
                 <span>START</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setCharge()" title="Charge beans (Drying Phase Start)">
+            <div id="chargeButton" class="button actionButton" onclick="roastProfile.setCharge();" title="Charge beans (Drying Phase Start)">
                 <span>CHG</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setDryEnd()" title="Insert Drying Phase End Event">
+            <div id="dryEndButton" class="button actionButton" onclick="roastProfile.setDryEnd();" title="Insert Drying Phase End Event">
                 <span>DRY<br />END</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setFirstCrackStart()" title="Insert First Crack Start Event">
+            <div id="fcStartButton" class="button actionButton" onclick="roastProfile.setFirstCrackStart();" title="Insert First Crack Start Event">
                 <span>FC<br />START</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setFirstCrackEnd()" title="Insert First Crack End Event">
+            <div id="fcEndButton" class="button actionButton" onclick="roastProfile.setFirstCrackEnd();" title="Insert First Crack End Event">
                 <span>FC<br />END</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setSecondCrackStart()" title="Insert Second Crack Start Event">
+            <div id="scStartButton" class="button actionButton" onclick="roastProfile.setSecondCrackStart();" title="Insert Second Crack Start Event">
                 <span>SC<br />START</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setSecondCrackEnd()" title="Insert Second Crack End Event">
+            <div id="scEndButton" class="button actionButton" onclick="roastProfile.setSecondCrackEnd();" title="Insert Second Crack End Event">
                 <span>SC<br />END</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setCool()" title="Start Cooldown (fan max, drum max, heater min)">
+            <div id="coolButton" class="button actionButton" onclick="roastProfile.setCool();" title="Start Cooldown (fan max, drum max, heater min)">
                 <span>COOL</span>
             </div>
 
-            <div class="button actionButton" onclick="roastProfile.setStop()" title="Stop Roasting">
+            <div id="stopButton" class="button actionButton" onclick="roastProfile.setStop();" title="Stop Roasting">
                 <span>STOP</span>
             </div>
 
@@ -472,21 +480,21 @@
             </div>
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                <div id="fanController" class="controller" title="Cooling Fan Control">
+                <div id="fanController" class="controller disabledElement" title="Cooling Fan Control">
                     <span style="height: 60%;">
                         <span><img src="img/fan.png" width="30" id="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
 
-                <div id="drumController" class="controller" title="Drum Motor Control">
+                <div id="drumController" class="controller disabledElement" title="Drum Motor Control">
                     <span style="height: 40%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
-                <div id="heaterController" class="controller" title="Heater Element Control">
+                <div id="heaterController" class="controller disabledElement" title="Heater Element Control">
                     <span style="height: 10%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
@@ -920,7 +928,7 @@
                 var ror = deltaTemp / deltaTime;
 
                 if (ror == 0)
-                    return;
+                    return 0;
 
                 if (this.#prevROR == 0) {
                     this.#prevROR = ror;
@@ -1055,6 +1063,8 @@
 
                     this.#updateDialog();
 
+                    document.getElementById("startButton").classList.add('disabledElement');
+
                     //for dev purposes
                     dummyData(0);
                 }
@@ -1073,6 +1083,7 @@
                 if (this.#chargeTime == null && this.#startTime != null && this.#stopTime == null) {
                     this.#chargeTime = performance.now();
                     this.#drawEvent("CHG", this.#chargeTime);
+                    document.getElementById("chargeButton").classList.add('disabledElement');
                 }
             }
 
@@ -1080,6 +1091,7 @@
                 if (this.#dryEndTime == null && this.#chargeTime != null && this.#stopTime == null) {
                     this.#dryEndTime = performance.now();
                     this.#drawEvent("DE", this.#dryEndTime);
+                    document.getElementById("dryEndButton").classList.add('disabledElement');
                 }
             }
 
@@ -1087,6 +1099,7 @@
                 if (this.#firstCrackStartTime == null && this.#dryEndTime != null && this.#stopTime == null) {
                     this.#firstCrackStartTime = performance.now();
                     this.#drawEvent("FCS", this.#firstCrackStartTime);
+                    document.getElementById("fcStartButton").classList.add('disabledElement');
                 }
             }
 
@@ -1094,6 +1107,7 @@
                 if (this.#firstCrackEndTime == null && this.#firstCrackStartTime != null && this.#stopTime == null) {
                     this.#firstCrackEndTime = performance.now();
                     this.#drawEvent("FCE", this.#firstCrackEndTime);
+                    document.getElementById("fcEndButton").classList.add('disabledElement');
                 }
             }
 
@@ -1101,6 +1115,7 @@
                 if (this.#secondCrackStartTime == null && this.#firstCrackEndTime != null && this.#stopTime == null) {
                     this.#secondCrackStartTime = performance.now();
                     this.#drawEvent("SCS", this.#secondCrackStartTime);
+                    document.getElementById("scStartButton").classList.add('disabledElement');
                 }
             }
 
@@ -1108,6 +1123,7 @@
                 if (this.#secondCrackEndTime == null && this.#secondCrackStartTime != null && this.#stopTime == null) {
                     this.#secondCrackEndTime = performance.now();
                     this.#drawEvent("SCE", this.#secondCrackEndTime);
+                    document.getElementById("scEndButton").classList.add('disabledElement');
                 }
             }
 
@@ -1116,10 +1132,7 @@
                 document.getElementById("drumController").firstElementChild.style.height = "100%";
                 document.getElementById("heaterController").firstElementChild.style.height = "0%"; 
                 this.setFanSpeed(100);
-                this.setFanSpeed(100);
                 this.setDrumSpeed(100);
-                this.setDrumSpeed(100);
-                this.setHeaterSpeed(0);
                 this.setHeaterSpeed(0);
             }
 
@@ -1128,6 +1141,7 @@
                     this.#coolTime = performance.now();
                     this.#drawEvent("COOL", this.#coolTime);
                     this.#endRoast();
+                    document.getElementById("coolButton").classList.add('disabledElement');
                 }
             }
 
@@ -1135,6 +1149,7 @@
                 if (this.#stopTime == null && this.#startTime != null) {
                     this.#stopTime = performance.now();
                     this.#endRoast();
+                    document.getElementById("stopButton").classList.add('disabledElement');
                 }
             }
 
@@ -1173,7 +1188,7 @@
 
                 if (index > 0) {
                     prevTime = setting[index - 1][0];
-                    prevSetting = setting[index - 1][1]
+                    prevSetting = setting[index - 1][1];
                 }
                 else {
                     prevTime = currTime;
@@ -1181,6 +1196,8 @@
                 }
 
                 if (now > currTime) {
+                    prevTime = currTime;
+                    prevSetting = currSetting;
                     currTime = now;
                 }
 
@@ -1829,10 +1846,24 @@
         }
 
         function lineChartMove(e) {
-            var x = e.offsetX - 5 - 10; //compensate line being 5 off to left, 10 for padding
-            var y = e.offsetY;
+            var x = e.offsetX; 
+            var leftBorder = 5 + 10 + 58;
+            var rightBorder = e.target.clientWidth - 40 - 5;
 
-            var time = lineChart.canvasXoffsetToVal(x);
+            var xPos = e.pageX;
+
+            //compensate line being 5 off to left, 10 for padding
+            if (x < leftBorder) {
+                xPos -= (x - leftBorder);
+                x = leftBorder;
+            }
+
+            if (x > rightBorder) {
+                xPos -= x - rightBorder;
+                x = rightBorder;
+            }
+
+            var time = lineChart.canvasXoffsetToVal(x - 14);
             var timems = time * 60000;
             var bt = roastProfile.getBeanTemperature(timems);
             if (bt == null) return;
@@ -1842,10 +1873,10 @@
             var hs = roastProfile.getHeaterSetting(timems);
 
             
-            document.getElementById("lineChartTooltip").style.left = e.pageX + 'px';
+            document.getElementById("lineChartTooltip").style.left = xPos + 'px';
             document.getElementById("lineChartTooltip").style.top = e.pageY + 'px';
 
-            document.getElementById("lineChartTooltipIndicator").style.left = e.pageX + 'px';
+            document.getElementById("lineChartTooltipIndicator").style.left = xPos + 'px';
 
             document.getElementById("lineChartTooltipText").innerHTML = Math.floor(time) + ":" + ((time - Math.floor(time)) * 60).toFixed(0) + "<br>"
                 + bt.toFixed(1) + " °C" + "<br>"
@@ -1865,6 +1896,7 @@
         function lineChartLeave(e) {
             document.getElementById("lineChartTooltip").style.visibility = "hidden";
             document.getElementById("lineChartTooltipIndicator").style.visibility = "hidden";
+            document.getElementById("lineChartTooltipIndicator").style.left = -999;
         }
 
 
@@ -1885,6 +1917,12 @@
                     var tccCtx = tcc.getContext("2d");
                     tccCtx.clearRect(0, 0, 320, 240);
                     document.getElementById("offlineText").style.visibility = "visible";
+
+                    document.getElementById("connectButton").classList.remove("disabledElement");
+                    document.getElementById("disconnectButton").classList.add("disabledElement");
+                    document.getElementById("heaterController").classList.add("disabledElement");
+                    document.getElementById("fanController").classList.add("disabledElement");
+                    document.getElementById("drumController").classList.add("disabledElement");
                 }
 
                 webSocket.onopen = (event) => {
@@ -1893,6 +1931,12 @@
                     webSocket.send("hello server!");
 
                     document.getElementById("offlineText").style.visibility = "hidden";
+
+                    document.getElementById("connectButton").classList.add("disabledElement");
+                    document.getElementById("disconnectButton").classList.remove("disabledElement");
+                    document.getElementById("heaterController").classList.remove("disabledElement");
+                    document.getElementById("fanController").classList.remove("disabledElement");
+                    document.getElementById("drumController").classList.remove("disabledElement");
                 }
 
                 webSocket.onmessage = (event) => {
@@ -1918,6 +1962,12 @@
             if (webSocket != undefined) {
                 webSocket.close();
                 webSocket = null;
+
+                document.getElementById("connectButton").classList.remove("disabledElement");
+                document.getElementById("disconnectButton").classList.add("disabledElement");
+                document.getElementById("heaterController").classList.add("disabledElement");
+                document.getElementById("fanController").classList.add("disabledElement");
+                document.getElementById("drumController").classList.add("disabledElement");
             }
         }
 
