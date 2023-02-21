@@ -96,13 +96,16 @@ int main(int argc, char** args)
 			{
 				websocketMessage* m = new websocketMessage();
 				m->type = FRAME_BINARY;
-				m->buf.resize(32 * 24 * sizeof(float));
+				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 1); //add float for Ta
 
 				for (int c = 0; c < 32 * 24; ++c)
 				{
 					float v = rand() / (float)RAND_MAX;
 					*(float*)(m->buf.data() + c * sizeof(float)) = v;
 				}
+
+				float Ta = 24.0f;
+				memcpy(m->buf.data() + 32 * 24 * sizeof(float), &Ta, sizeof(Ta));
 
 				ws.broadcastMessage(m);
 			}
@@ -119,8 +122,9 @@ int main(int argc, char** args)
 
 				websocketMessage* m = new websocketMessage();
 				m->type = FRAME_BINARY;
-				m->buf.resize(32 * 24 * sizeof(float));
-				memcpy(m->buf.data(), mlx90640To, m->buf.size());
+				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 1); //add float for Ta
+				memcpy(m->buf.data(), mlx90640To, 768 * sizeof(float));
+				memcpy(m->buf.data() + 768 * sizeof(float), &eTa, sizeof(eTa));
 				ws.broadcastMessage(m);
 			}
 #endif
