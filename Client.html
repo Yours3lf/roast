@@ -806,7 +806,7 @@
             #heaterSettings = [];
             #drumSettings = [];
 
-            #beanTemperatures = []; //stores pairs of (performance.now(), temperature in C)
+            #beanTemperatures = []; //stores pairs of (performance.now(), temperature[] in C)
             #airTemperatures = [];
             #exhaustTemperatures = [];
 
@@ -1080,7 +1080,7 @@
                     document.getElementById("beanTemperatureProjection").style.visibility = "visible";
 
                     //for dev purposes
-                    dummyData(0);
+                    //dummyData(0);
                 }
             }
 
@@ -1090,7 +1090,7 @@
                     if (this.#beanTemperatures[i][0] > inputTime) break;
                 }
                 var time = (inputTime - this.#startTime) / 60000;
-                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#beanTemperatures[i - 1][1].toFixed(1) + "°C");
+                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#calcAvgBeanTemperature(i-1)/*this.#beanTemperatures[i - 1][1]*/.toFixed(1) + "°C");
             }
 
             setCharge() {
@@ -1268,12 +1268,12 @@
 
             #drawBeanTemperature(index, now) {
                 var currTime = this.#beanTemperatures[index][0];
-                var currTemp = this.#beanTemperatures[index][1]
+                var currTemp = this.#calcAvgBeanTemperature(index);// this.#beanTemperatures[index][1];
                 var prevTime = 0;
                 var prevTemp = 0;
                 if (index > 0) {
                     prevTime = this.#beanTemperatures[index - 1][0];
-                    prevTemp = this.#beanTemperatures[index - 1][1];
+                    prevTemp = this.#calcAvgBeanTemperature(index - 1);// this.#beanTemperatures[index - 1][1];
                 }
                 else {
                     prevTime = currTime;
@@ -1370,6 +1370,24 @@
                         document.getElementById("coolingPhaseStat").innerHTML = "ROR: " + (this.#coolingPhaseRORSum / this.#coolingPhaseCount).toFixed(1) + " AUC: " + (this.#coolingPhaseAUCSum).toFixed(1);
                     }
                 }
+            }
+
+            #calcAvgBeanTemperature(index)
+            {
+                //calculate average bean temperature
+                var avg = 0.0;
+                var counter = 0;
+                //for (x = 0; x < 32; ++x)
+                for (var x = 4; x < 28; ++x)
+                    //for (y = 0; y < 24; ++y) {
+                    for (var y = 0; y < 16; ++y) {
+                        //average some pre-specified area of pixels
+                        avg += this.#beanTemperatures[index][1][32 * (23 - y) + x];
+                        counter++;
+                    }
+                avg /= counter;
+
+                return avg;
             }
 
             setBeanTemperature(temperature) {
@@ -1513,7 +1531,7 @@
                         if (this.#beanTemperatures[i][0] > (t + this.#startTime))
                             break;
                     }
-                    return this.#beanTemperatures[i - 1][1];
+                    return this.#calcAvgBeanTemperature(i - 1);// this.#beanTemperatures[i - 1][1];
                 }
 
                 return null;
@@ -1528,7 +1546,7 @@
                     }
 
                     var currTime = this.#beanTemperatures[i - 1][0];
-                    var currTemp = this.#beanTemperatures[i - 1][1];
+                    var currTemp = this.#calcAvgBeanTemperature(i-1);// this.#beanTemperatures[i - 1][1];
 
                     var prevTime = 0;
                     var prevTemp = 0;
@@ -1538,7 +1556,7 @@
                         prevTemp = currTemp;
                     } else {
                         prevTime = this.#beanTemperatures[i - 2][0];
-                        prevTemp = this.#beanTemperatures[i - 2][1];
+                        prevTemp = this.#calcAvgBeanTemperature(i-2);// this.#beanTemperatures[i - 2][1];
                     }
 
                     prevTime -= this.#startTime;
@@ -1789,6 +1807,14 @@
                 canvas.width = 320;
                 canvas.height = 240;
                 var canvasCtx = canvas.getContext("2d");
+
+                var min = 300.0;
+                var max = -40.0;
+                for (var x of temperatures) {
+                    min = Math.min(x, min);
+                    max = Math.max(x, max);
+                }
+
                 for (x = 0; x < 32; ++x)
                     for (y = 0; y < 24; ++y) {
                         //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -1796,8 +1822,8 @@
 
                         temp = temperatures[32 * (23 - y) + x];
                         //map temperatures to 0..1
-                        minTemp = 10.0; //-40c
-                        maxTemp = 40.0; //+300c
+                        minTemp = min;//10.0; //-40c
+                        maxTemp = max;//40.0; //+300c
                         temp = (temp - minTemp) / (maxTemp - minTemp);
 
                         canvasCtx.fillStyle = colorRamp(1 - temp);
@@ -1994,10 +2020,24 @@
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
-                        thermalCamTemperatures = new Float32Array(arrayBuf);
+                        thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
+
+                        //correct for zinc sulphide window absorption of about 15%
+                        for (var x = 0; x < 768; ++x)
+                        {
+                            thermalCamTemperatures[x] = thermalCamTemperatures[x] / 0.85;
+                        }
+
                         drawThermalCameraOutput(thermalCamTemperatures);
                         analyseThermalCameraData(thermalCamTemperatures);
                         drawThermalCameraHistogram(thermalCamTemperatures);
+                        var Ta = (new Float32Array(arrayBuf))[768];
+                        document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
+
+                        if (roastProfile != null)
+                        {
+                            roastProfile.setBeanTemperature(thermalCamTemperatures);
+                        }
                     }
                 }
             }
