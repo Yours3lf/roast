@@ -2034,6 +2034,10 @@
                         var Ta = (new Float32Array(arrayBuf))[768];
                         document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
 
+                        if (Ta > 70.0) {
+                            document.getElementById("airt").style.color = "red";
+                        }
+
                         if (roastProfile != null)
                         {
                             roastProfile.setBeanTemperature(thermalCamTemperatures);
@@ -2097,6 +2101,8 @@
             document.getElementById("lineChart").addEventListener("mousemove", lineChartMove);
             document.getElementById("lineChart").addEventListener("mouseenter", lineChartEnter);
             document.getElementById("lineChart").addEventListener("mouseleave", lineChartLeave);
+
+            window.onbeforeunload = function () { return "Are you sure you want to leave?"; };
 
             roastProfile = new RoastProfile();
         })();
