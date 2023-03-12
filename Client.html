@@ -1369,7 +1369,7 @@
                 var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
                 document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
 
-                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
+                //lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
                 lineChart.drawCurveSegment(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
@@ -2344,7 +2344,7 @@
                 1400, //width           default: 1400
                 800, //height           default: 800
                 0, //min time (mins)    default: 0
-                25, //max time (mins)   default: 25
+                20, //max time (mins)   default: 25
                 0, //min temp (c)       defaut: 0
                 300, //max temp (c)     default: 300
                 0, //min ror (c/min)    default: 0
@@ -2352,7 +2352,7 @@
             );
             lineChart.drawLineChartBackground(
                 "Time (min)",    "Temp °C",                "ROR °C/min",
-                [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
+                [5, 10, 15], [50, 100, 150, 200, 250], [10, 20, 30, 40]
             );
 
             document.addEventListener("mouseup", controlFunc);

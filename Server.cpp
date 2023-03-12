@@ -115,7 +115,7 @@ int main(int argc, char** args)
 				MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
 				float eTa = MLX90640_GetTa(frame, &mlx90640);
 				static float mlx90640To[768];
-				float emissivity = 0.78; //0.78 for roasted coffee
+				float emissivity = 0.88; //0.78 for roasted coffee
 				MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
 				MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
 				MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
