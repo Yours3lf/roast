@@ -44,7 +44,7 @@
         border-radius: 10px;
     }
 
-    #lineChartTooltip {
+    .lineChartHover {
         visibility: hidden;
         z-index: 999999;
         position: absolute;
@@ -52,13 +52,13 @@
         display: flex;
     }
 
-    #lineChartTooltipText {
+    .lineChartHoverText {
         background: rgba(255 255 255 / 53%);
         padding: 5px;
         border-radius: 10px;
     }
 
-    #lineChartTooltipIndicator {
+    #lineChartVerticalIndicator {
         visibility: hidden;
         z-index: 999999;
         position: absolute;
@@ -68,6 +68,18 @@
         height: 720px;
         width: 2px;
         top: 70px;
+    }
+
+    #lineChartHorizontalIndicator {
+        visibility: hidden;
+        z-index: 999999;
+        position: absolute;
+        margin-top: -5px;
+        display: block;
+        background: #bebebe;
+        height: 2px;
+        width: 1302px;
+        left: 164px;
     }
 
     #beanTemperatureProjection {
@@ -460,11 +472,24 @@
             Your browser does not support the canvas element.
         </canvas>
 
-        <div id="lineChartTooltip">
-            <span id="lineChartTooltipText"></span>
+        <div id="lineChartTooltip" class="lineChartHover">
+            <span id="lineChartTooltipText" class="lineChartHoverText"></span>
         </div>
 
-        <div id="lineChartTooltipIndicator"></div>
+        <div id="lineChartTimeHover" class="lineChartHover">
+            <span id="lineChartTimeHoverText" class="lineChartHoverText"></span>
+        </div>
+
+        <div id="lineChartTempHover" class="lineChartHover">
+            <span id="lineChartTempHoverText" class="lineChartHoverText"></span>
+        </div>
+
+        <div id="lineChartRorHover" class="lineChartHover">
+            <span id="lineChartRorHoverText" class="lineChartHoverText"></span>
+        </div>
+
+        <div id="lineChartVerticalIndicator"></div>
+        <div id="lineChartHorizontalIndicator"></div>
 
         <div id="beanTemperatureProjection"></div>
 
@@ -632,6 +657,24 @@
                 this.#vertAxisOffsetX = 0;
                 this.#secondaryVerticalMinVal = vsMinVal;
                 this.#secondaryVerticalMaxVal = vsMaxVal;
+            }
+
+            canvasYoffsetToVal(y) {
+                y = this.#canvasHeight - y;
+                var v = y - 20;
+                var h = this.#canvasHeight - 40 * 2;
+                var r = v / h;
+                var s = r * this.#verticalMaxVal - this.#verticalMinVal;
+                return s;
+            }
+
+            canvasYoffsetToValSecondaryAxis(y) {
+                y = this.#canvasHeight - y;
+                var v = y - 20;
+                var h = this.#canvasHeight - 40 * 2;
+                var r = v / h;
+                var s = r * this.#secondaryVerticalMaxVal - this.#secondaryVerticalMinVal;
+                return s;
             }
 
             valToCanvasYoffset(v) {
@@ -876,7 +919,12 @@
                 this.#fanSettings = j['#fanSettings'];
                 this.#heaterSettings = j['#heaterSettings'];
                 this.#drumSettings = j['#drumSettings'];
+                //TODO test new loading method
                 this.#beanTemperatures = j['#beanTemperatures'];
+                for (var x of this.#beanTemperatures)
+                {
+                    x[1] = new Float32Array(Object.values(x[1]));
+                }
                 this.#airTemperatures = j['#airTemperatures'];
                 this.#exhaustTemperatures = j['#exhaustTemperatures'];
                 this.#name = j['#name'];
@@ -933,7 +981,6 @@
                     this.#drawEvent("COOL", this.#coolTime);
             }
 
-            #prevROR = 0;
             #calcROR(prevTime, prevTemp, currTime, currTemp) {
                 var deltaTemp = Math.max(currTemp - prevTemp, 0.0);
                 var deltaTime = currTime - prevTime + 0.00001;
@@ -941,15 +988,6 @@
 
                 if (ror == 0)
                     return 0;
-
-                if (this.#prevROR == 0) {
-                    this.#prevROR = ror;
-                }
-
-                lineChart.drawCurveSegment(prevTime, this.#prevROR, currTime, ror, true, '#ababab');
-                document.getElementById("ror").innerHTML = "ROR: " + ror.toFixed(2) + " °C/min";
-
-                this.#prevROR = ror;
 
                 return ror;
             }
@@ -999,10 +1037,6 @@
                     }
                 }
 
-                document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
-
-                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
-
                 return deltaAUC;
             }
 
@@ -1034,22 +1068,22 @@
                     document.getElementById("beanScreenSize").value = this.#beanScreenSize;
 
                 if (this.#weight != null)
-                    document.getElementById("beanWeight").value = this.#weight;
+                    document.getElementById("beanWeight").value = Number.parseFloat(this.#weight).toFixed(1);;
 
                 if (this.#volume != null)
-                    document.getElementById("beanVolume").value = this.#volume;
+                    document.getElementById("beanVolume").value = Number.parseFloat(this.#volume).toFixed(1);;
 
                 if (this.#density != null)
-                    document.getElementById("beanDensity").value = this.#density;
+                    document.getElementById("beanDensity").value = Number.parseFloat(this.#density).toFixed(1);;
 
                 if (this.#endWeight != null)
-                    document.getElementById("endBeanWeight").value = this.#endWeight;
+                    document.getElementById("endBeanWeight").value = Number.parseFloat(this.#endWeight).toFixed(1);;
 
                 if (this.#endVolume != null)
-                    document.getElementById("endBeanVolume").value = this.#endVolume;
+                    document.getElementById("endBeanVolume").value = Number.parseFloat(this.#endVolume).toFixed(1);;
 
                 if (this.#endDensity != null)
-                    document.getElementById("endBeanDensity").value = this.#endDensity;
+                    document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(1);;
             }
 
             setStart() {
@@ -1227,6 +1261,7 @@
             #rorProjection = 0; //c / min
 
             #drawBeanTemperatureProjection(temp, time) {
+                //TODO really hacked, needs to be fixed up
                 var height = 800 - 40*2;
                 var width = 1400 - 38 - 20 - 40;
                 var onemin = width / 25;
@@ -1264,7 +1299,12 @@
             #developmentPhaseAUCSum = 0;
             #coolingPhaseAUCSum = 0;
 
-            #rorMA = new MovingAverage(50);
+            //4hz thermal cam update, so 30s smoothing
+            #rorMA = new MovingAverage(4 * 30);
+            #currTempMA = new MovingAverage(4 * 4);
+            #prevTempMA = new MovingAverage(4 * 4);
+
+            #prevROR = 0;
 
             #drawBeanTemperature(index, now) {
                 var currTime = this.#beanTemperatures[index][0];
@@ -1286,12 +1326,30 @@
                 currTime /= 60000; //ms to min
                 prevTime /= 60000; //ms to min
 
-                var ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
-                var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
+                var prevTempMovingAvg = this.#prevTempMA.ma(prevTemp);
+                var currTempMovingAvg = this.#currTempMA.ma(currTemp);
 
-                this.#rorProjection = this.#rorMA.ma(ror);
+                var ror = 0
+                { //calculate ROR and draw ROR curve and text
+                    // ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
+                    ror = this.#calcROR(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
+                    this.#rorProjection = this.#rorMA.ma(ror);
+
+                    if (this.#prevROR == 0) {
+                        this.#prevROR = this.#rorProjection;
+                    }
+
+                    lineChart.drawCurveSegment(prevTime, this.#prevROR, currTime, this.#rorProjection, true, '#ababab');
+                    document.getElementById("ror").innerHTML = "ROR: " + this.#rorProjection.toFixed(2) + " °C/min";
+
+                    this.#prevROR = this.#rorProjection;
+                }
+
+                var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
+                document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
 
                 lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
+                lineChart.drawCurveSegment(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
 
@@ -1374,13 +1432,20 @@
 
             #calcAvgBeanTemperature(index)
             {
+                //TODO testing
+                return this.#beanTemperatures[index][1][32 * (23 - 19) + 12];
+
                 //calculate average bean temperature
                 var avg = 0.0;
                 var counter = 0;
+
+                //x left 0, right 31
+                //y top 0, bottom 23 
+
                 //for (x = 0; x < 32; ++x)
                 for (var x = 5; x < 20; ++x)
                     //for (y = 0; y < 24; ++y) {
-                    for (var y = 0; y < 10; ++y) {
+                    for (var y = 13; y < 24; ++y) {
                         //average some pre-specified area of pixels
                         avg += this.#beanTemperatures[index][1][32 * (23 - y) + x];
                         counter++;
@@ -1437,19 +1502,19 @@
 
                 if (this.#density != null && this.#volume != null) {
                     this.#weight = this.#density * this.#volume;
-                    document.getElementById("beanWeight").value = this.#weight;
+                    document.getElementById("beanWeight").value = this.#weight.toFixed(1);
                     return;
                 }
 
                 if (this.#weight != null && this.#volume != null) {
                     this.#density = this.#weight / this.#volume;
-                    document.getElementById("beanDensity").value = this.#density;
+                    document.getElementById("beanDensity").value = this.#density.toFixed(1);;
                     return;
                 }
 
                 if (this.#density != null && this.#weight != null) {
                     this.#volume = this.#weight / this.#density;
-                    document.getElementById("beanVolume").value = this.#volume;
+                    document.getElementById("beanVolume").value = this.#volume.toFixed(1);;
                     return;
                 }
             }
@@ -1459,19 +1524,19 @@
 
                 if (this.#endDensity != null && this.#endVolume != null) {
                     this.#endWeight = this.#endDensity * this.#endVolume;
-                    document.getElementById("endBeanWeight").value = this.#endWeight;
+                    document.getElementById("endBeanWeight").value = this.#endWeight.toFixed(1);;
                     return;
                 }
 
                 if (this.#endWeight != null && this.#endVolume != null) {
                     this.#endDensity = this.#endWeight / this.#endVolume;
-                    document.getElementById("endBeanDensity").value = this.#endDensity;
+                    document.getElementById("endBeanDensity").value = this.#endDensity.toFixed(1);;
                     return;
                 }
 
                 if (this.#endDensity != null && this.#endWeight != null) {
                     this.#endVolume = this.#endWeight / this.#endDensity;
-                    document.getElementById("endBeanVolume").value = this.#endVolume;
+                    document.getElementById("endBeanVolume").value = this.#endVolume.toFixed(1);;
                     return;
                 }
             }
@@ -1524,13 +1589,39 @@
                 }
             }
 
-            getBeanTemperature(t) {
+            getBeanTemperatures(t) {
                 if (this.#beanTemperatures.length > 0) {
                     var i = 1;
                     for (; i < this.#beanTemperatures.length; ++i) {
                         if (this.#beanTemperatures[i][0] > (t + this.#startTime))
                             break;
                     }
+
+                    //time beyond stored value range
+                    if (i >= this.#beanTemperatures.length)
+                    {
+                        return null;
+                    }
+
+                    return this.#beanTemperatures[i][1];
+                }
+
+                return null;
+            }
+
+            getAvgBeanTemperature(t) {
+                if (this.#beanTemperatures.length > 0) {
+                    var i = 1;
+                    for (; i < this.#beanTemperatures.length; ++i) {
+                        if (this.#beanTemperatures[i][0] > (t + this.#startTime))
+                            break;
+                    }
+
+                    //time beyond stored value range
+                    if (i >= this.#beanTemperatures.length) {
+                        return null;
+                    }
+
                     return this.#calcAvgBeanTemperature(i - 1);// this.#beanTemperatures[i - 1][1];
                 }
 
@@ -1815,12 +1906,17 @@
                     max = Math.max(x, max);
                 }
 
+                //x left 0, right 31
+                //y top 0, bottom 23 
                 for (x = 0; x < 32; ++x)
                     for (y = 0; y < 24; ++y) {
                         //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
                         //randomTemp = Math.random(); //pretend that it's normalised to 0..1
 
                         temp = temperatures[32 * (23 - y) + x];
+
+                        if ((x == 11 || x == 13) && (y == 18 || y == 20)) { temp = 0; }
+
                         //map temperatures to 0..1
                         minTemp = min;//10.0; //-40c
                         maxTemp = max;//40.0; //+300c
@@ -1921,10 +2017,14 @@
 
         function lineChartMove(e) {
             var x = e.offsetX; 
+            var y = e.offsetY;
             var leftBorder = 5 + 10 + 58;
             var rightBorder = e.target.clientWidth - 40 - 5;
+            var topBorder = 5 + 10 + 40;
+            var bottomBorder = e.target.clientHeight - 40 - 5;
 
             var xPos = e.pageX;
+            var yPos = e.pageY;
 
             //compensate line being 5 off to left, 10 for padding
             if (x < leftBorder) {
@@ -1937,40 +2037,86 @@
                 x = rightBorder;
             }
 
-            var time = lineChart.canvasXoffsetToVal(x - 14);
+            if (y < topBorder) {
+                yPos -= (y - topBorder);
+                y = topBorder;
+            }
+
+            if (y > bottomBorder) {
+                yPos -= y - bottomBorder;
+                y = bottomBorder;
+            }
+
+            var time = lineChart.canvasXoffsetToVal(x - 15);
+            var temp = lineChart.canvasYoffsetToVal(y + 5);
+            var ror = lineChart.canvasYoffsetToValSecondaryAxis(y + 5);
+
+            document.getElementById("lineChartVerticalIndicator").style.left = xPos + 'px';
+            document.getElementById("lineChartHorizontalIndicator").style.top = yPos + 'px';
+
+            document.getElementById("lineChartTempHover").style.left = (leftBorder + 15) + 'px';
+            document.getElementById("lineChartTempHover").style.top = (yPos - 18) + 'px';
+            document.getElementById("lineChartTempHoverText").innerHTML =
+                temp.toFixed(1);
+
+            document.getElementById("lineChartTimeHover").style.top = (bottomBorder + 22) + 'px';
+            document.getElementById("lineChartTimeHover").style.left = (xPos - 48) + 'px';
+            document.getElementById("lineChartTimeHoverText").innerHTML =
+                Math.floor(time) + ":" + ((time - Math.floor(time)) * 60).toFixed(0);
+
+            document.getElementById("lineChartRorHover").style.left = (rightBorder + 84) + 'px';
+            document.getElementById("lineChartRorHover").style.top = (yPos - 18) + 'px';
+            document.getElementById("lineChartRorHoverText").innerHTML =
+                ror.toFixed(1);
+
             var timems = time * 60000;
-            var bt = roastProfile.getBeanTemperature(timems);
+            var bt = roastProfile.getAvgBeanTemperature(timems);
             if (bt == null) return;
             var ror = roastProfile.getROR(timems);
             var fs = roastProfile.getFanSpeed(timems);
             var ds = roastProfile.getDrumSpeed(timems);
             var hs = roastProfile.getHeaterSetting(timems);
 
-            
+            var beanTemperatures = roastProfile.getBeanTemperatures(timems);
+            if (beanTemperatures != null)
+            {
+                drawThermalCameraOutput(new Float32Array(beanTemperatures));
+            }
+    
             document.getElementById("lineChartTooltip").style.left = xPos + 'px';
             document.getElementById("lineChartTooltip").style.top = e.pageY + 'px';
 
-            document.getElementById("lineChartTooltipIndicator").style.left = xPos + 'px';
-
-            document.getElementById("lineChartTooltipText").innerHTML = Math.floor(time) + ":" + ((time - Math.floor(time)) * 60).toFixed(0) + "<br>"
+            document.getElementById("lineChartTooltipText").innerHTML = ""
                 + bt.toFixed(1) + " °C" + "<br>"
                 + ror.toFixed(1) + " °C/min" + "<br>"
                 + "Fan: " + fs.toFixed(1) + "%<br>"
                 + "Drum: " + ds.toFixed(1) + "%<br>"
-                + "Heater: " + hs.toFixed(1) + "%";
+                + "Heater: " + hs.toFixed(1) + "%";            
         }
 
         function lineChartEnter(e) {
-            var bt = roastProfile.getBeanTemperature(0);
+            var bt = roastProfile.getAvgBeanTemperature(0);
             if (bt == null) return;
             document.getElementById("lineChartTooltip").style.visibility = "visible";
-            document.getElementById("lineChartTooltipIndicator").style.visibility = "visible";
+            document.getElementById("lineChartVerticalIndicator").style.visibility = "visible";
+            document.getElementById("lineChartHorizontalIndicator").style.visibility = "visible";
+            document.getElementById("lineChartTempHover").style.visibility = "visible";
+            document.getElementById("lineChartTimeHover").style.visibility = "visible";
+            document.getElementById("lineChartRorHover").style.visibility = "visible";
         }
 
         function lineChartLeave(e) {
             document.getElementById("lineChartTooltip").style.visibility = "hidden";
-            document.getElementById("lineChartTooltipIndicator").style.visibility = "hidden";
-            document.getElementById("lineChartTooltipIndicator").style.left = -999;
+            document.getElementById("lineChartVerticalIndicator").style.visibility = "hidden";
+            document.getElementById("lineChartVerticalIndicator").style.left = -999;
+            document.getElementById("lineChartHorizontalIndicator").style.visibility = "hidden";
+            document.getElementById("lineChartHorizontalIndicator").style.top = -999;
+            document.getElementById("lineChartTempHover").style.visibility = "hidden";
+            document.getElementById("lineChartTempHover").style.left = -999;
+            document.getElementById("lineChartTimeHover").style.visibility = "hidden";
+            document.getElementById("lineChartTimeHover").style.top = -999;
+            document.getElementById("lineChartRorHover").style.visibility = "hidden";
+            document.getElementById("lineChartRorHover").style.left = -999;
         }
 
 
@@ -2023,9 +2169,10 @@
                         thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
 
                         //correct for zinc sulphide window absorption of about 15%
+                        const absorptionCoeff = 0.15; //default: 0.15
                         for (var x = 0; x < 768; ++x)
                         {
-                            thermalCamTemperatures[x] = thermalCamTemperatures[x] / 0.85;
+                            thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
                         }
 
                         drawThermalCameraOutput(thermalCamTemperatures);
@@ -2034,7 +2181,10 @@
                         var Ta = (new Float32Array(arrayBuf))[768];
                         document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
 
-                        if (Ta > 70.0) {
+                        //warn user with red text if camera temp goes above threshold
+                        //thermal camera is only rated to work up to 85c
+                        const camTempThreshold = 70.0; //default: 70.0
+                        if (Ta > camTempThreshold) {
                             document.getElementById("airt").style.color = "red";
                         }
 
@@ -2077,9 +2227,18 @@
         var lineChart = null;
 
         (function () {
-            lineChart = new LineChart(document.getElementById("lineChart"), 1400, 800, 0, 25, 0, 300, 0, 50);
+            lineChart = new LineChart(document.getElementById("lineChart"),
+                1400, //width           default: 1400
+                800, //height           default: 800
+                0, //min time (mins)    default: 0
+                25, //max time (mins)   default: 25
+                0, //min temp (c)       defaut: 0
+                300, //max temp (c)     default: 300
+                0, //min ror (c/min)    default: 0
+                50 //max ror (c/min)    default: 50
+            );
             lineChart.drawLineChartBackground(
-                "Time (min)", "Temp °C", "ROR °C/min",
+                "Time (min)",    "Temp °C",                "ROR °C/min",
                 [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
             );
 
