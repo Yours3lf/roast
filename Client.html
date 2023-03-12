@@ -940,7 +940,6 @@
                 this.#fanSettings = j['#fanSettings'];
                 this.#heaterSettings = j['#heaterSettings'];
                 this.#drumSettings = j['#drumSettings'];
-                //TODO test new loading method
                 this.#beanTemperatures = j['#beanTemperatures'];
                 for (var x of this.#beanTemperatures)
                 {
@@ -1089,22 +1088,22 @@
                     document.getElementById("beanScreenSize").value = this.#beanScreenSize;
 
                 if (this.#weight != null)
-                    document.getElementById("beanWeight").value = Number.parseFloat(this.#weight).toFixed(1);;
+                    document.getElementById("beanWeight").value = Number.parseFloat(this.#weight).toFixed(1);
 
                 if (this.#volume != null)
-                    document.getElementById("beanVolume").value = Number.parseFloat(this.#volume).toFixed(1);;
+                    document.getElementById("beanVolume").value = Number.parseFloat(this.#volume).toFixed(1);
 
                 if (this.#density != null)
-                    document.getElementById("beanDensity").value = Number.parseFloat(this.#density).toFixed(1);;
+                    document.getElementById("beanDensity").value = Number.parseFloat(this.#density).toFixed(2);
 
                 if (this.#endWeight != null)
-                    document.getElementById("endBeanWeight").value = Number.parseFloat(this.#endWeight).toFixed(1);;
+                    document.getElementById("endBeanWeight").value = Number.parseFloat(this.#endWeight).toFixed(1);
 
                 if (this.#endVolume != null)
-                    document.getElementById("endBeanVolume").value = Number.parseFloat(this.#endVolume).toFixed(1);;
+                    document.getElementById("endBeanVolume").value = Number.parseFloat(this.#endVolume).toFixed(1);
 
                 if (this.#endDensity != null)
-                    document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(1);;
+                    document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(2);
             }
 
             setStart() {
@@ -1148,6 +1147,7 @@
                 lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#calcAvgBeanTemperature(i-1)/*this.#beanTemperatures[i - 1][1]*/.toFixed(1) + "°C");
             }
 
+            //TODO add facilities to edit charge/fcs/fce etc. times
             setCharge() {
                 if (this.#chargeTime == null && this.#startTime != null && this.#stopTime == null) {
                     this.#chargeTime = performance.now();
@@ -1536,13 +1536,13 @@
 
                 if (this.#weight != null && this.#volume != null) {
                     this.#density = this.#weight / this.#volume;
-                    document.getElementById("beanDensity").value = this.#density.toFixed(1);;
+                    document.getElementById("beanDensity").value = this.#density.toFixed(2);
                     return;
                 }
 
                 if (this.#density != null && this.#weight != null) {
                     this.#volume = this.#weight / this.#density;
-                    document.getElementById("beanVolume").value = this.#volume.toFixed(1);;
+                    document.getElementById("beanVolume").value = this.#volume.toFixed(1);
                     return;
                 }
             }
@@ -1552,19 +1552,19 @@
 
                 if (this.#endDensity != null && this.#endVolume != null) {
                     this.#endWeight = this.#endDensity * this.#endVolume;
-                    document.getElementById("endBeanWeight").value = this.#endWeight.toFixed(1);;
+                    document.getElementById("endBeanWeight").value = this.#endWeight.toFixed(1);
                     return;
                 }
 
                 if (this.#endWeight != null && this.#endVolume != null) {
                     this.#endDensity = this.#endWeight / this.#endVolume;
-                    document.getElementById("endBeanDensity").value = this.#endDensity.toFixed(1);;
+                    document.getElementById("endBeanDensity").value = this.#endDensity.toFixed(2);
                     return;
                 }
 
                 if (this.#endDensity != null && this.#endWeight != null) {
                     this.#endVolume = this.#endWeight / this.#endDensity;
-                    document.getElementById("endBeanVolume").value = this.#endVolume.toFixed(1);;
+                    document.getElementById("endBeanVolume").value = this.#endVolume.toFixed(1);
                     return;
                 }
             }
@@ -2045,7 +2045,6 @@
         }
 
         function thermalCamClick(e) {
-            //TODO add button to toggle accepting editing this mask
             if (beanFilterMaskVisible) {
                 var x = Math.floor(e.offsetX / 10.0);
                 var y = Math.floor(e.offsetY / 10.0);
