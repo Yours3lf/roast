@@ -10,6 +10,23 @@
         color: #676767;
     }
 
+    .checkbox{
+        display: block;
+        background: white;
+        width: 10px;
+        height: 10px;
+        border: 1px inset;
+        border-radius: 3px;
+    }
+
+    .checkmark{
+        font-size: 10px;
+        position: relative;
+        top: -2px;
+        left: 2px;
+        visibility: hidden;
+    }
+
     #phaseContainer {
         display: flex;
         flex-direction: row;
@@ -538,6 +555,10 @@
                     </span>
                 </div>
             </div>
+        </div>
+    
+        <div class="checkbox" id="beanFilterMaskCheckbox" onclick="toggleBeanFilterMask()">
+            <span class="checkmark">x</span>
         </div>
     </div>
 
@@ -2010,9 +2031,22 @@
             }
         }
 
+        function toggleBeanFilterMask()
+        {
+            beanFilterMaskVisible = !beanFilterMaskVisible;
+
+            if (beanFilterMaskVisible) {
+                document.getElementById("beanFilterMaskCheckbox").firstElementChild.style.visibility = "visible";
+                drawBeanFilterMask(beanFilterMask);
+            } else
+            {
+                document.getElementById("beanFilterMaskCheckbox").firstElementChild.style.visibility = "hidden";
+            }
+        }
+
         function thermalCamClick(e) {
             //TODO add button to toggle accepting editing this mask
-            if (true) {
+            if (beanFilterMaskVisible) {
                 var x = Math.floor(e.offsetX / 10.0);
                 var y = Math.floor(e.offsetY / 10.0);
                 var samplePos = 32 * (23 - y) + x;
@@ -2126,6 +2160,9 @@
             if (beanTemperatures != null)
             {
                 drawThermalCameraOutput(new Float32Array(beanTemperatures));
+            }
+
+            if (beanFilterMaskVisible) {
                 drawBeanFilterMask(beanFilterMask);
             }
     
@@ -2272,14 +2309,36 @@
         var webSocket = null;
         var lineChart = null;
         var beanFilterMask = null;
+        var beanFilterMaskVisible = false;
 
         (function () {
             //fill mask with values
-            beanFilterMask = new Float32Array(768);
-            for (var x = 5; x < 20; ++x)
-                for (var y = 13; y < 24; ++y) {
-                    beanFilterMask[32 * (23 - y) + x] = 1.0;
-                }
+            beanFilterMask = new Float32Array([
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+                1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ]);
 
             lineChart = new LineChart(document.getElementById("lineChart"),
                 1400, //width           default: 1400
