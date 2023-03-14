@@ -370,6 +370,11 @@
         date time, roast name, blend, individual bean types, batch, weights, volumes,
         density calculation, moisture, bean screen size, ambient temp/humidity/pressure,
         end weight, end volume, end density
+
+        TODO add roasting/cupping notes
+        add colour measurement numbers whole and ground
+        calculate and display start/end weight percentage
+        calculate and display volume gain percentage
     -->
     <div id="propertiesDialog">
         <span class="closeButton button" onclick="hideRoastProperties();">X</span>
@@ -1298,7 +1303,6 @@
             #rorProjection = 0; //c / min
 
             #drawBeanTemperatureProjection(temp, time) {
-                //TODO really hacked, needs to be fixed up
                 var height = lineChart.getHeight() - 40*2;
                 var width = lineChart.getWidth() - 38 - 20 - 40;
                 var onemin = width / 25.0;
