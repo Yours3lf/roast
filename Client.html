@@ -112,8 +112,8 @@
     .propertySectionTitle {
         width: 100%;
         display: block;
-        margin-bottom: 10px;
-        margin-top: 20px;
+        margin-bottom: 3px;
+        margin-top: 10px;
         text-align: center;
         color: #9397a4;
         font-weight: bold;
@@ -128,6 +128,15 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+    }
+
+    .filePickerInput {
+        background-image: url('img/file.png');
+        background-repeat: no-repeat;
+        background-size: 20px;
+        padding-left: 40px;
+        background-position: 10px 5px;
+        cursor: pointer;
     }
 
     input {
@@ -182,7 +191,7 @@
         visibility: hidden;
     }
 
-    #websocketMessages {
+    .textBox {
         width: 97%;
         height: 100px;
         overflow-x: hidden;
@@ -196,27 +205,39 @@
         padding-top: 10px;
         font-size: 13px;
         margin-left: 5px;
+        padding-bottom: 10px;
+        text-shadow: 1px 1px white;
+        color: #676767;
+        font-family: Verdana;
     }
 
-    #websocketMessages::-webkit-scrollbar {
+    .textBox::-webkit-scrollbar {
         width: 20px;
     }
 
-    #websocketMessages::-webkit-scrollbar-track {
+    .textBox::-webkit-scrollbar-track {
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb {
+    .textBox::-webkit-scrollbar-thumb {
         border-radius: 20px;
         background: #babecc;
         border: 1px solid #9b9b9b;
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb:hover {
+    .textBox::-webkit-scrollbar-thumb:hover {
         background: #a9adbb;
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb:active {
+    .textBox::-webkit-scrollbar-thumb:active {
         background: #989caa;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    textarea:focus{
+        outline: none;
     }
 
     #propertiesIcon {
@@ -252,10 +273,10 @@
         width: 100%;
         display: block;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         color: #9397a4;
         font-weight: bold;
-        font-size: 2em;
+        font-size: 1.5em;
     }
 
     .button {
@@ -281,11 +302,14 @@
         box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
     }
 
-    .disabledElement {
-        pointer-events: none !important;
+    .disabledStyle, .disabledElement {
         box-shadow: none !important;
         border: 1px solid #bebebe !important;
         transition: all 0.35s ease-in-out 0.01s;
+    }
+
+    .disabledElement {
+        pointer-events: none !important;
     }
 
     .closeButton {
@@ -370,20 +394,20 @@
         date time, roast name, blend, individual bean types, batch, weights, volumes,
         density calculation, moisture, bean screen size, ambient temp/humidity/pressure,
         end weight, end volume, end density
-
-        TODO add roasting/cupping notes
-        add colour measurement numbers whole and ground
-        calculate and display start/end weight percentage
-        calculate and display volume gain percentage
     -->
     <div id="propertiesDialog">
         <span class="closeButton button" onclick="hideRoastProperties();">X</span>
-        <span id="propertiesTitle">Roast Properties:</span>
+        <span id="propertiesTitle">Roast Properties</span>
         <div id="propertiesInputForm">
             <div>
-                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" onchange="roastProfile.setName(event.target.value)"/>
+                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" onchange="roastProfile.setName(event.target.value)" />
                 <input type="date" readonly="readonly" disabled id="roastDate" title="Roast Date (auto filled)" />
                 <input type="time" readonly="readonly" disabled id="roastTime" title="Roast Time (auto filled)" />
+            </div>
+            <div>
+                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" title="Temperature (°C)" id="ambientTemperature" />
+                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" title="Humidity (%)" id="ambientHumidity" />
+                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" title="Pressure (atm)" id="ambientPressure" />
             </div>
             <span class="propertySectionTitle">Pre Roast Bean Data</span>
             <div>
@@ -393,8 +417,8 @@
             </div>
             <div>
                 <input type="number" id="beanWeight" placeholder="Bean Weight (g)" title="Bean Weight (g)" onchange="roastProfile.setWeight(event.target.value)" />
-                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" onchange="roastProfile.setVolume(event.target.value)"/>
-                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" onchange="roastProfile.setDensity(event.target.value)"/>
+                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" onchange="roastProfile.setVolume(event.target.value)" />
+                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" onchange="roastProfile.setDensity(event.target.value)" />
             </div>
             <span class="propertySectionTitle">Post Roast Bean Data</span>
             <div>
@@ -402,39 +426,37 @@
                 <input type="number" id="endBeanVolume" placeholder="End Volume (mL)" title="End Volume (mL)" onchange="roastProfile.setEndVolume(event.target.value)" />
                 <input type="number" id="endBeanDensity" placeholder="End Density (g/mL)" title="End Density (g/mL)" onchange="roastProfile.setEndDensity(event.target.value)" />
             </div>
-            <span class="propertySectionTitle">Ambient Values</span>
             <div>
-                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" title="Temperature (°C)" id="ambientTemperature" />
-                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" title="Humidity (%)" id="ambientHumidity"/>
-                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" title="Pressure (atm)" id="ambientPressure" />
+                <input type="number" readonly="readonly" disabled id="weightLossPercentage" placeholder="Weight loss (%)" title="Weight loss (%)" />
+                <input type="number" readonly="readonly" disabled id="volumeGainPercentage" placeholder="Volume gain (%)" title="Volume gain (%)" />
+                <input type="number" id="groundsColourIndex" placeholder="Grounds Colour Index" title="Grounds Colour Index" onchange="roastProfile.setColourIndex(event.target.value)" />
             </div>
         </div>
+        <span class="propertySectionTitle">Roasting Notes</span>
+        <textarea id="roastingNotes" class="textBox" style="width:99%;" placeholder="Roasting and cupping notes"  onchange="roastProfile.setRoastingNotes(event.target.value)"></textarea>
         <span class="propertySectionTitle">Roast Profile Management</span>
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
-            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileLoadPath" />
-            <!--We'll be able to read/write a file using this.files[0] here-->
-            <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
-            <span class="button" onclick="document.getElementById('filePicker').click();" style="margin-right:10px;">
-                <img src="img/file.png" width="20" />
-                <!--Icons created by Kiranshastry - Flaticon-->
-            </span>
-            <span class="button" onclick="loadRoastProfile()">Load</span>
-        </div>
-        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
-            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileSavePath" />
-            <span class="button" onclick="pickSaveFile()" style="margin-right:10px;">
-                <img src="img/file.png" width="20" />
-                <!--Icons created by Kiranshastry - Flaticon-->
-            </span>
-            <span class="button" onclick="saveRoastProfile()">Save</span>
+            <div style="width:49%; display:flex; flex-direction: row; justify-content: space-evenly; align-items:center;">
+                <!--We'll be able to read/write a file using this.files[0] here-->
+                <span class="button" onclick="loadRoastProfile()">Load</span>
+                    <!--Icons created by Kiranshastry - Flaticon-->
+                <input type="text" placeholder="Filename" readonly="readonly" class="disabledStyle filePickerInput"  onclick="document.getElementById('filePicker').click();" style="width:75%;" id="fileLoadPath" />
+                <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
+            </div>
+            <div style="min-width:2%;height:1px;"></div>
+            <div style="width:49%; display:flex; flex-direction: row; justify-content: space-evenly; align-items:center;">
+                <input type="text" placeholder="Filename" readonly="readonly" class="disabledStyle filePickerInput"  onclick="pickSaveFile()" style="width: 75%; text-align: right;" id="fileSavePath" />
+                    <!--Icons created by Kiranshastry - Flaticon-->
+                <span class="button" onclick="saveRoastProfile()">Save</span>
+            </div>
         </div>
         <span class="propertySectionTitle">Connection settings</span>
-        <div style="margin-top: 20px; margin-bottom: 10px; ">
+        <div style="margin-top: 0px; margin-bottom: 5px; ">
             <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
             <span id="connectButton" class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
             <span id="disconnectButton" class="button disabledElement" onclick="disconnect()">Disconnect</span>
         </div>
-        <div id="websocketMessages"></div>
+        <div id="websocketMessages" class="textBox"></div>
     </div>
 
     <div id="backgroundBlur"></div>
@@ -897,6 +919,8 @@
             #ambientTemperature = null;
             #ambientHumidity = null; //%
             #ambientPressure = null; //atm
+            #colourIndex = null;
+            #roastingNotes = null;
 
             #heaterLineColour = "#F09D9D";
             #drumMotorLineColour = "#F9F392";
@@ -934,6 +958,8 @@
                         '#ambientTemperature': this.#ambientTemperature,
                         '#ambientHumidity': this.#ambientHumidity,
                         '#ambientPressure': this.#ambientPressure,
+                        '#colourIndex': this.#colourIndex,
+                        '#roastingNotes': this.#roastingNotes,
                     }
                 );
             }
@@ -974,6 +1000,8 @@
                 this.#ambientTemperature = j['#ambientTemperature'];
                 this.#ambientHumidity = j['#ambientHumidity'];
                 this.#ambientPressure = j['#ambientPressure'];
+                this.#colourIndex = j['#colourIndex'];
+                this.#roastingNotes = j['#roastingNotes'];
 
                 this.#updateDialog();
 
@@ -1117,6 +1145,47 @@
 
                 if (this.#endDensity != null)
                     document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(2);
+
+                if (this.#colourIndex != null)
+                    document.getElementById("groundsColourIndex").value = this.#colourIndex;
+
+                if (this.#roastingNotes != null)
+                    document.getElementById("roastingNotes").value = this.#roastingNotes;
+
+                this.#updateWeightLoss();
+                this.#updateVolumeGain();
+            }
+
+            #updateWeightLoss()
+            {
+                if (this.#weight != null && this.#endWeight != null)
+                {
+                    var weightloss = (1.0 - this.#endWeight / this.#weight) * 100.0;
+                    document.getElementById("weightLossPercentage").value = weightloss.toFixed(1);
+                }
+            }
+
+            #updateVolumeGain() {
+                if (this.#volume != null && this.#endVolume != null) {
+                    var volumegain = (this.#endVolume / this.#volume - 1) * 100.0;
+                    document.getElementById("volumeGainPercentage").value = volumegain.toFixed(1);
+                }
+            }
+
+            setColourIndex(v)
+            {
+                if (v == "" || v == 0) this.#colourIndex = null;
+                else {
+                    this.#colourIndex = v;
+                }
+            }
+
+            setRoastingNotes(v)
+            {
+                if (v == "" || v == 0) this.#roastingNotes = null;
+                else {
+                    this.#roastingNotes = v;
+                }
             }
 
             setStart() {
@@ -1597,6 +1666,8 @@
                 else {
                     this.#weight = bw;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1605,6 +1676,8 @@
                 else {
                     this.#volume = bv;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1613,6 +1686,8 @@
                 else {
                     this.#density = bd;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1621,6 +1696,8 @@
                 else {
                     this.#endWeight = ew;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1629,6 +1706,8 @@
                 else {
                     this.#endVolume = ev;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1637,6 +1716,8 @@
                 else {
                     this.#endDensity = ed;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1846,7 +1927,7 @@
         async function saveRoastProfile() {
             if (fileToSave != null)
             {
-                console.log(roastProfile.stringify());
+                //console.log(roastProfile.stringify());
                 const fileStream = await fileToSave.createWritable();
                 await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
                 await fileStream.close();
