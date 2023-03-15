@@ -27,6 +27,40 @@
         visibility: hidden;
     }
 
+    .timeInput {
+        box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
+        border-radius: 30px;
+        border: 0;
+        height: 30px;
+        padding-left: 16px;
+        padding-right: 16px;
+        margin-right: 5px;
+        outline: 0;
+        background-color: #EBECF0;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .timeInput:focus-within {
+        box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff
+    }
+
+    .timeInput > input {
+        border: none;
+        outline: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        width: 16px;
+        color: #676767;
+        font-family: Verdana;
+        text-align: center;
+    }
+
+    .timeInput > input:focus{
+        box-shadow: none;
+    }
+
     #phaseContainer {
         display: flex;
         flex-direction: row;
@@ -135,7 +169,7 @@
         background-repeat: no-repeat;
         background-size: 20px;
         padding-left: 40px;
-        background-position: 10px 5px;
+        background-position: 16px 5px;
         cursor: pointer;
     }
 
@@ -224,7 +258,7 @@
     }
 
     .textBox::-webkit-scrollbar-thumb {
-        border-radius: 20px;
+        border-radius: 10px;
         background: #babecc;
         border: 1px solid #9b9b9b;
     }
@@ -441,14 +475,49 @@
         <span class="propertySectionTitle">Roasting Notes</span>
         <textarea id="roastingNotes" class="textBox" style="width:99%;" placeholder="Roasting and cupping notes" onchange="roastProfile.setRoastingNotes(event.target.value)"></textarea>
         <span class="propertySectionTitle">Event timing</span>
-        <div style="display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;">
-            <input style="width:50px" type="number" id="chgMin" value="10" />:<input style="width:50px" type="number" id="chgSec" value="12" />
-            <input style="width: 50px" type="number" id="deMin" value="10" />:<input style="width:50px" type="number" id="deSec" value="12" />
-            <input style="width: 50px" type="number" id="fcsMin" value="10" />:<input style="width:50px" type="number" id="fcsSec" value="12" />
-            <input style="width: 50px" type="number" id="fceMin" value="10" />:<input style="width:50px" type="number" id="fceSec" value="12" />
-            <input style="width: 50px" type="number" id="scsMin" value="10" />:<input style="width:50px" type="number" id="scsSec" value="12" />
-            <input style="width: 50px" type="number" id="sceMin" value="10" />:<input style="width:50px" type="number" id="sceSec" value="12" />
-            <input style="width: 50px" type="number" id="coolMin" value="10" />:<input style="width:50px" type="number" id="coolSec" value="12" />
+        <div style="display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-evenly;">
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">CHG</span>
+                <div class="timeInput">
+                    <input type="number" id="chgMin" onchange="roastProfile.setChargeMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="chgSec" onchange="roastProfile.setChargeSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">DE</span>
+                <div class="timeInput">
+                    <input type="number" id="deMin" onchange="roastProfile.setDryEndMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="deSec" onchange="roastProfile.setDryEndSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">FCS</span>
+                <div class="timeInput">
+                    <input type="number" id="fcsMin" onchange="roastProfile.setFirstCrackStartMin(event.target.value)"  placeholder="m" maxlength="2" />:<input type="number" id="fcsSec" onchange="roastProfile.setFirstCrackStartSec(event.target.value)"  placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">FCE</span>
+                <div class="timeInput">
+                    <input type="number" id="fceMin" onchange="roastProfile.setFirstCrackEndMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="fceSec" onchange="roastProfile.setFirstCrackEndSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">SCS</span>
+                <div class="timeInput">
+                    <input type="number" id="scsMin" onchange="roastProfile.setSecondCrackStartMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="scsSec" onchange="roastProfile.setSecondCrackStartSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">SCE</span>
+                <div class="timeInput">
+                    <input type="number" id="sceMin" onchange="roastProfile.setSecondCrackEndMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="sceSec" onchange="roastProfile.setSecondCrackEndSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">COOL</span>
+                <div class="timeInput">
+                    <input type="number" id="coolMin" onchange="roastProfile.setCoolMin(event.target.value)" placeholder="m" maxlength="2" />:<input type="number" id="coolSec" onchange="roastProfile.setCoolSec(event.target.value)" placeholder="s" maxlength="2" />
+                </div>
+            </div>
         </div>
         <span class="propertySectionTitle">Roast Profile Management</span>
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
@@ -456,12 +525,12 @@
                 <!--We'll be able to read/write a file using this.files[0] here-->
                 <span class="button" onclick="loadRoastProfile()">Load</span>
                 <!--Icons created by Kiranshastry - Flaticon-->
-                <input type="text" placeholder="Filename" readonly="readonly" class="disabledStyle filePickerInput" onclick="document.getElementById('filePicker').click();" style="width:75%;" id="fileLoadPath" />
+                <input type="text" placeholder="Filename" readonly="readonly" class="filePickerInput" onclick="document.getElementById('filePicker').click();" style="width:75%;" id="fileLoadPath" />
                 <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
             </div>
             <div style="min-width:2%;height:1px;"></div>
             <div style="width:49%; display:flex; flex-direction: row; justify-content: space-evenly; align-items:center;">
-                <input type="text" placeholder="Filename" readonly="readonly" class="disabledStyle filePickerInput" onclick="pickSaveFile()" style="width: 75%; text-align: right;" id="fileSavePath" />
+                <input type="text" placeholder="Filename" readonly="readonly" class="filePickerInput" onclick="pickSaveFile()" style="width: 75%; text-align: right; padding-right: 16px;" id="fileSavePath" />
                 <!--Icons created by Kiranshastry - Flaticon-->
                 <span class="button" onclick="saveRoastProfile()">Save</span>
             </div>
@@ -472,7 +541,7 @@
             <span id="connectButton" class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
             <span id="disconnectButton" class="button disabledElement" onclick="disconnect()">Disconnect</span>
         </div>
-        <div id="websocketMessages" class="textBox"></div>
+        <div id="websocketMessages" class="textBox" style="height:60px;"></div>
     </div>
 
     <div id="backgroundBlur"></div>
@@ -1245,12 +1314,42 @@
                 lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#calcAvgBeanTemperature(i-1)/*this.#beanTemperatures[i - 1][1]*/.toFixed(1) + "°C");
             }
 
-            //TODO add facilities to edit charge/fcs/fce etc. times
             setCharge() {
                 if (this.#chargeTime == null && this.#startTime != null && this.#stopTime == null) {
                     this.#chargeTime = performance.now();
                     this.#drawEvent("CHG", this.#chargeTime);
                     document.getElementById("chargeButton").classList.add('disabledElement');
+
+                    var chgMin = (this.#chargeTime - this.#startTime) / 60000;
+                    var chgSec = ((this.#chargeTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("chgMin").value = chgMin.toFixed(0);
+                    document.getElementById("chgSec").value = chgSec.toFixed(0);
+                }
+            }
+
+            setChargeMin(v)
+            {
+                if (v == "" || v == 0) return;
+
+                if (this.#chargeTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#chargeTime - this.#startTime) % 60000;
+                    this.#chargeTime = min + sec + this.#startTime;
+                    //this.#drawEvent("CHG", this.#chargeTime);
+                }
+            }
+
+            setChargeSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#chargeTime != null && this.#startTime != null) {
+                    var sec = (this.#chargeTime - this.#startTime) % 60000;
+                    var min = this.#chargeTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#chargeTime = min + sec + this.#startTime;
+                    //this.#drawEvent("CHG", this.#chargeTime);
                 }
             }
 
@@ -1259,6 +1358,36 @@
                     this.#dryEndTime = performance.now();
                     this.#drawEvent("DE", this.#dryEndTime);
                     document.getElementById("dryEndButton").classList.add('disabledElement');
+
+                    var deMin = (this.#dryEndTime - this.#startTime) / 60000;
+                    var deSec = ((this.#dryEndTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("deMin").value = deMin.toFixed(0);
+                    document.getElementById("deSec").value = deSec.toFixed(0);
+                }
+            }
+
+            setDryEndMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#dryEndTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#dryEndTime - this.#startTime) % 60000;
+                    this.#dryEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("DE", this.#dryEndTime);
+                }
+            }
+
+            setDryEndSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#dryEndTime != null && this.#startTime != null) {
+                    var sec = (this.#dryEndTime - this.#startTime) % 60000;
+                    var min = this.#dryEndTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#dryEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("DE", this.#dryEndTime);
                 }
             }
 
@@ -1267,6 +1396,38 @@
                     this.#firstCrackStartTime = performance.now();
                     this.#drawEvent("FCS", this.#firstCrackStartTime);
                     document.getElementById("fcStartButton").classList.add('disabledElement');
+
+                    //TODO also update the dialog back on file load
+                    //also refactor this code as it's very redundant
+                    var fcsMin = (this.#firstCrackStartTime - this.#startTime) / 60000;
+                    var fcsSec = ((this.#firstCrackStartTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("fcsMin").value = fcsMin.toFixed(0);
+                    document.getElementById("fcsSec").value = fcsSec.toFixed(0);
+                }
+            }
+
+            setFirstCrackStartMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#firstCrackStartTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#firstCrackStartTime - this.#startTime) % 60000;
+                    this.#firstCrackStartTime = min + sec + this.#startTime;
+                    this.#drawEvent("FCS", this.#firstCrackStartTime);
+                }
+            }
+
+            setFirstCrackStartSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#firstCrackStartTime != null && this.#startTime != null) {
+                    var sec = (this.#firstCrackStartTime - this.#startTime) % 60000;
+                    var min = this.#firstCrackStartTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#firstCrackStartTime = min + sec + this.#startTime;
+                    this.#drawEvent("FCS", this.#firstCrackStartTime);
                 }
             }
 
@@ -1275,6 +1436,36 @@
                     this.#firstCrackEndTime = performance.now();
                     this.#drawEvent("FCE", this.#firstCrackEndTime);
                     document.getElementById("fcEndButton").classList.add('disabledElement');
+
+                    var fceMin = (this.#firstCrackEndTime - this.#startTime) / 60000;
+                    var fceSec = ((this.#firstCrackEndTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("fceMin").value = fceMin.toFixed(0);
+                    document.getElementById("fceSec").value = fceSec.toFixed(0);
+                }
+            }
+
+            setFirstCrackEndMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#firstCrackEndTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#firstCrackEndTime - this.#startTime) % 60000;
+                    this.#firstCrackEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("FCE", this.#firstCrackEndTime);
+                }
+            }
+
+            setFirstCrackEndSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#firstCrackEndTime != null && this.#startTime != null) {
+                    var sec = (this.#firstCrackEndTime - this.#startTime) % 60000;
+                    var min = this.#firstCrackEndTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#firstCrackEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("FCE", this.#firstCrackEndTime);
                 }
             }
 
@@ -1283,6 +1474,36 @@
                     this.#secondCrackStartTime = performance.now();
                     this.#drawEvent("SCS", this.#secondCrackStartTime);
                     document.getElementById("scStartButton").classList.add('disabledElement');
+
+                    var scsMin = (this.#secondCrackStartTime - this.#startTime) / 60000;
+                    var scsSec = ((this.#secondCrackStartTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("scsMin").value = scsMin.toFixed(0);
+                    document.getElementById("scsSec").value = scsSec.toFixed(0);
+                }
+            }
+
+            setSecondCrackStartMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#secondCrackStartTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#secondCrackStartTime - this.#startTime) % 60000;
+                    this.#secondCrackStartTime = min + sec + this.#startTime;
+                    this.#drawEvent("SCS", this.#secondCrackStartTime);
+                }
+            }
+
+            setSecondCrackStartSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#secondCrackStartTime != null && this.#startTime != null) {
+                    var sec = (this.#secondCrackStartTime - this.#startTime) % 60000;
+                    var min = this.#secondCrackStartTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#secondCrackStartTime = min + sec + this.#startTime;
+                    this.#drawEvent("SCS", this.#secondCrackStartTime);
                 }
             }
 
@@ -1291,6 +1512,36 @@
                     this.#secondCrackEndTime = performance.now();
                     this.#drawEvent("SCE", this.#secondCrackEndTime);
                     document.getElementById("scEndButton").classList.add('disabledElement');
+
+                    var sceMin = (this.#secondCrackEndTime - this.#startTime) / 60000;
+                    var sceSec = ((this.#secondCrackEndTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("sceMin").value = sceMin.toFixed(0);
+                    document.getElementById("sceSec").value = sceSec.toFixed(0);
+                }
+            }
+
+            setSecondCrackEndMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#secondCrackEndTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#secondCrackEndTime - this.#startTime) % 60000;
+                    this.#secondCrackEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("SCE", this.#secondCrackEndTime);
+                }
+            }
+
+            setSecondCrackEndSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#secondCrackEndTime != null && this.#startTime != null) {
+                    var sec = (this.#secondCrackEndTime - this.#startTime) % 60000;
+                    var min = this.#secondCrackEndTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#secondCrackEndTime = min + sec + this.#startTime;
+                    this.#drawEvent("SCE", this.#secondCrackEndTime);
                 }
             }
 
@@ -1309,6 +1560,36 @@
                     this.#drawEvent("COOL", this.#coolTime);
                     this.#endRoast();
                     document.getElementById("coolButton").classList.add('disabledElement');
+
+                    var coolMin = (this.#coolTime - this.#startTime) / 60000;
+                    var coolSec = ((this.#coolTime - this.#startTime) % 60000) / 1000;
+                    document.getElementById("coolMin").value = coolMin.toFixed(0);
+                    document.getElementById("coolSec").value = coolSec.toFixed(0);
+                }
+            }
+
+            setCoolMin(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#coolTime != null && this.#startTime != null) {
+                    var min = v * 60000;
+                    var sec = (this.#coolTime - this.#startTime) % 60000;
+                    this.#coolTime = min + sec + this.#startTime;
+                    this.#drawEvent("COOL", this.#coolTime);
+                }
+            }
+
+            setCoolSec(v) {
+                if (v == "" || v == 0) return;
+
+                if (this.#coolTime != null && this.#startTime != null) {
+                    var sec = (this.#coolTime - this.#startTime) % 60000;
+                    var min = this.#coolTime - this.#startTime - sec;
+
+                    sec = v * 1000;
+
+                    this.#coolTime = min + sec + this.#startTime;
+                    this.#drawEvent("COOL", this.#coolTime);
                 }
             }
 
@@ -1570,9 +1851,11 @@
 
             #calcAvgBeanTemperature(index)
             {
-                //testing
-                //return this.#beanTemperatures[index][1][32 * (23 - 19) + 12];
-
+                if (this.#beanTemperatures.length < 1)
+                {
+                    return 0;
+                }
+                
                 //calculate average bean temperature
                 var avg = 0.0;
                 var counter = 0;
@@ -2518,6 +2801,20 @@
             document.getElementById("lineChart").addEventListener("mousemove", lineChartMove);
             document.getElementById("lineChart").addEventListener("mouseenter", lineChartEnter);
             document.getElementById("lineChart").addEventListener("mouseleave", lineChartLeave);
+
+            //input type number doesn't respect maxlength so we make it...
+            var inputs = document.getElementsByTagName('input');
+            for (var i of inputs) {
+                i.addEventListener("input",
+                    function ()
+                    {
+                        if (this.maxLength > 0 && this.value.length > this.maxLength)
+                        {
+                            this.value = this.value.slice(0, this.maxLength);
+                        }
+                    }
+                );
+            }
 
             window.onbeforeunload = function () { return "Are you sure you want to leave?"; };
 
