@@ -761,6 +761,24 @@
 
                 return avg;
             }
+
+            min() {
+                var minval = this.#containerMA[0];
+                for (var v of this.#containerMA) {
+                    if (v < minval) minval = v;
+                }
+
+                return minval;
+            }
+
+            max() {
+                var maxval = this.#containerMA[0];
+                for (var v of this.#containerMA) {
+                    if (v > maxval) maxval = v;
+                }
+
+                return maxval;
+            }
         } 
 
         class LineChart {
@@ -1332,7 +1350,7 @@
                     if (this.#beanTemperatures[i][0] > inputTime) break;
                 }
                 var time = (inputTime - this.#startTime) / 60000;
-                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#calcAvgBeanTemperature(i-1)/*this.#beanTemperatures[i - 1][1]*/.toFixed(1) + "°C");
+                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#beanFilteredAvgTemps[i-1].toFixed(1) + "°C");
             }
 
             setCharge() {
@@ -1612,21 +1630,22 @@
             #developmentPhaseAUCSum = 0;
             #coolingPhaseAUCSum = 0;
 
+            #rorValues = [];
             //4hz thermal cam update, so 30s smoothing
             #rorMA = new MovingAverage(4 * 30);
-            #currTempMA = new MovingAverage(4 * 4);
-            #prevTempMA = new MovingAverage(4 * 4);
 
             #prevROR = 0;
 
             #drawBeanTemperature(index, now) {
+                this.#calcAvgBeanTemperature(index);
+
                 var currTime = this.#beanTemperatures[index][0];
-                var currTemp = this.#calcAvgBeanTemperature(index);// this.#beanTemperatures[index][1];
+                var currTemp = this.#beanFilteredAvgTemps[index];// this.#beanTemperatures[index][1];
                 var prevTime = 0;
                 var prevTemp = 0;
                 if (index > 0) {
                     prevTime = this.#beanTemperatures[index - 1][0];
-                    prevTemp = this.#calcAvgBeanTemperature(index - 1);// this.#beanTemperatures[index - 1][1];
+                    prevTemp = this.#beanFilteredAvgTemps[index - 1];// this.#beanTemperatures[index - 1][1];
                 }
                 else {
                     prevTime = currTime;
@@ -1639,14 +1658,11 @@
                 currTime /= 60000; //ms to min
                 prevTime /= 60000; //ms to min
 
-                var prevTempMovingAvg = this.#prevTempMA.ma(prevTemp);
-                var currTempMovingAvg = this.#currTempMA.ma(currTemp);
-
                 var ror = 0
                 { //calculate ROR and draw ROR curve and text
-                    // ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
-                    ror = this.#calcROR(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
-                    this.#rorProjection = this.#rorMA.ma(ror);
+                    ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
+                    this.#rorValues.push(this.#rorMA.ma(ror));
+                    this.#rorProjection = this.#rorValues[this.#rorValues.length - 1];
 
                     if (this.#prevROR == 0) {
                         this.#prevROR = this.#rorProjection;
@@ -1661,8 +1677,7 @@
                 var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
                 document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
 
-                //lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
-                lineChart.drawCurveSegment(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
+                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
 
@@ -1743,26 +1758,50 @@
                 }
             }
 
-            //TODO
-            //instead of calculating avg bean temps over and over again
-            //create an array of averaged/filtered values
-            //keep a window of moving average of 4 seconds
-            //keep track of min/max values in that window
-            //if min/max difference is >5 degrees then filter out the top outliers
-            //then just need to sample the averaged filtered values when grabbing bean temps
-            //same goes for rate of rise
+            #beanFilterMovingAverages = null;
+
+            #beanFilteredAvgTemps = [];
+            #beanFilteredAvgTempsMA = new MovingAverage(4 * 4);
 
             #calcAvgBeanTemperature(index)
             {
-                if (this.#beanTemperatures.length < 1)
+                if (this.#beanTemperatures.length < 1 || index >= this.#beanTemperatures.length)
                 {
-                    return 0;
+                    return;
                 }
-                
+
+                if (this.#beanFilterMovingAverages == null)
+                {
+                    this.#beanFilterMovingAverages = [];
+                    for (var x = 0; x < 768; ++x) {
+                        //4hz thermal cam update, so 4s of smoothing
+                        //this should be enough for 16rpm drum rotation
+                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 4);
+                    }
+                }
+
                 //calculate average bean temperature
                 var avg = 0.0;
                 var counter = 0;
 
+                for (var x = 0; x < 768; ++x) {
+                    var val = this.#beanTemperatures[index][1][x];
+                    var ma = this.#beanFilterMovingAverages[x].ma(val);
+                    var min = this.#beanFilterMovingAverages[x].min();
+                    var max = this.#beanFilterMovingAverages[x].max();
+
+                    var range = max - min;
+
+                    //if val is in the lower 70% of the values of the last 4 seconds then
+                    //it's probably not a spike
+                    const threshold = 0.7;
+                    var filter = val < (threshold * range + min);
+
+                    avg += val * beanFilterMask[x] * filter;
+                    counter += beanFilterMask[x] * filter;
+                }
+
+                /**
                 //x left 0, right 31
                 //y top 0, bottom 23 
 
@@ -1772,9 +1811,13 @@
                         avg += this.#beanTemperatures[index][1][32 * (23 - y) + x] * beanFilterMask[32 * (23 - y) + x];
                         counter += beanFilterMask[32 * (23 - y) + x];
                     }
+                /**/
+
                 avg /= counter;
 
-                return avg;
+                //put the spatial average through a temporal average too
+                //then store the filtered result
+                this.#beanFilteredAvgTemps.push(this.#beanFilteredAvgTempsMA.ma(avg));
             }
 
             setBeanTemperature(temperature) {
@@ -1790,7 +1833,7 @@
                 this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now, this.#heaterLineColour);
                 this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now, this.#drumMotorLineColour);
 
-                this.#drawBeanTemperatureProjection(this.#calcAvgBeanTemperature(this.#beanTemperatures.length - 1), now);
+                this.#drawBeanTemperatureProjection(this.#beanFilteredAvgTemps[this.#beanTemperatures.length - 1], now);
             }
 
             setAirTemperature(temperature) {
@@ -1956,7 +1999,7 @@
                         return null;
                     }
 
-                    return this.#calcAvgBeanTemperature(i - 1);// this.#beanTemperatures[i - 1][1];
+                    return this.#beanFilteredAvgTemps[i - 1];
                 }
 
                 return null;
@@ -1970,30 +2013,12 @@
                             break;
                     }
 
-                    var currTime = this.#beanTemperatures[i - 1][0];
-                    var currTemp = this.#calcAvgBeanTemperature(i-1);// this.#beanTemperatures[i - 1][1];
-
-                    var prevTime = 0;
-                    var prevTemp = 0;
-
-                    if (i < 2) {
-                        prevTime = currTime;
-                        prevTemp = currTemp;
-                    } else {
-                        prevTime = this.#beanTemperatures[i - 2][0];
-                        prevTemp = this.#calcAvgBeanTemperature(i-2);// this.#beanTemperatures[i - 2][1];
+                    //time beyond stored value range
+                    if (i >= this.#beanTemperatures.length) {
+                        return null;
                     }
 
-                    prevTime -= this.#startTime;
-                    currTime -= this.#startTime;
-
-                    prevTime /= 60000;
-                    currTime /= 60000;
-
-                    var deltaTemp = Math.max(currTemp - prevTemp, 0.0);
-                    var deltaTime = currTime - prevTime + 0.00001;
-
-                    return deltaTemp / deltaTime;
+                    return this.#rorValues[i];
                 }
 
                 return null;
