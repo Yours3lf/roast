@@ -1681,9 +1681,11 @@
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
 
-                var totalTime = now - this.#startTime;
-                if (this.#coolTime != null)
-                    totalTime = this.#coolTime - this.#startTime;
+                if (this.#chargeTime != null) {
+                    var totalTime = now - this.#chargeTime;
+                    if (this.#coolTime != null)
+                        totalTime = this.#coolTime - this.#chargeTime;
+                }
 
                 if (this.#chargeTime != null) {
                     var dryingPhaseTime = now;
@@ -2616,11 +2618,11 @@
                         thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
 
                         //correct for zinc sulphide window absorption of about 15%
-                        const absorptionCoeff = 0.15; //default: 0.15
-                        for (var x = 0; x < 768; ++x)
-                        {
-                            thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
-                        }
+                        //const absorptionCoeff = 0.15; //default: 0.15
+                        //for (var x = 0; x < 768; ++x)
+                        //{
+                        //    thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
+                        //}
 
                         drawThermalCameraOutput(thermalCamTemperatures);
                         analyseThermalCameraData(thermalCamTemperatures);
