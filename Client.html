@@ -27,6 +27,40 @@
         visibility: hidden;
     }
 
+    .timeInput {
+        box-shadow: inset 2px 2px 5px #babecc, inset -5px -5px 10px #fff;
+        border-radius: 30px;
+        border: 0;
+        height: 30px;
+        padding-left: 16px;
+        padding-right: 16px;
+        margin-right: 5px;
+        outline: 0;
+        background-color: #EBECF0;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .timeInput:focus-within {
+        box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff
+    }
+
+    .timeInput > input {
+        border: none;
+        outline: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        width: 16px;
+        color: #676767;
+        font-family: Verdana;
+        text-align: center;
+    }
+
+    .timeInput > input:focus{
+        box-shadow: none;
+    }
+
     #phaseContainer {
         display: flex;
         flex-direction: row;
@@ -112,8 +146,8 @@
     .propertySectionTitle {
         width: 100%;
         display: block;
-        margin-bottom: 10px;
-        margin-top: 20px;
+        margin-bottom: 3px;
+        margin-top: 10px;
         text-align: center;
         color: #9397a4;
         font-weight: bold;
@@ -130,6 +164,15 @@
         justify-content: space-between;
     }
 
+    .filePickerInput {
+        background-image: url('img/file.png');
+        background-repeat: no-repeat;
+        background-size: 20px;
+        padding-left: 40px;
+        background-position: 16px 5px;
+        cursor: pointer;
+    }
+
     input {
         margin: 5px;
         width: 220px;
@@ -137,7 +180,7 @@
         border-radius: 30px;
         border: 0;
         height: 30px;
-        padding: 16px;
+        padding-left: 16px;
         outline: 0;
         background-color: #EBECF0;
         transition: all 0.2s ease-in-out;
@@ -150,6 +193,11 @@
     input:disabled {
         box-shadow: none;
         border: 1px solid #bebebe;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
     }
 
     #actions{
@@ -182,7 +230,7 @@
         visibility: hidden;
     }
 
-    #websocketMessages {
+    .textBox {
         width: 97%;
         height: 100px;
         overflow-x: hidden;
@@ -196,27 +244,39 @@
         padding-top: 10px;
         font-size: 13px;
         margin-left: 5px;
+        padding-bottom: 10px;
+        text-shadow: 1px 1px white;
+        color: #676767;
+        font-family: Verdana;
     }
 
-    #websocketMessages::-webkit-scrollbar {
+    .textBox::-webkit-scrollbar {
         width: 20px;
     }
 
-    #websocketMessages::-webkit-scrollbar-track {
+    .textBox::-webkit-scrollbar-track {
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb {
-        border-radius: 20px;
+    .textBox::-webkit-scrollbar-thumb {
+        border-radius: 10px;
         background: #babecc;
         border: 1px solid #9b9b9b;
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb:hover {
+    .textBox::-webkit-scrollbar-thumb:hover {
         background: #a9adbb;
     }
 
-    #websocketMessages::-webkit-scrollbar-thumb:active {
+    .textBox::-webkit-scrollbar-thumb:active {
         background: #989caa;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    textarea:focus{
+        outline: none;
     }
 
     #propertiesIcon {
@@ -238,6 +298,7 @@
         position: fixed;
         left: 0;
         right: 0;
+        top: 0;
         margin: 2% auto;
         width: 700px;
         padding: 20px;
@@ -252,10 +313,10 @@
         width: 100%;
         display: block;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         color: #9397a4;
         font-weight: bold;
-        font-size: 2em;
+        font-size: 1.5em;
     }
 
     .button {
@@ -281,11 +342,14 @@
         box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
     }
 
-    .disabledElement {
-        pointer-events: none !important;
+    .disabledStyle, .disabledElement {
         box-shadow: none !important;
         border: 1px solid #bebebe !important;
         transition: all 0.35s ease-in-out 0.01s;
+    }
+
+    .disabledElement {
+        pointer-events: none !important;
     }
 
     .closeButton {
@@ -373,12 +437,17 @@
     -->
     <div id="propertiesDialog">
         <span class="closeButton button" onclick="hideRoastProperties();">X</span>
-        <span id="propertiesTitle">Roast Properties:</span>
+        <span id="propertiesTitle">Roast Properties</span>
         <div id="propertiesInputForm">
             <div>
-                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" onchange="roastProfile.setName(event.target.value)"/>
+                <input type="text" id="roastName" placeholder="Roast Name" title="Roast Name" onchange="roastProfile.setName(event.target.value)" />
                 <input type="date" readonly="readonly" disabled id="roastDate" title="Roast Date (auto filled)" />
                 <input type="time" readonly="readonly" disabled id="roastTime" title="Roast Time (auto filled)" />
+            </div>
+            <div>
+                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" title="Temperature (°C)" id="ambientTemperature" />
+                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" title="Humidity (%)" id="ambientHumidity" />
+                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" title="Pressure (atm)" id="ambientPressure" />
             </div>
             <span class="propertySectionTitle">Pre Roast Bean Data</span>
             <div>
@@ -388,8 +457,8 @@
             </div>
             <div>
                 <input type="number" id="beanWeight" placeholder="Bean Weight (g)" title="Bean Weight (g)" onchange="roastProfile.setWeight(event.target.value)" />
-                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" onchange="roastProfile.setVolume(event.target.value)"/>
-                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" onchange="roastProfile.setDensity(event.target.value)"/>
+                <input type="number" id="beanVolume" placeholder="Bean Volume (mL)" title="Bean Volume (mL)" onchange="roastProfile.setVolume(event.target.value)" />
+                <input type="number" id="beanDensity" placeholder="Density (g/mL)" title="Density (g/mL)" onchange="roastProfile.setDensity(event.target.value)" />
             </div>
             <span class="propertySectionTitle">Post Roast Bean Data</span>
             <div>
@@ -397,39 +466,82 @@
                 <input type="number" id="endBeanVolume" placeholder="End Volume (mL)" title="End Volume (mL)" onchange="roastProfile.setEndVolume(event.target.value)" />
                 <input type="number" id="endBeanDensity" placeholder="End Density (g/mL)" title="End Density (g/mL)" onchange="roastProfile.setEndDensity(event.target.value)" />
             </div>
-            <span class="propertySectionTitle">Ambient Values</span>
             <div>
-                <input type="number" readonly="readonly" disabled placeholder="Temperature (°C)" title="Temperature (°C)" id="ambientTemperature" />
-                <input type="number" readonly="readonly" disabled placeholder="Humidity (%)" title="Humidity (%)" id="ambientHumidity"/>
-                <input type="number" readonly="readonly" disabled placeholder="Pressure (atm)" title="Pressure (atm)" id="ambientPressure" />
+                <input type="number" readonly="readonly" disabled id="weightLossPercentage" placeholder="Weight loss (%)" title="Weight loss (%)" />
+                <input type="number" readonly="readonly" disabled id="volumeGainPercentage" placeholder="Volume gain (%)" title="Volume gain (%)" />
+                <input type="number" id="groundsColourIndex" placeholder="Grounds Colour Index" title="Grounds Colour Index" onchange="roastProfile.setColourIndex(event.target.value)" />
+            </div>
+        </div>
+        <span class="propertySectionTitle">Roasting Notes</span>
+        <textarea id="roastingNotes" class="textBox" style="width:99%;" placeholder="Roasting and cupping notes" onchange="roastProfile.setRoastingNotes(event.target.value)"></textarea>
+        <span class="propertySectionTitle">Event timing</span>
+        <div style="display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-evenly;">
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">CHG</span>
+                <div class="timeInput">
+                    <input type="number" id="chgMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'CHG')" placeholder="m" maxlength="2" />:<input type="number" id="chgSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'CHG')" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">DE</span>
+                <div class="timeInput">
+                    <input type="number" id="deMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'DE')" placeholder="m" maxlength="2" />:<input type="number" id="deSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'DE')" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">FCS</span>
+                <div class="timeInput">
+                    <input type="number" id="fcsMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'FCS')"  placeholder="m" maxlength="2" />:<input type="number" id="fcsSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'FCS')"  placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">FCE</span>
+                <div class="timeInput">
+                    <input type="number" id="fceMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'FCE')" placeholder="m" maxlength="2" />:<input type="number" id="fceSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'FCE')" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">SCS</span>
+                <div class="timeInput">
+                    <input type="number" id="scsMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'SCS')" placeholder="m" maxlength="2" />:<input type="number" id="scsSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'SCS')" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">SCE</span>
+                <div class="timeInput">
+                    <input type="number" id="sceMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'SCE')" placeholder="m" maxlength="2" />:<input type="number" id="sceSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'SCE')" placeholder="s" maxlength="2" />
+                </div>
+            </div>
+            <div style="display:flex; flex-direction: column; align-items:center;">
+                <span style="margin-bottom: 3px;">COOL</span>
+                <div class="timeInput">
+                    <input type="number" id="coolMin" onchange="roastProfile.setEventTimeMin(event.target.value, 'COOL')" placeholder="m" maxlength="2" />:<input type="number" id="coolSec" onchange="roastProfile.setEventTimeSec(event.target.value, 'COOL')" placeholder="s" maxlength="2" />
+                </div>
             </div>
         </div>
         <span class="propertySectionTitle">Roast Profile Management</span>
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
-            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileLoadPath" />
-            <!--We'll be able to read/write a file using this.files[0] here-->
-            <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
-            <span class="button" onclick="document.getElementById('filePicker').click();" style="margin-right:10px;">
-                <img src="img/file.png" width="20" />
+            <div style="width:49%; display:flex; flex-direction: row; justify-content: space-evenly; align-items:center;">
+                <!--We'll be able to read/write a file using this.files[0] here-->
+                <span class="button" onclick="loadRoastProfile()">Load</span>
                 <!--Icons created by Kiranshastry - Flaticon-->
-            </span>
-            <span class="button" onclick="loadRoastProfile()">Load</span>
-        </div>
-        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
-            <input type="text" placeholder="Filename" readonly="readonly" disabled style="width:350px; margin-right:10px;" id="fileSavePath" />
-            <span class="button" onclick="pickSaveFile()" style="margin-right:10px;">
-                <img src="img/file.png" width="20" />
+                <input type="text" placeholder="Filename" readonly="readonly" class="filePickerInput" onclick="document.getElementById('filePicker').click();" style="width:75%;" id="fileLoadPath" />
+                <input type="file" id="filePicker" accept=".json" style="display:none;" onchange="document.getElementById('fileLoadPath').value = this.files[0].name; fileToLoad = this.files[0];" />
+            </div>
+            <div style="min-width:2%;height:1px;"></div>
+            <div style="width:49%; display:flex; flex-direction: row; justify-content: space-evenly; align-items:center;">
+                <input type="text" placeholder="Filename" readonly="readonly" class="filePickerInput" onclick="pickSaveFile()" style="width: 75%; text-align: right; padding-right: 16px;" id="fileSavePath" />
                 <!--Icons created by Kiranshastry - Flaticon-->
-            </span>
-            <span class="button" onclick="saveRoastProfile()">Save</span>
+                <span class="button" onclick="saveRoastProfile()">Save</span>
+            </div>
         </div>
         <span class="propertySectionTitle">Connection settings</span>
-        <div style="margin-top: 20px; margin-bottom: 10px; ">
+        <div style="margin-top: 0px; margin-bottom: 5px; ">
             <input type="text" id="wsAddress" placeholder="Websocket address: ws://xxx.xxx.xxx.xxx:xxxxx" style=" width: 350px; margin-right: 10px; " />
             <span id="connectButton" class="button" onclick="connect()" style="margin-right:10px;">Connect</span>
             <span id="disconnectButton" class="button disabledElement" onclick="disconnect()">Disconnect</span>
         </div>
-        <div id="websocketMessages"></div>
+        <div id="websocketMessages" class="textBox" style="height:60px;"></div>
     </div>
 
     <div id="backgroundBlur"></div>
@@ -649,6 +761,24 @@
 
                 return avg;
             }
+
+            min() {
+                var minval = this.#containerMA[0];
+                for (var v of this.#containerMA) {
+                    if (v < minval) minval = v;
+                }
+
+                return minval;
+            }
+
+            max() {
+                var maxval = this.#containerMA[0];
+                for (var v of this.#containerMA) {
+                    if (v > maxval) maxval = v;
+                }
+
+                return maxval;
+            }
         } 
 
         class LineChart {
@@ -662,6 +792,9 @@
             #canvasHeight;
             #ctx;
             #vertAxisOffsetX;
+
+            getWidth() { return this.#canvasWidth; }
+            getHeight() { return this.#canvasHeight; }
 
             constructor(canvas, cWidth, cHeight, hMinVal, hMaxVal, vMinVal, vMaxVal, vsMinVal, vsMaxVal) {
                 var c = canvas.getContext("2d");
@@ -737,9 +870,9 @@
                 this.#ctx.fillText(v, xOffset + 15 + chartWidth + 15, lineOffsetY + 7);
             }
 
-            valToCanvasXoffset(v, offsetX) {
-                var spaceAvailable = this.#canvasWidth - 40 - (offsetX + 20);
-                return offsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
+            valToCanvasXoffset(v) {
+                var spaceAvailable = this.#canvasWidth - 40 - (this.#vertAxisOffsetX + 20);
+                return this.#vertAxisOffsetX + 20 + (v - this.#horizontalMinVal) / (this.#horizontalMaxVal - this.#horizontalMinVal) * spaceAvailable;
             }
 
             canvasXoffsetToVal(x) {
@@ -750,16 +883,16 @@
                 return s;
             }
 
-            #drawHorizontalAxisText(v, vertAxisOffsetX) {
-                var offsetX = this.valToCanvasXoffset(v, vertAxisOffsetX);
+            #drawHorizontalAxisText(v) {
+                var offsetX = this.valToCanvasXoffset(v);
 
                 var textWidth = this.#ctx.measureText(v).width;
 
                 this.#ctx.fillText(v, offsetX - textWidth / 2, this.#canvasHeight - 10);
             }
 
-            #drawVertixalLines(v, vertAxisOffsetX, offsetY) {
-                var offsetX = this.valToCanvasXoffset(v, vertAxisOffsetX);
+            #drawVertixalLines(v, offsetY) {
+                var offsetX = this.valToCanvasXoffset(v);
 
                 var line = new Path2D();
                 line.moveTo(offsetX, this.#canvasHeight - 40 + offsetY);
@@ -768,7 +901,7 @@
             }
 
             drawEventLine(x, title, subtitle, subsubtitle) {
-                var xPos = this.valToCanvasXoffset(x, this.#vertAxisOffsetX);
+                var xPos = this.valToCanvasXoffset(x);
                 this.#ctx.font = "13px Verdana";
                 this.#ctx.fillText(title, xPos - this.#ctx.measureText(title).width / 2, 55);
                 this.#ctx.fillText(subtitle, xPos - this.#ctx.measureText(subtitle).width / 2, 55 + 13);
@@ -778,6 +911,7 @@
                 line.moveTo(xPos, this.#canvasHeight - 40);
                 line.lineTo(xPos, 50 + 3 * 13);
                 this.#ctx.lineWidth = 2.0;
+                this.#ctx.strokeStyle = '#676767';
                 this.#ctx.stroke(line);
             }
 
@@ -811,7 +945,7 @@
 
                 //draw horizontal axis texts
                 for (var i of horizontalLabelArray) {
-                    this.#drawHorizontalAxisText(i, this.#vertAxisOffsetX);
+                    this.#drawHorizontalAxisText(i);
                 }
 
                 //draw horizontal lines
@@ -824,10 +958,10 @@
 
 
                 //draw vertical lines
-                this.#drawVertixalLines(this.#horizontalMinVal, this.#vertAxisOffsetX, 0);
-                this.#drawVertixalLines(this.#horizontalMaxVal, this.#vertAxisOffsetX, 0)
+                this.#drawVertixalLines(this.#horizontalMinVal, 0);
+                this.#drawVertixalLines(this.#horizontalMaxVal, 0)
                 for (var i of horizontalLabelArray) {
-                    this.#drawVertixalLines(i, this.#vertAxisOffsetX, 5);
+                    this.#drawVertixalLines(i, 5);
                 }
             }
 
@@ -837,8 +971,8 @@
                 this.#ctx.lineJoin = "round";
                 this.#ctx.lineWidth = 4.0;
                 var line = new Path2D();
-                var xfrom = this.valToCanvasXoffset(prevH, this.#vertAxisOffsetX);
-                var xto = this.valToCanvasXoffset(h, this.#vertAxisOffsetX);
+                var xfrom = this.valToCanvasXoffset(prevH);
+                var xto = this.valToCanvasXoffset(h);
                 var yfrom = 0;
                 var yto = 0;
                 if (!secondary) {
@@ -888,6 +1022,12 @@
             #ambientTemperature = null;
             #ambientHumidity = null; //%
             #ambientPressure = null; //atm
+            #colourIndex = null;
+            #roastingNotes = null;
+
+            #heaterLineColour = "#F09D9D";
+            #drumMotorLineColour = "#F9F392";
+            #fanMotorLineColour = "#A7C7E7";
 
             stringify() {
                 return JSON.stringify(
@@ -921,13 +1061,15 @@
                         '#ambientTemperature': this.#ambientTemperature,
                         '#ambientHumidity': this.#ambientHumidity,
                         '#ambientPressure': this.#ambientPressure,
+                        '#colourIndex': this.#colourIndex,
+                        '#roastingNotes': this.#roastingNotes,
                     }
                 );
             }
 
             parse(s) {
                 var j = JSON.parse(s);
-
+                
                 this.#startTime = j['#startTime'];
                 this.#chargeTime = j['#chargeTime'];
                 this.#dryEndTime = j['#dryEndTime'];
@@ -940,7 +1082,6 @@
                 this.#fanSettings = j['#fanSettings'];
                 this.#heaterSettings = j['#heaterSettings'];
                 this.#drumSettings = j['#drumSettings'];
-                //TODO test new loading method
                 this.#beanTemperatures = j['#beanTemperatures'];
                 for (var x of this.#beanTemperatures)
                 {
@@ -962,6 +1103,8 @@
                 this.#ambientTemperature = j['#ambientTemperature'];
                 this.#ambientHumidity = j['#ambientHumidity'];
                 this.#ambientPressure = j['#ambientPressure'];
+                this.#colourIndex = j['#colourIndex'];
+                this.#roastingNotes = j['#roastingNotes'];
 
                 this.#updateDialog();
 
@@ -969,16 +1112,16 @@
                     this.#drawBeanTemperature(i, this.#beanTemperatures[i][0]);
 
                 for (var i = 0; i < this.#fanSettings.length; ++i)
-                    this.#drawSetting(this.#fanSettings, i, 0);
-                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, this.#stopTime);
+                    this.#drawSetting(this.#fanSettings, i, 0, this.#fanMotorLineColour);
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, this.#stopTime, this.#fanMotorLineColour);
 
                 for (var i = 0; i < this.#heaterSettings.length; ++i)
-                    this.#drawSetting(this.#heaterSettings, i, 0);
-                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, this.#stopTime);
+                    this.#drawSetting(this.#heaterSettings, i, 0, this.#heaterLineColour);
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, this.#stopTime, this.#heaterLineColour);
 
                 for (var i = 0; i < this.#drumSettings.length; ++i)
-                    this.#drawSetting(this.#drumSettings, i, 0);
-                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, this.#stopTime);
+                    this.#drawSetting(this.#drumSettings, i, 0, this.#drumMotorLineColour);
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, this.#stopTime, this.#drumMotorLineColour);
 
                 if (this.#chargeTime != null && this.#startTime != null)
                     this.#drawEvent("CHG", this.#chargeTime);
@@ -1089,22 +1232,84 @@
                     document.getElementById("beanScreenSize").value = this.#beanScreenSize;
 
                 if (this.#weight != null)
-                    document.getElementById("beanWeight").value = Number.parseFloat(this.#weight).toFixed(1);;
+                    document.getElementById("beanWeight").value = Number.parseFloat(this.#weight).toFixed(1);
 
                 if (this.#volume != null)
-                    document.getElementById("beanVolume").value = Number.parseFloat(this.#volume).toFixed(1);;
+                    document.getElementById("beanVolume").value = Number.parseFloat(this.#volume).toFixed(1);
 
                 if (this.#density != null)
-                    document.getElementById("beanDensity").value = Number.parseFloat(this.#density).toFixed(1);;
+                    document.getElementById("beanDensity").value = Number.parseFloat(this.#density).toFixed(2);
 
                 if (this.#endWeight != null)
-                    document.getElementById("endBeanWeight").value = Number.parseFloat(this.#endWeight).toFixed(1);;
+                    document.getElementById("endBeanWeight").value = Number.parseFloat(this.#endWeight).toFixed(1);
 
                 if (this.#endVolume != null)
-                    document.getElementById("endBeanVolume").value = Number.parseFloat(this.#endVolume).toFixed(1);;
+                    document.getElementById("endBeanVolume").value = Number.parseFloat(this.#endVolume).toFixed(1);
 
                 if (this.#endDensity != null)
-                    document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(1);;
+                    document.getElementById("endBeanDensity").value = Number.parseFloat(this.#endDensity).toFixed(2);
+
+                if (this.#colourIndex != null)
+                    document.getElementById("groundsColourIndex").value = this.#colourIndex;
+
+                if (this.#roastingNotes != null)
+                    document.getElementById("roastingNotes").value = this.#roastingNotes;
+
+                if (this.#chargeTime != null)
+                    this.#drawEventTime(this.#chargeTime, "chg");
+
+                if (this.#dryEndTime != null)
+                    this.#drawEventTime(this.#dryEndTime, "de");
+
+                if (this.#firstCrackStartTime != null)
+                    this.#drawEventTime(this.#firstCrackStartTime, "fcs");
+
+                if (this.#firstCrackEndTime != null)
+                    this.#drawEventTime(this.#firstCrackEndTime, "fce");
+
+                if (this.#secondCrackStartTime != null)
+                    this.#drawEventTime(this.#secondCrackStartTime, "scs");
+
+                if (this.#secondCrackEndTime != null)
+                    this.#drawEventTime(this.#secondCrackEndTime, "sce");
+
+                if (this.#coolTime != null)
+                    this.#drawEventTime(this.#coolTime, "cool");
+
+                this.#updateWeightLoss();
+                this.#updateVolumeGain();
+            }
+
+            #updateWeightLoss()
+            {
+                if (this.#weight != null && this.#endWeight != null)
+                {
+                    var weightloss = (1.0 - this.#endWeight / this.#weight) * 100.0;
+                    document.getElementById("weightLossPercentage").value = weightloss.toFixed(1);
+                }
+            }
+
+            #updateVolumeGain() {
+                if (this.#volume != null && this.#endVolume != null) {
+                    var volumegain = (this.#endVolume / this.#volume - 1) * 100.0;
+                    document.getElementById("volumeGainPercentage").value = volumegain.toFixed(1);
+                }
+            }
+
+            setColourIndex(v)
+            {
+                if (v == "" || v == 0) this.#colourIndex = null;
+                else {
+                    this.#colourIndex = v;
+                }
+            }
+
+            setRoastingNotes(v)
+            {
+                if (v == "" || v == 0) this.#roastingNotes = null;
+                else {
+                    this.#roastingNotes = v;
+                }
             }
 
             setStart() {
@@ -1145,7 +1350,7 @@
                     if (this.#beanTemperatures[i][0] > inputTime) break;
                 }
                 var time = (inputTime - this.#startTime) / 60000;
-                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#calcAvgBeanTemperature(i-1)/*this.#beanTemperatures[i - 1][1]*/.toFixed(1) + "°C");
+                lineChart.drawEventLine(time, str, Math.floor(time) + ":" + (time * 60 - Math.floor(time) * 60).toFixed(0), this.#beanFilteredAvgTemps[i-1].toFixed(1) + "°C");
             }
 
             setCharge() {
@@ -1153,7 +1358,90 @@
                     this.#chargeTime = performance.now();
                     this.#drawEvent("CHG", this.#chargeTime);
                     document.getElementById("chargeButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#chargeTime, "chg");
                 }
+            }
+
+            setEventTimeMin(v, n)
+            {
+                if (v == "" || v == 0) return;
+
+                var time = null;
+
+                switch (n) {
+                    case "CHG": { time = this.#chargeTime; break; }
+                    case "DE": { time = this.#dryEndTime; break; }
+                    case "FCS": { time = this.#firstCrackStartTime; break; }
+                    case "FCE": { time = this.#firstCrackEndTime; break; }
+                    case "SCS": { time = this.#secondCrackStartTime; break; }
+                    case "SCE": { time = this.#secondCrackEndTime; break; }
+                    case "COOL": { time = this.#coolTime; break; }
+                }
+
+                if (time == null || this.#startTime == null) return;
+
+                var min = v * 60000;
+                var sec = (time - this.#startTime) % 60000;
+                time = min + sec + this.#startTime;
+                this.#drawEvent(n, time);
+
+                switch (n) {
+                    case "CHG": { this.#chargeTime = time; break; }
+                    case "DE": { this.#dryEndTime = time; break; }
+                    case "FCS": { this.#firstCrackStartTime = time; break; }
+                    case "FCE": { this.#firstCrackEndTime = time; break; }
+                    case "SCS": { this.#secondCrackStartTime = time; break; }
+                    case "SCE": { this.#secondCrackEndTime = time; break; }
+                    case "COOL": { this.#coolTime = time; break; }
+                }
+            }
+
+            setEventTimeSec(v, n)
+            {
+                if (v == "" || v == 0) return;
+
+                var time = null;
+
+                switch (n) {
+                    case "CHG": { time = this.#chargeTime; break; }
+                    case "DE": { time = this.#dryEndTime; break; }
+                    case "FCS": { time = this.#firstCrackStartTime; break; }
+                    case "FCE": { time = this.#firstCrackEndTime; break; }
+                    case "SCS": { time = this.#secondCrackStartTime; break; }
+                    case "SCE": { time = this.#secondCrackEndTime; break; }
+                    case "COOL": { time = this.#coolTime; break; }
+                }
+
+                if (time == null || this.#startTime == null) return;
+
+                var sec = (time - this.#startTime) % 60000;
+                var min = time - this.#startTime - sec;
+
+                sec = v * 1000;
+
+                time = min + sec + this.#startTime;
+                this.#drawEvent(n, time);
+
+                switch (n) {
+                    case "CHG": { this.#chargeTime = time; break; }
+                    case "DE": { this.#dryEndTime = time; break; }
+                    case "FCS": { this.#firstCrackStartTime = time; break; }
+                    case "FCE": { this.#firstCrackEndTime = time; break; }
+                    case "SCS": { this.#secondCrackStartTime = time; break; }
+                    case "SCE": { this.#secondCrackEndTime = time; break; }
+                    case "COOL": { this.#coolTime = time; break; }
+                }
+            }
+
+            #drawEventTime(v, n)
+            {
+                if (this.#startTime == null) return;
+
+                var min = (v - this.#startTime) / 60000;
+                var sec = ((v - this.#startTime) % 60000) / 1000;
+                document.getElementById(n+"Min").value = min.toFixed(0);
+                document.getElementById(n+"Sec").value = sec.toFixed(0);
             }
 
             setDryEnd() {
@@ -1161,6 +1449,8 @@
                     this.#dryEndTime = performance.now();
                     this.#drawEvent("DE", this.#dryEndTime);
                     document.getElementById("dryEndButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#dryEndTime, "de");
                 }
             }
 
@@ -1169,6 +1459,8 @@
                     this.#firstCrackStartTime = performance.now();
                     this.#drawEvent("FCS", this.#firstCrackStartTime);
                     document.getElementById("fcStartButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#firstCrackStartTime, "fcs");
                 }
             }
 
@@ -1177,6 +1469,8 @@
                     this.#firstCrackEndTime = performance.now();
                     this.#drawEvent("FCE", this.#firstCrackEndTime);
                     document.getElementById("fcEndButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#firstCrackEndTime, "fce");
                 }
             }
 
@@ -1185,6 +1479,8 @@
                     this.#secondCrackStartTime = performance.now();
                     this.#drawEvent("SCS", this.#secondCrackStartTime);
                     document.getElementById("scStartButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#secondCrackStartTime, "scs");
                 }
             }
 
@@ -1193,6 +1489,8 @@
                     this.#secondCrackEndTime = performance.now();
                     this.#drawEvent("SCE", this.#secondCrackEndTime);
                     document.getElementById("scEndButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#secondCrackEndTime, "sce");
                 }
             }
 
@@ -1211,6 +1509,8 @@
                     this.#drawEvent("COOL", this.#coolTime);
                     this.#endRoast();
                     document.getElementById("coolButton").classList.add('disabledElement');
+
+                    this.#drawEventTime(this.#coolTime, "cool");
                 }
             }
 
@@ -1228,7 +1528,7 @@
                 var now = performance.now();
                 this.#fanSettings.push([now, percentage]);
 
-                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now);
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now, this.#fanMotorLineColour);
             }
 
             setHeaterSpeed(percentage) {
@@ -1237,7 +1537,7 @@
                 var now = performance.now();
                 this.#heaterSettings.push([now, percentage]);
 
-                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now);
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now, this.#heaterLineColour);
             }
 
             setDrumSpeed(percentage) {
@@ -1246,10 +1546,10 @@
                 var now = performance.now();
                 this.#drumSettings.push([now, percentage]);
 
-                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now);
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now, this.#drumMotorLineColour);
             }
 
-            #drawSetting(setting, index, now) {
+            #drawSetting(setting, index, now, colour) {
                 var currTime = setting[index][0];
                 var currSetting = setting[index][1];
                 var prevTime = 0;
@@ -1276,17 +1576,24 @@
                 prevTime /= 60000;
                 currTime /= 60000;
 
-                lineChart.drawCurveSegment(prevTime, prevSetting, currTime, currSetting);
+                if (prevSetting != currSetting)
+                {
+                    lineChart.drawCurveSegment(prevTime, prevSetting, currTime, prevSetting, false, colour);
+                    lineChart.drawCurveSegment(currTime, prevSetting, currTime, currSetting, false, colour);
+                }
+                else
+                {
+                    lineChart.drawCurveSegment(prevTime, prevSetting, currTime, currSetting, false, colour);
+                }
             }
 
             #rorProjection = 0; //c / min
 
             #drawBeanTemperatureProjection(temp, time) {
-                //TODO really hacked, needs to be fixed up
-                var height = 800 - 40*2;
-                var width = 1400 - 38 - 20 - 40;
-                var onemin = width / 25;
-                var onec = height / 300;
+                var height = lineChart.getHeight() - 40*2;
+                var width = lineChart.getWidth() - 38 - 20 - 40;
+                var onemin = width / 25.0;
+                var onec = height / 300.0;
                 /*
                  *     /|
                  *   /  | ror * onec
@@ -1294,13 +1601,16 @@
                  * ------
                  * 1min
                  * */
-                var angle = 270 - Math.atan(this.#rorProjection * onec / onemin) * 180 / Math.PI;
+                var angle = 270.0 - Math.atan(this.#rorProjection * onec / onemin) * 180.0 / Math.PI;
 
-                var currentTime = (time - this.#startTime) / 60000;
+                var currentTime = (time - this.#startTime) / 60000.0;
 
-                var xoffset = lineChart.valToCanvasXoffset(currentTime, 0) + 145;
-                var yoffset = lineChart.valToCanvasYoffset(temp) - 220; //includes / affected by length
+                var xoffset = lineChart.valToCanvasXoffset(currentTime) + (163.0-58.0);
+                var yoffset = lineChart.valToCanvasYoffset(temp) - 220.0; //includes / affected by length
 
+                //rotate 90deg, translatey -250px will put it horizontal
+                //top 540px will put it right at zero degrees
+                //left: 163 will put it right at zero seconds
                 document.getElementById("beanTemperatureProjection").style.transform = "rotate(" + angle + "deg) translatey(250px)";
                 document.getElementById("beanTemperatureProjection").style.left = xoffset + "px";
                 document.getElementById("beanTemperatureProjection").style.top = yoffset + "px";
@@ -1320,21 +1630,22 @@
             #developmentPhaseAUCSum = 0;
             #coolingPhaseAUCSum = 0;
 
+            #rorValues = [];
             //4hz thermal cam update, so 30s smoothing
             #rorMA = new MovingAverage(4 * 30);
-            #currTempMA = new MovingAverage(4 * 4);
-            #prevTempMA = new MovingAverage(4 * 4);
 
             #prevROR = 0;
 
             #drawBeanTemperature(index, now) {
+                this.#calcAvgBeanTemperature(index);
+
                 var currTime = this.#beanTemperatures[index][0];
-                var currTemp = this.#calcAvgBeanTemperature(index);// this.#beanTemperatures[index][1];
+                var currTemp = this.#beanFilteredAvgTemps[index];// this.#beanTemperatures[index][1];
                 var prevTime = 0;
                 var prevTemp = 0;
                 if (index > 0) {
                     prevTime = this.#beanTemperatures[index - 1][0];
-                    prevTemp = this.#calcAvgBeanTemperature(index - 1);// this.#beanTemperatures[index - 1][1];
+                    prevTemp = this.#beanFilteredAvgTemps[index - 1];// this.#beanTemperatures[index - 1][1];
                 }
                 else {
                     prevTime = currTime;
@@ -1347,14 +1658,11 @@
                 currTime /= 60000; //ms to min
                 prevTime /= 60000; //ms to min
 
-                var prevTempMovingAvg = this.#prevTempMA.ma(prevTemp);
-                var currTempMovingAvg = this.#currTempMA.ma(currTemp);
-
                 var ror = 0
                 { //calculate ROR and draw ROR curve and text
-                    // ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
-                    ror = this.#calcROR(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
-                    this.#rorProjection = this.#rorMA.ma(ror);
+                    ror = this.#calcROR(prevTime, prevTemp, currTime, currTemp);
+                    this.#rorValues.push(this.#rorMA.ma(ror));
+                    this.#rorProjection = this.#rorValues[this.#rorValues.length - 1];
 
                     if (this.#prevROR == 0) {
                         this.#prevROR = this.#rorProjection;
@@ -1369,14 +1677,15 @@
                 var deltaAUC = this.#calcAUC(prevTime, prevTemp, currTime, currTemp);
                 document.getElementById("auc").innerHTML = "AUC: " + this.#auc.toFixed(2) + " °C*min";
 
-                //lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
-                lineChart.drawCurveSegment(prevTime, prevTempMovingAvg, currTime, currTempMovingAvg);
+                lineChart.drawCurveSegment(prevTime, prevTemp, currTime, currTemp);
 
                 document.getElementById("bt").innerHTML = "BT: " + currTemp.toFixed(2) + " °C";
 
-                var totalTime = now - this.#startTime;
-                if (this.#coolTime != null)
-                    totalTime = this.#coolTime - this.#startTime;
+                if (this.#chargeTime != null) {
+                    var totalTime = now - this.#chargeTime;
+                    if (this.#coolTime != null)
+                        totalTime = this.#coolTime - this.#chargeTime;
+                }
 
                 if (this.#chargeTime != null) {
                     var dryingPhaseTime = now;
@@ -1451,24 +1760,50 @@
                 }
             }
 
-            //TODO
-            //instead of calculating avg bean temps over and over again
-            //create an array of averaged/filtered values
-            //keep a window of moving average of 4 seconds
-            //keep track of min/max values in that window
-            //if min/max difference is >5 degrees then filter out the top outliers
-            //then just need to sample the averaged filtered values when grabbing bean temps
-            //same goes for rate of rise
+            #beanFilterMovingAverages = null;
+
+            #beanFilteredAvgTemps = [];
+            #beanFilteredAvgTempsMA = new MovingAverage(4 * 4);
 
             #calcAvgBeanTemperature(index)
             {
-                //testing
-                //return this.#beanTemperatures[index][1][32 * (23 - 19) + 12];
+                if (this.#beanTemperatures.length < 1 || index >= this.#beanTemperatures.length)
+                {
+                    return;
+                }
+
+                if (this.#beanFilterMovingAverages == null)
+                {
+                    this.#beanFilterMovingAverages = [];
+                    for (var x = 0; x < 768; ++x) {
+                        //4hz thermal cam update, so 4s of smoothing
+                        //this should be enough for 16rpm drum rotation
+                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 4);
+                    }
+                }
 
                 //calculate average bean temperature
                 var avg = 0.0;
                 var counter = 0;
 
+                for (var x = 0; x < 768; ++x) {
+                    var val = this.#beanTemperatures[index][1][x];
+                    var ma = this.#beanFilterMovingAverages[x].ma(val);
+                    var min = this.#beanFilterMovingAverages[x].min();
+                    var max = this.#beanFilterMovingAverages[x].max();
+
+                    var range = max - min;
+
+                    //if val is in the lower 70% of the values of the last 4 seconds then
+                    //it's probably not a spike
+                    const threshold = 0.7;
+                    var filter = val < (threshold * range + min);
+
+                    avg += val * beanFilterMask[x] * filter;
+                    counter += beanFilterMask[x] * filter;
+                }
+
+                /**
                 //x left 0, right 31
                 //y top 0, bottom 23 
 
@@ -1478,9 +1813,13 @@
                         avg += this.#beanTemperatures[index][1][32 * (23 - y) + x] * beanFilterMask[32 * (23 - y) + x];
                         counter += beanFilterMask[32 * (23 - y) + x];
                     }
+                /**/
+
                 avg /= counter;
 
-                return avg;
+                //put the spatial average through a temporal average too
+                //then store the filtered result
+                this.#beanFilteredAvgTemps.push(this.#beanFilteredAvgTempsMA.ma(avg));
             }
 
             setBeanTemperature(temperature) {
@@ -1492,11 +1831,11 @@
 
                 this.#drawBeanTemperature(this.#beanTemperatures.length - 1, now);
 
-                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now);
-                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now);
-                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now);
+                this.#drawSetting(this.#fanSettings, this.#fanSettings.length - 1, now, this.#fanMotorLineColour);
+                this.#drawSetting(this.#heaterSettings, this.#heaterSettings.length - 1, now, this.#heaterLineColour);
+                this.#drawSetting(this.#drumSettings, this.#drumSettings.length - 1, now, this.#drumMotorLineColour);
 
-                this.#drawBeanTemperatureProjection(temperature, now);
+                this.#drawBeanTemperatureProjection(this.#beanFilteredAvgTemps[this.#beanTemperatures.length - 1], now);
             }
 
             setAirTemperature(temperature) {
@@ -1536,13 +1875,13 @@
 
                 if (this.#weight != null && this.#volume != null) {
                     this.#density = this.#weight / this.#volume;
-                    document.getElementById("beanDensity").value = this.#density.toFixed(1);;
+                    document.getElementById("beanDensity").value = this.#density.toFixed(2);
                     return;
                 }
 
                 if (this.#density != null && this.#weight != null) {
                     this.#volume = this.#weight / this.#density;
-                    document.getElementById("beanVolume").value = this.#volume.toFixed(1);;
+                    document.getElementById("beanVolume").value = this.#volume.toFixed(1);
                     return;
                 }
             }
@@ -1552,19 +1891,19 @@
 
                 if (this.#endDensity != null && this.#endVolume != null) {
                     this.#endWeight = this.#endDensity * this.#endVolume;
-                    document.getElementById("endBeanWeight").value = this.#endWeight.toFixed(1);;
+                    document.getElementById("endBeanWeight").value = this.#endWeight.toFixed(1);
                     return;
                 }
 
                 if (this.#endWeight != null && this.#endVolume != null) {
                     this.#endDensity = this.#endWeight / this.#endVolume;
-                    document.getElementById("endBeanDensity").value = this.#endDensity.toFixed(1);;
+                    document.getElementById("endBeanDensity").value = this.#endDensity.toFixed(2);
                     return;
                 }
 
                 if (this.#endDensity != null && this.#endWeight != null) {
                     this.#endVolume = this.#endWeight / this.#endDensity;
-                    document.getElementById("endBeanVolume").value = this.#endVolume.toFixed(1);;
+                    document.getElementById("endBeanVolume").value = this.#endVolume.toFixed(1);
                     return;
                 }
             }
@@ -1574,6 +1913,8 @@
                 else {
                     this.#weight = bw;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1582,6 +1923,8 @@
                 else {
                     this.#volume = bv;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1590,6 +1933,8 @@
                 else {
                     this.#density = bd;
                     this.#calcWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1598,6 +1943,8 @@
                 else {
                     this.#endWeight = ew;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1606,6 +1953,8 @@
                 else {
                     this.#endVolume = ev;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1614,6 +1963,8 @@
                 else {
                     this.#endDensity = ed;
                     this.#calcEndWeightVolumeDensity();
+                    this.#updateWeightLoss();
+                    this.#updateVolumeGain();
                 }
             }
 
@@ -1650,7 +2001,7 @@
                         return null;
                     }
 
-                    return this.#calcAvgBeanTemperature(i - 1);// this.#beanTemperatures[i - 1][1];
+                    return this.#beanFilteredAvgTemps[i - 1];
                 }
 
                 return null;
@@ -1664,30 +2015,12 @@
                             break;
                     }
 
-                    var currTime = this.#beanTemperatures[i - 1][0];
-                    var currTemp = this.#calcAvgBeanTemperature(i-1);// this.#beanTemperatures[i - 1][1];
-
-                    var prevTime = 0;
-                    var prevTemp = 0;
-
-                    if (i < 2) {
-                        prevTime = currTime;
-                        prevTemp = currTemp;
-                    } else {
-                        prevTime = this.#beanTemperatures[i - 2][0];
-                        prevTemp = this.#calcAvgBeanTemperature(i-2);// this.#beanTemperatures[i - 2][1];
+                    //time beyond stored value range
+                    if (i >= this.#beanTemperatures.length) {
+                        return null;
                     }
 
-                    prevTime -= this.#startTime;
-                    currTime -= this.#startTime;
-
-                    prevTime /= 60000;
-                    currTime /= 60000;
-
-                    var deltaTemp = Math.max(currTemp - prevTemp, 0.0);
-                    var deltaTime = currTime - prevTime + 0.00001;
-
-                    return deltaTemp / deltaTime;
+                    return this.#rorValues[i];
                 }
 
                 return null;
@@ -1768,6 +2101,11 @@
             return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
         }
 
+        function gammaCorrect(x)
+        {
+            return Math.pow(x, 1.0 / 2.2);
+        }
+
         function colorRamp(v) {
             v = 2.0 * v;
             r = v - 0.0;
@@ -1777,6 +2115,25 @@
             r = 1.0 - r * r;
             g = 1.0 - g * g;
             b = 1.0 - b * b;
+
+            r = Math.floor(saturate(r) * 255);
+            g = Math.floor(saturate(g) * 255);
+            b = Math.floor(saturate(b) * 255);
+
+            return rgbToHex(r, g, b);
+        }
+
+        function pastelRamp(v)
+        {
+            //(.6 + .6 * cos(6.3 * (h) + vec4(0, 23, 21, 0)))
+
+            r = 0.6 + 0.3 * Math.cos(6.3 * v + 0);
+            g = 0.6 + 0.3 * Math.cos(6.3 * v + 23.0);
+            b = 0.6 + 0.3 * Math.cos(6.3 * v + 21.0);
+
+            r = gammaCorrect(r);
+            g = gammaCorrect(g);
+            b = gammaCorrect(b);
 
             r = Math.floor(saturate(r) * 255);
             g = Math.floor(saturate(g) * 255);
@@ -1799,20 +2156,30 @@
         async function saveRoastProfile() {
             if (fileToSave != null)
             {
-                console.log(roastProfile.stringify());
-                const fileStream = await fileToSave.createWritable();
-                await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
-                await fileStream.close();
+                //console.log(roastProfile.stringify());
+                try {
+                    const fileStream = await fileToSave.createWritable();
+                    await fileStream.write(new Blob([roastProfile.stringify()], { type: "application/json" }));
+                    await fileStream.close();
+                }
+                catch (e) {
+                    document.getElementById("websocketMessages").innerHTML += e + "<br>";
+                }
             }
         }
 
         function loadRoastProfile() {
-            if (fileToLoad != null) {
-                var reader = new FileReader();
-                reader.readAsText(fileToLoad);
-                reader.onload = function (evt) {
-                    roastProfile = new RoastProfile();
-                    roastProfile.parse(reader.result);
+            if (fileToLoad != null) { 
+                try {
+                    var reader = new FileReader();
+                    reader.readAsText(fileToLoad);
+                    reader.onload = function (evt) {
+                        roastProfile = new RoastProfile();
+                        roastProfile.parse(reader.result);
+                    }
+                }
+                catch (e) {
+                    document.getElementById("websocketMessages").innerHTML += e + "<br>";
                 }
             }
         }
@@ -1968,7 +2335,7 @@
                         maxTemp = max;//40.0; //+300c
                         temp = (temp - minTemp) / (maxTemp - minTemp);
 
-                        canvasCtx.fillStyle = colorRamp(1 - temp);
+                        canvasCtx.fillStyle = pastelRamp(1 - temp);
                         canvasCtx.fillRect(x * 10, y * 10, 10, 10);
                     }
             }
@@ -2045,7 +2412,6 @@
         }
 
         function thermalCamClick(e) {
-            //TODO add button to toggle accepting editing this mask
             if (beanFilterMaskVisible) {
                 var x = Math.floor(e.offsetX / 10.0);
                 var y = Math.floor(e.offsetY / 10.0);
@@ -2252,11 +2618,11 @@
                         thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
 
                         //correct for zinc sulphide window absorption of about 15%
-                        const absorptionCoeff = 0.15; //default: 0.15
-                        for (var x = 0; x < 768; ++x)
-                        {
-                            thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
-                        }
+                        //const absorptionCoeff = 0.15; //default: 0.15
+                        //for (var x = 0; x < 768; ++x)
+                        //{
+                        //    thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
+                        //}
 
                         drawThermalCameraOutput(thermalCamTemperatures);
                         analyseThermalCameraData(thermalCamTemperatures);
@@ -2344,7 +2710,7 @@
                 1400, //width           default: 1400
                 800, //height           default: 800
                 0, //min time (mins)    default: 0
-                20, //max time (mins)   default: 25
+                25, //max time (mins)   default: 25
                 0, //min temp (c)       defaut: 0
                 300, //max temp (c)     default: 300
                 0, //min ror (c/min)    default: 0
@@ -2352,7 +2718,7 @@
             );
             lineChart.drawLineChartBackground(
                 "Time (min)",    "Temp °C",                "ROR °C/min",
-                [5, 10, 15], [50, 100, 150, 200, 250], [10, 20, 30, 40]
+                [5, 10, 15, 20], [50, 100, 150, 200, 250], [10, 20, 30, 40]
             );
 
             document.addEventListener("mouseup", controlFunc);
@@ -2375,6 +2741,20 @@
             document.getElementById("lineChart").addEventListener("mousemove", lineChartMove);
             document.getElementById("lineChart").addEventListener("mouseenter", lineChartEnter);
             document.getElementById("lineChart").addEventListener("mouseleave", lineChartLeave);
+
+            //input type number doesn't respect maxlength so we make it...
+            var inputs = document.getElementsByTagName('input');
+            for (var i of inputs) {
+                i.addEventListener("input",
+                    function ()
+                    {
+                        if (this.maxLength > 0 && this.value.length > this.maxLength)
+                        {
+                            this.value = this.value.slice(0, this.maxLength);
+                        }
+                    }
+                );
+            }
 
             window.onbeforeunload = function () { return "Are you sure you want to leave?"; };
 
