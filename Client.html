@@ -1206,13 +1206,13 @@
 
             #updateDialog() {
                 if(this.#ambientTemperature != null)
-                    document.getElementById("ambientTemperature").value = this.#ambientTemperature;
+                    document.getElementById("ambientTemperature").value = this.#ambientTemperature.toFixed(2);
 
                 if(this.#ambientHumidity != null)
-                    document.getElementById("ambientHumidity").value = this.#ambientHumidity;
+                    document.getElementById("ambientHumidity").value = this.#ambientHumidity.toFixed(2);
 
                 if(this.#ambientPressure != null)
-                    document.getElementById("ambientPressure").value = this.#ambientPressure;
+                    document.getElementById("ambientPressure").value = this.#ambientPressure.toFixed(3);
 
                 if (this.#date != null) {
                     document.getElementById("roastDate").valueAsDate = this.#date;
@@ -1312,14 +1312,28 @@
                 }
             }
 
+            setAmbientValues(temperature, pressure, humidity)
+            {
+                if (this.#ambientTemperature == null)
+                {
+                    this.#ambientTemperature = temperature;
+                }
+
+                if (this.#ambientHumidity == null)
+                {
+                    this.#ambientHumidity = humidity;
+                }
+
+                if (this.#ambientPressure == null)
+                {
+                    this.#ambientPressure = pressure;
+                }
+            }
+
             setStart() {
                 if (this.#startTime == null) {
                     this.#startTime = performance.now();
                     this.#date = new Date();
-
-                    this.#ambientTemperature = 24.0; //TODO read from sensor
-                    this.#ambientHumidity = 50.0;
-                    this.#ambientPressure = 1.0;
 
                     var fanPercentage = document.getElementById("fanController").firstElementChild.style.height;
                     fanPercentage = parseFloat(fanPercentage.substring(0, fanPercentage.length - 1));
@@ -2615,7 +2629,7 @@
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
-                        thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
+                        thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 4);
 
                         //correct for zinc sulphide window absorption of about 15%
                         //const absorptionCoeff = 0.15; //default: 0.15
@@ -2628,6 +2642,9 @@
                         analyseThermalCameraData(thermalCamTemperatures);
                         drawThermalCameraHistogram(thermalCamTemperatures);
                         var Ta = (new Float32Array(arrayBuf))[768];
+                        var ambientTemperature = (new Float32Array(arrayBuf))[769];
+                        var ambientPressure = (new Float32Array(arrayBuf))[770];
+                        var ambientHumidity = (new Float32Array(arrayBuf))[771];
                         document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
 
                         //warn user with red text if camera temp goes above threshold
@@ -2639,6 +2656,7 @@
 
                         if (roastProfile != null)
                         {
+                            roastProfile.setAmbientValues(ambientTemperature, ambientPressure, ambientHumidity);
                             roastProfile.setBeanTemperature(thermalCamTemperatures);
                         }
                     }
