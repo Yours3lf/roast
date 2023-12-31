@@ -13,6 +13,10 @@
 #define MLX_I2C_ADDR 0x33
 #endif
 
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <fstream>
+
 int main(int argc, char** args)
 {
 	if (argc < 2)
@@ -45,6 +49,39 @@ int main(int argc, char** args)
 		}
 	}
 
+	float temperature = 0.0f, pressure = 0.0f, humidity = 0.0f;
+	{ //Get env data using python script
+		pid_t pid;
+		if((pid = fork()) < 0)
+		{
+			return -1; //fork failed
+		}
+		else if(pid == 0)
+		{
+			//child process
+			execlp("python3", "python3", "getEnvData.py");
+		}
+		else
+		{
+			//parent process, wait for child to complete
+			int status;
+			wait(&status);
+			if(status != 0)
+			{
+				return status;
+			}
+
+			std::ifstream file("envDataOutput.txt");
+			std::string str;
+			file >> temperature >> str;
+			file >> pressure >> str;
+			file >> humidity >>  str;
+
+			//std::cout << temperature << std::endl
+			//	<< pressure << std::endl
+			//	<< humidity << std::endl;
+		}
+	}
 
 #ifndef _WIN32
 	paramsMLX90640 mlx90640;
@@ -96,7 +133,7 @@ int main(int argc, char** args)
 			{
 				websocketMessage* m = new websocketMessage();
 				m->type = FRAME_BINARY;
-				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 1); //add float for Ta
+				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 4); //add float for Ta, temp, pressure, humidity
 
 				for (int c = 0; c < 32 * 24; ++c)
 				{
@@ -106,6 +143,9 @@ int main(int argc, char** args)
 
 				float Ta = 24.0f;
 				memcpy(m->buf.data() + 32 * 24 * sizeof(float), &Ta, sizeof(Ta));
+				memcpy(m->buf.data() + 32 * 24 * sizeof(float) + sizeof(float), &temperature, sizeof(temperature));
+				memcpy(m->buf.data() + 32 * 24 * sizeof(float) + sizeof(float) * 2, &pressure, sizeof(pressure));
+				memcpy(m->buf.data() + 32 * 24 * sizeof(float) + sizeof(float) * 3, &humidity, sizeof(humidity));
 
 				ws.broadcastMessage(m);
 			}
@@ -122,9 +162,12 @@ int main(int argc, char** args)
 
 				websocketMessage* m = new websocketMessage();
 				m->type = FRAME_BINARY;
-				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 1); //add float for Ta
+				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 4); //add float for Ta, temp, pressure, humidity
 				memcpy(m->buf.data(), mlx90640To, 768 * sizeof(float));
 				memcpy(m->buf.data() + 768 * sizeof(float), &eTa, sizeof(eTa));
+				memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float), &temperature, sizeof(temperature));
+                                memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float) * 2, &pressure, sizeof(pressure));
+                                memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float) * 3, &humidity, sizeof(humidity));
 				ws.broadcastMessage(m);
 			}
 #endif
