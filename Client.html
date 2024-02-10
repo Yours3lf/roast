@@ -647,21 +647,21 @@
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                 <div id="fanController" class="controller disabledElement" title="Cooling Fan Control">
-                    <span style="height: 60%;">
+                    <span style="height: 0%;">
                         <span><img src="img/fan.png" width="30" id="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
 
                 <div id="drumController" class="controller disabledElement" title="Drum Motor Control">
-                    <span style="height: 40%;">
+                    <span style="height: 50%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
                 <div id="heaterController" class="controller disabledElement" title="Heater Element Control">
-                    <span style="height: 10%;">
+                    <span style="height: 25%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
                     </span>
@@ -1646,7 +1646,7 @@
 
             #rorValues = [];
             //4hz thermal cam update, so 30s smoothing
-            #rorMA = new MovingAverage(4 * 30);
+            #rorMA = new MovingAverage(4 * 16);
 
             #prevROR = 0;
 
@@ -1777,7 +1777,7 @@
             #beanFilterMovingAverages = null;
 
             #beanFilteredAvgTemps = [];
-            #beanFilteredAvgTempsMA = new MovingAverage(4 * 4);
+            #beanFilteredAvgTempsMA = new MovingAverage(4 * 8);
 
             #calcAvgBeanTemperature(index)
             {
@@ -1792,7 +1792,7 @@
                     for (var x = 0; x < 768; ++x) {
                         //4hz thermal cam update, so 4s of smoothing
                         //this should be enough for 16rpm drum rotation
-                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 4);
+                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 8);
                     }
                 }
 
@@ -1811,7 +1811,7 @@
                     //if val is in the lower 70% of the values of the last 4 seconds then
                     //it's probably not a spike
                     const threshold = 0.7;
-                    var filter = val < (threshold * range + min);
+                    var filter = val < (threshold * range + min) || (range < 5.0);
 
                     avg += val * beanFilterMask[x] * filter;
                     counter += beanFilterMask[x] * filter;
@@ -1829,7 +1829,7 @@
                     }
                 /**/
 
-                avg /= counter;
+                avg /= counter + 0.0001;
 
                 //put the spatial average through a temporal average too
                 //then store the filtered result
