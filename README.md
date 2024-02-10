@@ -25,3 +25,24 @@ This data can then be saved to a JSON file, shared and loaded on demand.
   - MLX90640 thermal camera
 - Laptop
 - Hair dryer on cold setting for improved cooling phase performance
+
+## Usage
+- Create makefile using Cmake. Needs:
+  - system threads lib
+  - OpenSSL
+  - MLX90640 API lib
+- Use make to compile Server executable
+- Run the server: `./roast [ip address] [optional port] [optional thermal cam refresh rate]`
+  - Default port: 50000
+  - Default refresh rate: 4HZ
+- Open the Client.html file in Chrome
+- Click the cog icon in the top left corner to open the settings dialog
+- Connect to the server by entering the websocket address and clicking the connect button
+  - Websocket address: `ws://[ip address]:[port]`
+  - Observe successful connection message
+- Close settings dialog
+- Start roasting on your Behmor
+  - Select weight
+  - Press start
+  - Select manual heat setting
+- Click the start button on the left to start recording data
