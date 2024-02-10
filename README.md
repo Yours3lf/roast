@@ -31,6 +31,8 @@ This data can then be saved to a JSON file, shared and loaded on demand.
   - system threads lib
   - OpenSSL
   - MLX90640 API lib
+  - BME280 python lib
+  - Python 3
 - Use make to compile Server executable
 - Run the server: `./roast [ip address] [optional port] [optional thermal cam refresh rate]`
   - Default port: 50000
