@@ -48,3 +48,17 @@ This data can then be saved to a JSON file, shared and loaded on demand.
   - Press start
   - Select manual heat setting
 - Click the start button on the left to start recording data
+
+## Calibrating beanFilterMask
+Depending on your physical setup, ie. where your thermal camera points, you need a different beanFilterMask array than provided.
+- To calibrate this crucial mask heat up about 250g of roasted (brown) coffee to about 180c. 
+- Then add these hot coffee beans into the roaster basket.
+- Next, start your roasting session
+  - on the lowest power setting (P1 manual, ie. heating off)
+  - the highest drum speed setting.
+- Record the thermal camera output through the roasting client. The hot beans should be clearly distinguishable from the cold background.
+- You can edit your beanFilterMask by ticking that little box by the thermal camera output.
+- Select pixels with the left mouse button and deselect with the right mouse button.
+- When satisfied you can print your mask using printBeanFilterMask() through the javascript console.
+- Replacing the beanFilterMask in the html code with this should calibrate your mask.
+- Reload your client file to inspect the results
