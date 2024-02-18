@@ -635,12 +635,16 @@
                 <canvas id="thermalCamHistogram" width="300" height="150" style="border: 1px solid #bebebe; background-color: #d1d4e0"></canvas>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
                     <span id="thermalCamMin"></span>
-                    <span id="thermalCamMedian"></span>
+                    <span id="thermalCamMostFreq"></span>
+                    <span id="thermalCamMiddle"></span>
+                    <span id="thermalCamAvg"></span>
                     <span id="thermalCamMax"></span>
                 </div>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
                     <span>min</span>
-                    <span>med</span>
+                    <span>mof</span>
+                    <span>mid</span>
+                    <span>avg</span>
                     <span>max</span>
                 </div>
             </div>
@@ -1803,18 +1807,18 @@
                 for (var x = 0; x < 768; ++x) {
                     var val = this.#beanTemperatures[index][1][x];
                     var ma = this.#beanFilterMovingAverages[x].ma(val);
-                    var min = this.#beanFilterMovingAverages[x].min();
-                    var max = this.#beanFilterMovingAverages[x].max();
+                    //var min = this.#beanFilterMovingAverages[x].min();
+                    //var max = this.#beanFilterMovingAverages[x].max();
 
-                    var range = max - min;
+                    //var range = max - min;
 
                     //if val is in the lower 70% of the values of the last 4 seconds then
                     //it's probably not a spike
-                    const threshold = 0.7;
-                    var filter = val < (threshold * range + min) || (range < 5.0);
+                    //const threshold = 0.7;
+                    //var filter = val < (threshold * range + min) || (range < 5.0);
 
-                    avg += val * beanFilterMask[x] * filter;
-                    counter += beanFilterMask[x] * filter;
+                    avg += ma * beanFilterMask[x]; // * filter;
+                    counter += beanFilterMask[x]; // * filter;
                 }
 
                 /**
@@ -2356,17 +2360,27 @@
         }
 
         function analyseThermalCameraData(temperatures) {
-            var temps = temperatures.slice().sort();
+            var temps = []
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    temps.push(temperatures[x]);
+                }
+            }
+            temps = temps.slice().sort();
             var min = 300.0;
             var max = -40.0;
-            var median = (temps[temps.length / 2] + temps[temps.length / 2 + 1]) / 2.0;
+            var median = (temps[Math.floor(temps.length / 2)] + temps[Math.floor(temps.length / 2 + 1)]) / 2.0;
+            var avg = 0;
             for (var x of temps) {
                 min = Math.min(x, min);
                 max = Math.max(x, max);
+                avg += x;
             }
+            avg /= temps.length;
             document.getElementById("thermalCamMin").innerHTML = min.toFixed(1);
             document.getElementById("thermalCamMax").innerHTML = max.toFixed(1);
-            document.getElementById("thermalCamMedian").innerHTML = median.toFixed(1);
+            document.getElementById("thermalCamMiddle").innerHTML = median.toFixed(1);
+            document.getElementById("thermalCamAvg").innerHTML = avg.toFixed(1);
         }
 
         function drawThermalCameraHistogram(temperatures) {
@@ -2379,9 +2393,11 @@
 
             var min = 300.0;
             var max = -40.0;
-            for (var x of temperatures) {
-                min = Math.min(x, min);
-                max = Math.max(x, max);
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    min = Math.min(temperatures[x], min);
+                    max = Math.max(temperatures[x], max);
+                }
             }
 
             var histogram = new Map();
@@ -2389,14 +2405,22 @@
                 histogram.set(x, 0);
             }
 
-            for (var x of temperatures) {
-                histogram.set(Math.floor(x), histogram.get(Math.floor(x)) + 1);
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    histogram.set(Math.floor(temperatures[x]), histogram.get(Math.floor(temperatures[x])) + 1);
+                }
             }
 
             var mostFrequentVal = 0;
+            var mostFrequentKey = 0;
             for (const [key, val] of histogram) {
-                mostFrequentVal = Math.max(val, mostFrequentVal);
+                if (mostFrequentVal < val) {
+                    mostFrequentVal = val;
+                    mostFrequentKey = key;
+                }
             }
+
+            document.getElementById("thermalCamMostFreq").innerHTML = mostFrequentKey.toFixed(1);
 
             histoCtx.clearRect(0, 0, canvasWidth, canvasHeight);
             histoCtx.fillStyle = "#555";
@@ -2545,6 +2569,8 @@
                 }
 
                 drawThermalCameraOutput(thermalCamTemperatures);
+                drawThermalCameraHistogram(thermalCamTemperatures);
+                analyseThermalCameraData(thermalCamTemperatures);
             }
 
             if (beanFilterMaskVisible) {
@@ -2726,12 +2752,12 @@
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
