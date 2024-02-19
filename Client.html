@@ -1,4 +1,5 @@
 <html>
+<head>
 <style>
     body {
         background-color: #EBECF0;
@@ -428,13 +429,8 @@
         }
     }
 </style>
+</head>
 <body  oncontextmenu="return false;">
-    <!--
-    Roast properties:
-        date time, roast name, blend, individual bean types, batch, weights, volumes,
-        density calculation, moisture, bean screen size, ambient temp/humidity/pressure,
-        end weight, end volume, end density
-    -->
     <div id="propertiesDialog">
         <span class="closeButton button" onclick="hideRoastProperties();">X</span>
         <span id="propertiesTitle">Roast Properties</span>
@@ -711,38 +707,6 @@
 
 
     <script>
-        // Heating elements:
-        // afterburner 230v (2 wire)
-        // quartz heater 115v each
-        //
-        // Motors to be controlled:
-        // dc exhaust fan 12v 0.2a (2 wire)
-        // dc logic board cooling fan 12v 0.2a (2 wire)
-        // drum motor 16v (2 wire)
-        // afterburner draw fan 230v
-        // scroll / cooling fan 230v
-        //
-        // On/off switch:
-        // light bulb 230v
-        //
-        // Sensors:
-        // draw fan thermocouple
-        // exhaust fan thermocouple
-        // main chamber thermocouple
-        // thermal camera 3.3v
-
-        //https://www.wikiwand.com/en/Coffee_roasting
-        //22c  unroasted
-        //165c drying phase
-        //196c cinnamon roast (right after first crack)
-        //205c new england roast
-        //210c american roast
-        //219c city roast (common for speciality coffee)
-        //225c full city roast (beginning of second crack)
-        //230c vienna roast
-        //240c french roast
-        //245c italian roast
-
         class MovingAverage {
             #containerMA = [];
             #maxSize = 1000;
@@ -1112,6 +1076,17 @@
 
                 this.#updateDialog();
 
+                // debugging: recalculate emissivity values
+                //const oldEmissivity = 0.86;
+                //const newEmissivity = 0.78;
+                //for (var i = 0; i < this.#beanTemperatures.length; ++i)
+                //{
+                //    for (var j = 0; j < 768; ++j)
+                //    {
+                //        this.#beanTemperatures[i][1][j] = this.#beanTemperatures[i][1][j] * oldEmissivity / newEmissivity;
+                //    }
+                //}
+
                 for (var i = 0; i < this.#beanTemperatures.length; ++i)
                     this.#drawBeanTemperature(i, this.#beanTemperatures[i][0]);
 
@@ -1356,9 +1331,6 @@
                     document.getElementById("startButton").classList.add('disabledElement');
 
                     document.getElementById("beanTemperatureProjection").style.visibility = "visible";
-
-                    //for dev purposes
-                    //dummyData(0);
                 }
             }
 
@@ -1649,7 +1621,7 @@
             #coolingPhaseAUCSum = 0;
 
             #rorValues = [];
-            //4hz thermal cam update, so 30s smoothing
+            //4hz thermal cam update, so 16s smoothing
             #rorMA = new MovingAverage(4 * 16);
 
             #prevROR = 0;
@@ -1658,12 +1630,12 @@
                 this.#calcAvgBeanTemperature(index);
 
                 var currTime = this.#beanTemperatures[index][0];
-                var currTemp = this.#beanFilteredAvgTemps[index];// this.#beanTemperatures[index][1];
+                var currTemp = this.#beanFilteredAvgTemps[index];
                 var prevTime = 0;
                 var prevTemp = 0;
                 if (index > 0) {
                     prevTime = this.#beanTemperatures[index - 1][0];
-                    prevTemp = this.#beanFilteredAvgTemps[index - 1];// this.#beanTemperatures[index - 1][1];
+                    prevTemp = this.#beanFilteredAvgTemps[index - 1];
                 }
                 else {
                     prevTime = currTime;
@@ -1762,10 +1734,9 @@
                 if (this.#coolTime != null) {
                     var coolingPhaseTime = now;
                     coolingPhaseTime -= this.#coolTime;
-                    //var coolingPhasePercentage = coolingPhaseTime / totalTime * 100.0;
                     coolingPhaseTime /= 1000.0;
                     var coolingPhaseTimeMin = coolingPhaseTime / 60;
-                    document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1);// + " " + coolingPhasePercentage.toFixed(1) + "%";
+                    document.getElementById("coolingPhaseTime").innerHTML = Math.floor(coolingPhaseTimeMin) + ":" + ((coolingPhaseTime) - Math.floor(coolingPhaseTimeMin) * 60).toFixed(1);
 
                     if(now >= this.#coolTime)
                     {
@@ -1794,7 +1765,7 @@
                 {
                     this.#beanFilterMovingAverages = [];
                     for (var x = 0; x < 768; ++x) {
-                        //4hz thermal cam update, so 4s of smoothing
+                        //4hz thermal cam update, so 8s of smoothing
                         //this should be enough for 16rpm drum rotation
                         this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 8);
                     }
@@ -1807,31 +1778,10 @@
                 for (var x = 0; x < 768; ++x) {
                     var val = this.#beanTemperatures[index][1][x];
                     var ma = this.#beanFilterMovingAverages[x].ma(val);
-                    //var min = this.#beanFilterMovingAverages[x].min();
-                    //var max = this.#beanFilterMovingAverages[x].max();
 
-                    //var range = max - min;
-
-                    //if val is in the lower 70% of the values of the last 4 seconds then
-                    //it's probably not a spike
-                    //const threshold = 0.7;
-                    //var filter = val < (threshold * range + min) || (range < 5.0);
-
-                    avg += ma * beanFilterMask[x]; // * filter;
-                    counter += beanFilterMask[x]; // * filter;
+                    avg += ma * beanFilterMask[x];
+                    counter += beanFilterMask[x];
                 }
-
-                /**
-                //x left 0, right 31
-                //y top 0, bottom 23 
-
-                for (var x = 0; x < 32; ++x)
-                    for (var y = 0; y < 24; ++y) {
-                        //average some pre-specified area of pixels
-                        avg += this.#beanTemperatures[index][1][32 * (23 - y) + x] * beanFilterMask[32 * (23 - y) + x];
-                        counter += beanFilterMask[32 * (23 - y) + x];
-                    }
-                /**/
 
                 avg /= counter + 0.0001;
 
@@ -2143,8 +2093,6 @@
 
         function pastelRamp(v)
         {
-            //(.6 + .6 * cos(6.3 * (h) + vec4(0, 23, 21, 0)))
-
             r = 0.6 + 0.3 * Math.cos(6.3 * v + 0);
             g = 0.6 + 0.3 * Math.cos(6.3 * v + 23.0);
             b = 0.6 + 0.3 * Math.cos(6.3 * v + 21.0);
@@ -2281,29 +2229,6 @@
             updateUI = true;
         }
 
-        var temperatureMA = new MovingAverage(100);
-        function dummyData(t) {
-            //test data for drawing a curve
-            var dataSet = [
-                22, //minute 0, eg starting
-                43, 87, 120, //drying phase
-                165, 177, 185, 192, 196, //yellowing, fc
-                204, 213, 220, //development
-                225, 226, 227, //second crack
-                229, 232, 236, 239, 242, 245, //15-20mins
-                199, 143, 93, 54, 25 //20-25mins
-            ];
-
-            var tMin = t / 60.0;
-            var interp = tMin - Math.floor(tMin);
-            var val = lerp(dataSet[Math.floor(tMin)], dataSet[Math.ceil(tMin)], interp);
-            val = temperatureMA.ma(val);
-
-            roastProfile.setBeanTemperature(val);
-
-            setTimeout(dummyData.bind(null, t + 0.250), 250);
-        }
-
         function drawBeanFilterMask(mask) {
                 var canvas = document.getElementById("thermalCamera");
                 canvas.style.visibility = "visible";
@@ -2341,16 +2266,11 @@
                 //y top 0, bottom 23 
                 for (x = 0; x < 32; ++x)
                     for (y = 0; y < 24; ++y) {
-                        //const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-                        //randomTemp = Math.random(); //pretend that it's normalised to 0..1
-
                         temp = temperatures[32 * (23 - y) + x];
 
-                        //if ((x == 11 || x == 13) && (y == 18 || y == 20)) { temp = 0; }
-
                         //map temperatures to 0..1
-                        minTemp = min;//10.0; //-40c
-                        maxTemp = max;//40.0; //+300c
+                        minTemp = min;
+                        maxTemp = max;
                         temp = (temp - minTemp) / (maxTemp - minTemp);
 
                         canvasCtx.fillStyle = pastelRamp(1 - temp);
@@ -2641,7 +2561,6 @@
 
                 webSocket.onopen = (event) => {
                     document.getElementById("websocketMessages").innerHTML += "Connection opened successfully" + "<br>";
-                    //webSocket.send(("a").repeat(65536*2));
                     webSocket.send("hello server!");
 
                     document.getElementById("offlineText").style.visibility = "hidden";
@@ -2654,20 +2573,12 @@
                 }
 
                 webSocket.onmessage = (event) => {
-                    //document.getElementById("websocketMessages").innerHTML += "onmessage " + (typeof event.data) + "<br>";
                     if (typeof event.data == "string") {
                         document.getElementById("websocketMessages").innerHTML += event.data + "<br>";
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
                         thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 4);
-
-                        //correct for zinc sulphide window absorption of about 15%
-                        //const absorptionCoeff = 0.15; //default: 0.15
-                        //for (var x = 0; x < 768; ++x)
-                        //{
-                        //    thermalCamTemperatures[x] = thermalCamTemperatures[x] / (1.0 - absorptionCoeff);
-                        //}
 
                         drawThermalCameraOutput(thermalCamTemperatures);
                         analyseThermalCameraData(thermalCamTemperatures);
