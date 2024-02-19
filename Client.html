@@ -548,7 +548,7 @@
 
     <div style="display: flex; flex-direction: row;">
         <div id="actions">
-            <div class="button actionButton" onclick="showRoastProperties();" title="Start Roasting (Drying Phase Start)">
+            <div class="button actionButton" onclick="showRoastProperties();" title="Show settings dialog">
                 <img src="img/properties.png" width="40" id="propertiesIcon" />
                 <!--Icon created by Freepik - Flaticon-->
             </div>
@@ -635,33 +635,37 @@
                 <canvas id="thermalCamHistogram" width="300" height="150" style="border: 1px solid #bebebe; background-color: #d1d4e0"></canvas>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
                     <span id="thermalCamMin"></span>
-                    <span id="thermalCamMedian"></span>
+                    <span id="thermalCamMostFreq"></span>
+                    <span id="thermalCamMiddle"></span>
+                    <span id="thermalCamAvg"></span>
                     <span id="thermalCamMax"></span>
                 </div>
                 <div style="display: flex; flex-direction: row; justify-content: space-around;">
                     <span>min</span>
-                    <span>med</span>
+                    <span>mof</span>
+                    <span>mid</span>
+                    <span>avg</span>
                     <span>max</span>
                 </div>
             </div>
 
             <div id="controllers" style="display: flex; flex-direction: row; justify-content: space-evenly;">
                 <div id="fanController" class="controller disabledElement" title="Cooling Fan Control">
-                    <span style="height: 60%;">
+                    <span style="height: 0%;">
                         <span><img src="img/fan.png" width="30" id="fanImage" /></span>
                         <!--Icon created by Dreamstale - Flaticon-->
                     </span>
                 </div>
 
                 <div id="drumController" class="controller disabledElement" title="Drum Motor Control">
-                    <span style="height: 40%;">
+                    <span style="height: 50%;">
                         <span><img src="img/motor.png" width="50" style="opacity:0.75; rotate: 270deg;" /></span>
                         <!--Icon created by monkik - Flaticon-->
                     </span>
                 </div>
 
                 <div id="heaterController" class="controller disabledElement" title="Heater Element Control">
-                    <span style="height: 10%;">
+                    <span style="height: 25%;">
                         <span><img src="img/fire.png" width="40" style="opacity:0.75;" /></span>
                         <!--Icon created by Those Icons - Flaticon-->
                     </span>
@@ -1206,13 +1210,13 @@
 
             #updateDialog() {
                 if(this.#ambientTemperature != null)
-                    document.getElementById("ambientTemperature").value = this.#ambientTemperature;
+                    document.getElementById("ambientTemperature").value = this.#ambientTemperature.toFixed(2);
 
                 if(this.#ambientHumidity != null)
-                    document.getElementById("ambientHumidity").value = this.#ambientHumidity;
+                    document.getElementById("ambientHumidity").value = this.#ambientHumidity.toFixed(2);
 
                 if(this.#ambientPressure != null)
-                    document.getElementById("ambientPressure").value = this.#ambientPressure;
+                    document.getElementById("ambientPressure").value = this.#ambientPressure.toFixed(3);
 
                 if (this.#date != null) {
                     document.getElementById("roastDate").valueAsDate = this.#date;
@@ -1312,14 +1316,28 @@
                 }
             }
 
+            setAmbientValues(temperature, pressure, humidity)
+            {
+                if (this.#ambientTemperature == null)
+                {
+                    this.#ambientTemperature = temperature;
+                }
+
+                if (this.#ambientHumidity == null)
+                {
+                    this.#ambientHumidity = humidity;
+                }
+
+                if (this.#ambientPressure == null)
+                {
+                    this.#ambientPressure = pressure;
+                }
+            }
+
             setStart() {
                 if (this.#startTime == null) {
                     this.#startTime = performance.now();
                     this.#date = new Date();
-
-                    this.#ambientTemperature = 24.0; //TODO read from sensor
-                    this.#ambientHumidity = 50.0;
-                    this.#ambientPressure = 1.0;
 
                     var fanPercentage = document.getElementById("fanController").firstElementChild.style.height;
                     fanPercentage = parseFloat(fanPercentage.substring(0, fanPercentage.length - 1));
@@ -1632,7 +1650,7 @@
 
             #rorValues = [];
             //4hz thermal cam update, so 30s smoothing
-            #rorMA = new MovingAverage(4 * 30);
+            #rorMA = new MovingAverage(4 * 16);
 
             #prevROR = 0;
 
@@ -1763,7 +1781,7 @@
             #beanFilterMovingAverages = null;
 
             #beanFilteredAvgTemps = [];
-            #beanFilteredAvgTempsMA = new MovingAverage(4 * 4);
+            #beanFilteredAvgTempsMA = new MovingAverage(4 * 8);
 
             #calcAvgBeanTemperature(index)
             {
@@ -1778,7 +1796,7 @@
                     for (var x = 0; x < 768; ++x) {
                         //4hz thermal cam update, so 4s of smoothing
                         //this should be enough for 16rpm drum rotation
-                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 4);
+                        this.#beanFilterMovingAverages[x] = new MovingAverage(4 * 8);
                     }
                 }
 
@@ -1789,18 +1807,18 @@
                 for (var x = 0; x < 768; ++x) {
                     var val = this.#beanTemperatures[index][1][x];
                     var ma = this.#beanFilterMovingAverages[x].ma(val);
-                    var min = this.#beanFilterMovingAverages[x].min();
-                    var max = this.#beanFilterMovingAverages[x].max();
+                    //var min = this.#beanFilterMovingAverages[x].min();
+                    //var max = this.#beanFilterMovingAverages[x].max();
 
-                    var range = max - min;
+                    //var range = max - min;
 
                     //if val is in the lower 70% of the values of the last 4 seconds then
                     //it's probably not a spike
-                    const threshold = 0.7;
-                    var filter = val < (threshold * range + min);
+                    //const threshold = 0.7;
+                    //var filter = val < (threshold * range + min) || (range < 5.0);
 
-                    avg += val * beanFilterMask[x] * filter;
-                    counter += beanFilterMask[x] * filter;
+                    avg += ma * beanFilterMask[x]; // * filter;
+                    counter += beanFilterMask[x]; // * filter;
                 }
 
                 /**
@@ -1815,7 +1833,7 @@
                     }
                 /**/
 
-                avg /= counter;
+                avg /= counter + 0.0001;
 
                 //put the spatial average through a temporal average too
                 //then store the filtered result
@@ -2342,17 +2360,27 @@
         }
 
         function analyseThermalCameraData(temperatures) {
-            var temps = temperatures.slice().sort();
+            var temps = []
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    temps.push(temperatures[x]);
+                }
+            }
+            temps = temps.slice().sort();
             var min = 300.0;
             var max = -40.0;
-            var median = (temps[temps.length / 2] + temps[temps.length / 2 + 1]) / 2.0;
+            var median = (temps[Math.floor(temps.length / 2)] + temps[Math.floor(temps.length / 2 + 1)]) / 2.0;
+            var avg = 0;
             for (var x of temps) {
                 min = Math.min(x, min);
                 max = Math.max(x, max);
+                avg += x;
             }
+            avg /= temps.length;
             document.getElementById("thermalCamMin").innerHTML = min.toFixed(1);
             document.getElementById("thermalCamMax").innerHTML = max.toFixed(1);
-            document.getElementById("thermalCamMedian").innerHTML = median.toFixed(1);
+            document.getElementById("thermalCamMiddle").innerHTML = median.toFixed(1);
+            document.getElementById("thermalCamAvg").innerHTML = avg.toFixed(1);
         }
 
         function drawThermalCameraHistogram(temperatures) {
@@ -2365,9 +2393,11 @@
 
             var min = 300.0;
             var max = -40.0;
-            for (var x of temperatures) {
-                min = Math.min(x, min);
-                max = Math.max(x, max);
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    min = Math.min(temperatures[x], min);
+                    max = Math.max(temperatures[x], max);
+                }
             }
 
             var histogram = new Map();
@@ -2375,14 +2405,22 @@
                 histogram.set(x, 0);
             }
 
-            for (var x of temperatures) {
-                histogram.set(Math.floor(x), histogram.get(Math.floor(x)) + 1);
+            for (var x = 0; x < 768; ++x) {
+                if (beanFilterMask[x] > 0) {
+                    histogram.set(Math.floor(temperatures[x]), histogram.get(Math.floor(temperatures[x])) + 1);
+                }
             }
 
             var mostFrequentVal = 0;
+            var mostFrequentKey = 0;
             for (const [key, val] of histogram) {
-                mostFrequentVal = Math.max(val, mostFrequentVal);
+                if (mostFrequentVal < val) {
+                    mostFrequentVal = val;
+                    mostFrequentKey = key;
+                }
             }
+
+            document.getElementById("thermalCamMostFreq").innerHTML = mostFrequentKey.toFixed(1);
 
             histoCtx.clearRect(0, 0, canvasWidth, canvasHeight);
             histoCtx.fillStyle = "#555";
@@ -2525,7 +2563,14 @@
             var beanTemperatures = roastProfile.getBeanTemperatures(timems);
             if (beanTemperatures != null)
             {
-                drawThermalCameraOutput(new Float32Array(beanTemperatures));
+                if (arrayBuf == null)
+                {
+                    thermalCamTemperatures = new Float32Array(beanTemperatures);
+                }
+
+                drawThermalCameraOutput(thermalCamTemperatures);
+                drawThermalCameraHistogram(thermalCamTemperatures);
+                analyseThermalCameraData(thermalCamTemperatures);
             }
 
             if (beanFilterMaskVisible) {
@@ -2615,7 +2660,7 @@
                     }
                     else if (typeof event.data == "object") {
                         arrayBuf = event.data;
-                        thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 1);
+                        thermalCamTemperatures = new Float32Array(arrayBuf, 0, arrayBuf.byteLength / 4 - 4);
 
                         //correct for zinc sulphide window absorption of about 15%
                         //const absorptionCoeff = 0.15; //default: 0.15
@@ -2628,6 +2673,9 @@
                         analyseThermalCameraData(thermalCamTemperatures);
                         drawThermalCameraHistogram(thermalCamTemperatures);
                         var Ta = (new Float32Array(arrayBuf))[768];
+                        var ambientTemperature = (new Float32Array(arrayBuf))[769];
+                        var ambientPressure = (new Float32Array(arrayBuf))[770];
+                        var ambientHumidity = (new Float32Array(arrayBuf))[771];
                         document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
 
                         //warn user with red text if camera temp goes above threshold
@@ -2639,6 +2687,7 @@
 
                         if (roastProfile != null)
                         {
+                            roastProfile.setAmbientValues(ambientTemperature, ambientPressure, ambientHumidity);
                             roastProfile.setBeanTemperature(thermalCamTemperatures);
                         }
                     }
@@ -2668,6 +2717,7 @@
         var controllerInitialYPos = 0.0;
         var controllerClickedElem = undefined;
         var updateUI = true;
+        var arrayBuf = null;
         var thermalCamTemperatures = null;
         var thermalCamSamplePos = 0;
         var thermalCamIsMouseIn = false;
@@ -2677,34 +2727,53 @@
         var beanFilterMask = null;
         var beanFilterMaskVisible = false;
 
+        function printBeanFilterMask()
+        {
+            var str = "";
+
+            str += "[";
+
+            for (var x = 0; x < 768; ++x)
+            {
+                if (x > 0 && x % 32 == 0) {
+                    str += "\n";
+                }
+                str += beanFilterMask[x] + ", ";
+            }
+
+            str += "]";
+
+            console.log(str);
+        }
+
         (function () {
             //fill mask with values
-            beanFilterMask = new Float32Array([
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-                1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-            ]);
+            beanFilterMask = new Float32Array(
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
+            );
 
             lineChart = new LineChart(document.getElementById("lineChart"),
                 1400, //width           default: 1400
