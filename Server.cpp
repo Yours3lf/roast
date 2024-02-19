@@ -113,7 +113,7 @@ int main(int argc, char** args)
 	}
 #endif
 
-        float emissivity = 0.86; //0.78 for roasted coffee
+        float emissivity = 0.78; // for roasted coffee
 	std::cout << "Emissivity: " << emissivity << std::endl;
 
 	socket::init();
