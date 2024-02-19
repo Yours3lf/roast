@@ -701,8 +701,8 @@
         <span id="auc"></span>
         <span id="ror"></span>
         <span id="bt"></span>
+        <span id="camt">CamT: xx*C</span>
         <span id="airt">AirT: xx*C</span>
-        <span id="ext">ExT: xx*C</span>
     </div>
 
 
@@ -2587,13 +2587,14 @@
                         var ambientTemperature = (new Float32Array(arrayBuf))[769];
                         var ambientPressure = (new Float32Array(arrayBuf))[770];
                         var ambientHumidity = (new Float32Array(arrayBuf))[771];
-                        document.getElementById("airt").innerHTML = "AirT: " + Ta.toFixed(1) + " °C";
+                        document.getElementById("camt").innerHTML = "CamT: " + Ta.toFixed(1) + " °C";
+                        document.getElementById("airt").innerHTML = "AirT: " + ambientTemperature.toFixed(1) + " °C";
 
                         //warn user with red text if camera temp goes above threshold
                         //thermal camera is only rated to work up to 85c
                         const camTempThreshold = 70.0; //default: 70.0
                         if (Ta > camTempThreshold) {
-                            document.getElementById("airt").style.color = "red";
+                            document.getElementById("camt").style.color = "red";
                         }
 
                         if (roastProfile != null)
