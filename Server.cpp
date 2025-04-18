@@ -23,10 +23,13 @@ int main(int argc, char** args)
 	{
 		std::cerr << "Usage " << args[0] << " address port refreshRate" << std::endl;
 		std::cerr << "Default port 50000 and refreshRate 4HZ is used if omitted" << std::endl;
-		return -1;
 	}
 
-	std::string address(args[1]);
+	std::string address;
+	if(argc > 1)
+	{
+		address = std::string(args[1]);
+	}
 
 	int port = 50000;
 	if (argc > 2)
@@ -134,7 +137,7 @@ int main(int argc, char** args)
 
 #ifdef _WIN32
 			{
-				websocketMessage* m = new websocketMessage();
+				std::unique_ptr<websocketMessage> m(new websocketMessage());
 				m->type = FRAME_BINARY;
 				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 4); //add float for Ta, temp, pressure, humidity
 
@@ -150,7 +153,7 @@ int main(int argc, char** args)
 				memcpy(m->buf.data() + 32 * 24 * sizeof(float) + sizeof(float) * 2, &pressure, sizeof(pressure));
 				memcpy(m->buf.data() + 32 * 24 * sizeof(float) + sizeof(float) * 3, &humidity, sizeof(humidity));
 
-				ws.broadcastMessage(m);
+				ws.broadcastMessage(std::move(m));
 			}
 #else
 			{ //Read thermal camera values
@@ -163,7 +166,7 @@ int main(int argc, char** args)
 				MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
 				MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
 
-				websocketMessage* m = new websocketMessage();
+				std::unique_ptr<websocketMessage> m(new websocketMessage());
 				m->type = FRAME_BINARY;
 				m->buf.resize(32 * 24 * sizeof(float) + sizeof(float) * 4); //add float for Ta, temp, pressure, humidity
 				memcpy(m->buf.data(), mlx90640To, 768 * sizeof(float));
@@ -171,37 +174,23 @@ int main(int argc, char** args)
 				memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float), &temperature, sizeof(temperature));
                                 memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float) * 2, &pressure, sizeof(pressure));
                                 memcpy(m->buf.data() + 768 * sizeof(float) + sizeof(float) * 3, &humidity, sizeof(humidity));
-				ws.broadcastMessage(m);
+				ws.broadcastMessage(std::move(m));
 			}
 #endif
 
-			std::vector<websocketMessage*> messages;
-			ws.receiveMessages(messages);
-
-			if (messages.size() > 0)
+			while(ws.hasMessagesReceived())
 			{
-				bool close = false;
-				for (auto m : messages)
-				{
-					if (m->type == FRAME_CLOSE)
-					{
-						close = true;
-					}
+				auto m = ws.popMessageReceived();
 
-					if (close)
-					{
-						free(m);
-						continue;
-					}
+				if (!m.second) continue;
 
-					m->buf.push_back('\0');
-					std::cout << "Message received: " << m->buf.data() << std::endl;
-					free(m);
-				}
+				m.second->buf.push_back('\0');
+				std::cout << "Message received: " << m.second->buf.data() << std::endl;
 
-				if (close)
+				if (m.second->type == FRAME_CLOSE)
 				{
 					ws.close();
+					break;
 				}
 			}
 
